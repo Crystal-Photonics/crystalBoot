@@ -9,6 +9,14 @@
 *.so
 *.dll
 *.dylib
+*.elf
+*.lst
+*.eep
+*.lss
+*.hex
+*.map
+*.sym
+*.d
 
 # Qt-es
 
@@ -32,3 +40,70 @@ Makefile*
 #QtCtreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
+
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+
+# Eclipse Core
+.project
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# PyDev specific (Python IDE for Eclipse)
+*.pydevproject
+
+# CDT-specific (C/C++ Development Tooling)
+.cproject
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# Java annotation processor (APT)
+.factorypath
+
+# PDT-specific (PHP Development Tools)
+.buildpath
+
+# sbteclipse plugin
+.target
+
+# Tern plugin
+.tern-project
+
+# TeXlipse plugin
+.texlipse
+
+# STS (Spring Tool Suite)
+.springBeans
+
+# Code Recommenders
+.recommenders/
+
+qt/builds
+qt/project/libs/build/
+vc.h
+
+qt/project/libs/rpc/doc
+qt/project/libs/rpc/src/server/generated_app/
+qt/project/libs/rpc/src/client/generated_app/
+qt/project/libs/rpc/include/rpc_transmission/server/generated_general/
+qt/project/libs/rpc/include/rpc_transmission/client/
+
+mcu/libs/rpc/doc
+mcu/libs/rpc/src/server/generated_app/
+mcu/libs/rpc/src/client/generated_app/
+mcu/libs/rpc/include/rpc_transmission/server/generated_general/
+mcu/libs/rpc/include/rpc_transmission/client/
