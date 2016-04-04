@@ -1,6 +1,3 @@
-[submodule "RPC-Generator"]
-	path = RPC-Generator
-	url = https://github.com/Crystal-Photonics/RPC-Generator.git
 [submodule "qt/project/libs/googletest"]
 	path = qt/project/libs/googletest
 	url = https://github.com/google/googletest.git
