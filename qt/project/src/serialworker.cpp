@@ -6,13 +6,14 @@
 #include "errorlogger/generic_eeprom_errorlogger.h"
 #include "rpc_transmission/client/generated_app/RPC_TRANSMISSION_qt2mcu.h"
 
-QSerialPort* globSerialPort;
+SerialThread* globSerialThread;
 
 SerialWorker *serialWorkerForRPCFunc = NULL;
 
 
 extern "C" RPC_TRANSMISSION_RESULT phyPushDataBuffer(const char *buffer, size_t length){
-    globSerialPort->write(buffer,length);
+    QByteArray data = QByteArray(buffer,length);
+    globSerialThread->sendByteData(data);
     return RPC_TRANSMISSION_SUCCESS;
 }
 
@@ -26,10 +27,11 @@ SerialThread::SerialThread(QObject *parent) :
     channel_init();
     thread = new QThread();
     serialport = new QSerialPort();
-    globSerialPort = serialport;
+    globSerialThread = this;
     serialWorker = new SerialWorker(serialport);
     serialWorkerForRPCFunc = serialWorker;
     serialWorker->moveToThread(thread);
+    serialport->moveToThread(thread);
 
 
 
@@ -40,11 +42,12 @@ SerialThread::SerialThread(QObject *parent) :
 
     connect(serialport,SIGNAL(readyRead()),serialWorker,SLOT(on_readyRead()));
     connect(serialWorker,SIGNAL(updateTemperature(float)),this,SIGNAL(updateTemperature(float)));
-#if 0
+#if 1
 
     connect(this, SIGNAL(openPort(QString, int)), serialWorker, SLOT(openPort(QString, int)));
     connect(this, SIGNAL(closePort()), serialWorker, SLOT(closePort()));
     connect(this, SIGNAL(isPortOpened()), serialWorker, SLOT(isPortOpened()));
+    connect(this, SIGNAL(sendData(QByteArray)), serialWorker, SLOT(sendData(QByteArray)));
 #endif
 
 
@@ -54,24 +57,33 @@ SerialThread::SerialThread(QObject *parent) :
 
 void SerialThread::open(QString name, int baudrate)
 {
+#if 0
     serialport->setPortName(name);
     serialport->setBaudRate(baudrate);
     serialport->setFlowControl(QSerialPort::NoFlowControl);
     serialport->open(QIODevice::ReadWrite);
-    //emit openPort(name,baudrate);
+#else
+    emit openPort(name,baudrate);
+#endif
 }
 
 void SerialThread::close()
 {
+#if 0
     serialport->close();
-    //emit closePort();
+#else
+    emit closePort();
+#endif
 }
 
 bool SerialThread::isOpen()
 {
     bool result;
+#if 0
     result = serialport->isOpen();
-    //    result = emit isPortOpened();
+#else
+    result = emit isPortOpened();
+#endif
     return result;
 }
 
@@ -82,6 +94,11 @@ void SerialThread::rpcSetTemperature(float temperature)
     result = mcuSetMCUTargetTemperature(&temp_returnvalue, temperature);
     qDebug() << "sending data return: " << temp_returnvalue << " with success: "<< result;
     qDebug()<<"rpcSetTemperature threadid "<<QThread::currentThreadId();
+}
+
+void SerialThread::sendByteData(QByteArray data)
+{
+    emit sendData(data);
 }
 
 
@@ -97,7 +114,7 @@ void SerialWorker::wrapUpdateTemperature(float temperature)
     emit updateTemperature(temperature);
 }
 
-#if 0
+#if 1
 void SerialWorker::openPort(QString name, int baudrate)
 {
     serialport->setPortName(name);
@@ -114,6 +131,11 @@ bool SerialWorker::isPortOpened()
 {
     bool result = serialport->isOpen();
     return result;
+}
+
+void SerialWorker::sendData(QByteArray data)
+{
+    serialport->write(data);
 }
 #endif
 

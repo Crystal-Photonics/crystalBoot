@@ -94,6 +94,7 @@ int main(void)
 	//sputchar('A');
 	max6675Init();
 	temperature = 30;
+	max33185result_t temperature_data;
 	channel_init();
 	while (1){
 		int16_t errorvalue;
@@ -106,7 +107,8 @@ int main(void)
 		_delay_ms(400);
 		CLEAR_LED_L();
 		//CLEAR_BUZZER();
-		result= max6675Read(&temperature);
+		result= max6675Read(&temperature_data);
+		temperature = temperature_data.temperature_thermocuouple;
 		(void)result;
 		errorvalue = TARGETEMP_C-temperature;
 
@@ -131,7 +133,7 @@ int main(void)
 		//printh16(errorvalue);
 		//printc('\n');
 
-		//qtUpdateRealTemperature(temperature);
+		qtUpdateRealTemperature(temperature);
 
 
 

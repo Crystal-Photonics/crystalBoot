@@ -17,10 +17,11 @@ public:
 
 public slots:
 
-#if 0
+#if 1
     void openPort(QString name, int baudrate);
     void closePort();
     bool isPortOpened();
+    void sendData(QByteArray data);
 #endif
     void process();
 
@@ -48,11 +49,14 @@ public:
     bool isOpen();
 
     void rpcSetTemperature(float temperature);
+    void sendByteData(QByteArray data);
 signals:
+
     void openPort(QString name, int baudrate);
     void closePort(void);
     bool isPortOpened();
     void updateTemperature(float temperature);
+    void sendData(QByteArray data);
 
 public slots:
 

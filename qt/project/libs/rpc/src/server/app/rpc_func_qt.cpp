@@ -12,6 +12,6 @@
 
 extern "C" void qtUpdateRealTemperature(uint16_t data){
     qDebug() << "temperature" << data/4;
-    serialWorkerForRPCFunc->wrapUpdateTemperature((float) data / 4.0);
+    serialWorkerForRPCFunc->wrapUpdateTemperature((float) data );
 }
 
