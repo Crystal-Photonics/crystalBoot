@@ -57,8 +57,8 @@ rfcomm connect 4*/
 #include "channel_codec/channel_codec.h"
 #include "errorlogger/generic_eeprom_errorlogger.h"
 #include "rpc_transmission/client/generated_app/RPC_TRANSMISSION_mcu2qt.h"
-const uint8_t TARGETEMP_C = 0x20*4;
-const uint8_t P_CONST_DIV_BY_16 = 32;
+uint8_t TARGETEMP_C = 55;
+const uint8_t P_CONST_DIV_BY_16 = 16;
 const int8_t TEMPERATURE_TOLERACE = 4;
 
 //setting fuses:avrdude -p atmega8 -P /dev/ttyUSB0     -c avr910    -b115200 -U lfuse:w:0xee:m -U hfuse:w:0xd9:m 
@@ -93,7 +93,7 @@ int main(void)
 	sei(); // Interrupts einschalten
 	//sputchar('A');
 	max6675Init();
-	temperature = 30;
+	temperature = 40;
 	max33185result_t temperature_data;
 	channel_init();
 	while (1){
@@ -104,21 +104,21 @@ int main(void)
 		}
 		timebaselo++;
 
-		_delay_ms(400);
+		_delay_ms(50);
 		CLEAR_LED_L();
 		//CLEAR_BUZZER();
 		result= max6675Read(&temperature_data);
-		temperature = temperature_data.temperature_thermocuouple;
+		temperature = temperature_data.temperature_thermocuouple/4;
 		(void)result;
 		errorvalue = TARGETEMP_C-temperature;
 
 		if ((TEMPERATURE_TOLERACE > errorvalue) && (errorvalue > -TEMPERATURE_TOLERACE) ){
-			//SET_LED_M();
+			SET_LED_M();
 		}else{
-			//CLEAR_LED_M();
+			CLEAR_LED_M();
 		}
 
-		errorvalue += 2;
+		//errorvalue += 2;
 
 		errorvalue *=P_CONST_DIV_BY_16;
 
@@ -126,20 +126,24 @@ int main(void)
 		if (errorvalue < 0){
 			errorvalue = 0;
 		}
-		//printh16(result);
+
 		//printc(' ');
 		//printh16(temperature/4);
 		//printc(' ');
 		//printh16(errorvalue);
 		//printc('\n');
-
-		qtUpdateRealTemperature(temperature);
-
-
+		//
+#if 1
+		qtUpdateRealTemperature(
+				temperature_data.temperature_thermocuouple,
+				temperature_data.temperature_coldjunction,
+				TARGETEMP_C,errorvalue);
+#endif
+		printc('\n');
 
 		spwm_setVal(errorvalue);
 
-		_delay_ms(400);
+		_delay_ms(50);
 
 
 

@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "max6675.h"
+#include "print.h"
 
 void max6675Init(){
 #if 1
@@ -35,8 +36,11 @@ int8_t max6675Read(max33185result_t *maxResult){
 	SPDR = 0;
 	while ((SPSR & (1 << SPIF)) == 0){}
 	inData |= (SPDR << 0);
-
-
+#if 0
+	printh16(inData >> 16);
+	printh16(inData);
+	printc('\n');
+#endif
 	if (inData & 0x0001)
 		maxResult->ocFault = 1;
 
@@ -51,14 +55,42 @@ int8_t max6675Read(max33185result_t *maxResult){
 
 	maxResult->temperature_thermocuouple = inData >> 18;
 
-	maxResult->temperature_coldjunction = inData >> 4;
-	maxResult->temperature_coldjunction &= 0x0FFF;
-
+	uint16_t junctemp = (inData & 0x7FF0 ) >> 4;
 	if (inData & 0x8000)
-		maxResult->temperature_coldjunction |= 0xF000;
+		junctemp |= 0xF800;
+
+	uint16_t thermtemp = (inData & 0xFFFC0000 ) >> 18;
 
 	if (inData & 0x80000000)
-		maxResult->temperature_coldjunction |= 0xC000;
+		thermtemp |= 0xE000;
+
+
+#if 0
+
+	printh16(junctemp);
+	printc('\n');
+#endif
+
+	maxResult->temperature_coldjunction = junctemp;
+	maxResult->temperature_thermocuouple = thermtemp;
+
+#if 0
+
+	printh16(maxResult->temperature_thermocuouple/4 + maxResult->temperature_coldjunction/16);
+	printc(' ');
+
+	printh16(maxResult->temperature_thermocuouple);
+	printc(' ');
+
+	printh16(maxResult->temperature_thermocuouple/4);
+	printc(' ');
+
+
+	printh16(maxResult->temperature_coldjunction/16);
+	printc('\n');
+#endif
+
+
 
 
 	SET_SPI_CS();

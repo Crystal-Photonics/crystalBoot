@@ -11,6 +11,9 @@ typedef struct{
 
 t_glob glob;
 
+extern uint8_t TARGETEMP_C;
+
+
 #define PRINT_SCPI_CHARGECHECK_DATA 0
 #define TRUE 1
 #define FALSE 0

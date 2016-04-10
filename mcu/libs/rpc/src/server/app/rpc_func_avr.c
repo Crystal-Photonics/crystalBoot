@@ -7,6 +7,7 @@
 
 #include "../../../include/rpc_transmission/server/app/qt2mcu.h"
 #include "board.h"
+#include "globals.h"
 void mcuSendDataNoAnswer(uint8_t data){
 
 }
@@ -14,6 +15,7 @@ void mcuSendDataNoAnswer(uint8_t data){
 uint16_t mcuSetMCUTargetTemperature(uint16_t data){
 	static uint8_t ledstatus = 0;
 	ledstatus++;
+	TARGETEMP_C = data;
 	if (ledstatus & 1){
 		SET_LED_M();
 	}else{

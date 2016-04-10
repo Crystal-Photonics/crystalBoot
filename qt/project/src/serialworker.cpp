@@ -148,7 +148,7 @@ void SerialWorker::on_readyRead()
 {
 
     //qDebug() << "on read ID:" << thread()->currentThreadId();
-    qDebug() << "on read:" << QThread::currentThreadId();
+    //qDebug() << "on read:" << QThread::currentThreadId();
     QByteArray inbuffer = serialport->readAll();
 
     if (inbuffer.count() == 512){
@@ -157,7 +157,7 @@ void SerialWorker::on_readyRead()
     for (int i=0;i<inbuffer.count();i++){
         channel_push_byte_to_RPC(inbuffer[i]);
         if (inbuffer[i] == '\n'){
-            qDebug() << linebuffer;
+           // qDebug() << linebuffer;
 
             linebuffer = "";
         }else{
