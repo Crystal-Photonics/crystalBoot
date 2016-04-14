@@ -44,11 +44,11 @@ INCLUDEPATH += ../libs/RPC-ChannelCodec/include
 INCLUDEPATH += ../libs/RPC-ChannelCodec/include/errorlogger_dummy
 INCLUDEPATH += ../libs/RPC-ChannelCodec/tests/include
 
-
+INCLUDEPATH += ../libs/rpc/include/
 
 FORMS    += mainwindow.ui
 
-INCLUDEPATH += ../libs/rpc/include/
+
 
 #INCLUDEPATH += $$(PYTHON_PATH)/include
 

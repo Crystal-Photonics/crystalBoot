@@ -4,16 +4,16 @@
 #include <QObject>
 #include <QThread>
 #include <QtSerialPort/QSerialPort>
-
+#include "rpc_transmission/server/app/mcu2qt.h"
 
 
 class SerialWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit SerialWorker(QSerialPort *serialport, QObject *parent = 0);
-    void wrapUpdateTemperature(float temperature);
-
+    explicit SerialWorker(QObject *parent = 0);
+    void wrapUpdateADC(float adc1);
+    void wrapUpdateKeyState(rpcKeyStatus_t keyState);
 
 public slots:
 
@@ -27,13 +27,16 @@ public slots:
 
 signals:
     void finished();
-    void updateTemperature(float temperature);
+
+    void updateADC(float adc1);
+    void updateKeyState(rpcKeyStatus_t keyState);
 
 private slots:
     void on_readyRead();
 private:
     QSerialPort* serialport;
     QString linebuffer;
+
 };
 
 class SerialThread : public QObject
@@ -42,7 +45,7 @@ class SerialThread : public QObject
 public:
     explicit SerialThread(QObject *parent = 0);
     QThread* thread;
-    QSerialPort* serialport;
+    //QSerialPort* serialport;
     SerialWorker * serialWorker;
     void open(QString name, int baudrate);
     void close();
@@ -55,8 +58,11 @@ signals:
     void openPort(QString name, int baudrate);
     void closePort(void);
     bool isPortOpened();
-    void updateTemperature(float temperature);
     void sendData(QByteArray data);
+
+    void updateADC(float adc1);
+    void updateKeyState(rpcKeyStatus_t keyState);
+
 
 public slots:
 

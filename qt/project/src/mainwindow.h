@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "serialworker.h"
 
+#include "rpc_transmission/server/app/mcu2qt.h"
 
 namespace Ui {
 class MainWindow;
@@ -18,7 +19,8 @@ public:
     ~MainWindow();
 
 public slots:
-    void updateTemperature(float temperature);
+    void updateADC(float adcValue);
+    void updateKeyState(rpcKeyStatus_t keyState);
 
 private slots:
     void on_btnRefresh_clicked();
@@ -31,6 +33,7 @@ private:
     Ui::MainWindow *ui;
 
     SerialThread* serialThread;
+
 
 };
 

@@ -1,0 +1,21 @@
+[submodule "BTProtocoll"]
+	path = BTProtocoll
+	url = //candy/GIT/funksonde_nextgen/BTProtokoll
+[submodule "BTProtokoll"]
+	path = BTProtokoll
+	url = //candy/git/funksonde_nextgen/BTProtokoll/
+[submodule "modules/btprotokoll"]
+	path = modules/btprotokoll
+	url = //candy/GIT/modules/btprotokoll
+[submodule "modules/eunistone"]
+	path = modules/eunistone
+	url = //candy/GIT/modules/eunistone
+[submodule "modules/twi_bitbang"]
+	path = modules/twi_bitbang
+	url = //candy/GIT/modules/twi_bitbang
+[submodule "modules/RPC-Generator"]
+	path = modules/RPC-Generator
+	url = https://github.com/Crystal-Photonics/RPC-Generator.git
+[submodule "modules/mutex"]
+	path = modules/mutex
+	url = //candy/GIT/modules/mutex

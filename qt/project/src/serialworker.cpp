@@ -26,29 +26,26 @@ SerialThread::SerialThread(QObject *parent) :
 {
     channel_init();
     thread = new QThread();
-    serialport = new QSerialPort();
+
     globSerialThread = this;
-    serialWorker = new SerialWorker(serialport);
+    serialWorker = new SerialWorker();
     serialWorkerForRPCFunc = serialWorker;
     serialWorker->moveToThread(thread);
-    serialport->moveToThread(thread);
-
-
 
     connect(thread, SIGNAL(started()), serialWorker, SLOT(process()));
     connect(serialWorker, SIGNAL(finished()), thread, SLOT(quit()));
     connect(serialWorker, SIGNAL(finished()), serialWorker, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
-    connect(serialport,SIGNAL(readyRead()),serialWorker,SLOT(on_readyRead()));
-    connect(serialWorker,SIGNAL(updateTemperature(float)),this,SIGNAL(updateTemperature(float)));
-#if 1
+
+    connect(serialWorker,SIGNAL(updateADC(float)),this,SIGNAL(updateADC(float)));
+    connect(serialWorker,SIGNAL(updateKeyState(rpcKeyStatus_t)),this,SIGNAL(updateKeyState(rpcKeyStatus_t)));
 
     connect(this, SIGNAL(openPort(QString, int)), serialWorker, SLOT(openPort(QString, int)));
     connect(this, SIGNAL(closePort()), serialWorker, SLOT(closePort()));
     connect(this, SIGNAL(isPortOpened()), serialWorker, SLOT(isPortOpened()));
     connect(this, SIGNAL(sendData(QByteArray)), serialWorker, SLOT(sendData(QByteArray)));
-#endif
+
 
 
     thread->start();
@@ -57,43 +54,55 @@ SerialThread::SerialThread(QObject *parent) :
 
 void SerialThread::open(QString name, int baudrate)
 {
-#if 0
-    serialport->setPortName(name);
-    serialport->setBaudRate(baudrate);
-    serialport->setFlowControl(QSerialPort::NoFlowControl);
-    serialport->open(QIODevice::ReadWrite);
-#else
+
     emit openPort(name,baudrate);
-#endif
+
 }
 
 void SerialThread::close()
 {
-#if 0
-    serialport->close();
-#else
+
     emit closePort();
-#endif
+
 }
 
 bool SerialThread::isOpen()
 {
     bool result;
-#if 0
-    result = serialport->isOpen();
-#else
     result = emit isPortOpened();
-#endif
     return result;
 }
 
 void SerialThread::rpcSetTemperature(float temperature)
 {
-    u_int16_t temp_returnvalue;
+    uint16_t temp_returnvalue;
     RPC_TRANSMISSION_RESULT result;
-    result = mcuSetMCUTargetTemperature(&temp_returnvalue, temperature);
-    qDebug() << "sending data return: " << temp_returnvalue << " with success: "<< result;
-    qDebug()<<"rpcSetTemperature threadid "<<QThread::currentThreadId();
+    rpcLEDStatus_t ledStatus = rpcLEDStatus_none;
+    if (temperature > 10){
+        ledStatus = rpcLEDStatus_on;
+    }else{
+        ledStatus = rpcLEDStatus_off;
+    }
+
+    result = mcuSetLEDStatus(&temp_returnvalue, ledStatus);
+    QString resultstr;
+    switch(result){
+    case RPC_TRANSMISSION_SUCCESS:
+        resultstr = "RPC_TRANSMISSION_SUCCESS";
+        break;
+    case RPC_TRANSMISSION_FAILURE:
+        resultstr = "RPC_TRANSMISSION_FAILURE";
+        break;
+    case RPC_TRANSMISSION_COMMAND_UNKNOWN:
+        resultstr = "RPC_TRANSMISSION_COMMAND_UNKNOWN";
+        break;
+    case RPC_TRANSMISSION_COMMAND_INCOMPLETE:
+        resultstr = "RPC_TRANSMISSION_COMMAND_INCOMPLETE";
+        break;
+    }
+
+    qDebug() << "sending data return: " << temp_returnvalue << " with : "<< resultstr;
+    //qDebug()<<" rpcSetTemperature threadid "<<QThread::currentThreadId();
 }
 
 void SerialThread::sendByteData(QByteArray data)
@@ -103,18 +112,23 @@ void SerialThread::sendByteData(QByteArray data)
 
 
 
-SerialWorker::SerialWorker(QSerialPort *serialport, QObject *parent):
+SerialWorker::SerialWorker( QObject *parent):
     QObject(parent)
 {
-    this->serialport = serialport;
+    serialport = new QSerialPort(this);
+    connect(serialport,SIGNAL(readyRead()),this,SLOT(on_readyRead()));
 }
 
-void SerialWorker::wrapUpdateTemperature(float temperature)
+void SerialWorker::wrapUpdateADC(float adc1)
 {
-    emit updateTemperature(temperature);
+    emit updateADC(adc1);
 }
 
-#if 1
+void SerialWorker::wrapUpdateKeyState(rpcKeyStatus_t keyState)
+{
+    emit updateKeyState(keyState);
+}
+
 void SerialWorker::openPort(QString name, int baudrate)
 {
     serialport->setPortName(name);
@@ -137,7 +151,7 @@ void SerialWorker::sendData(QByteArray data)
 {
     serialport->write(data);
 }
-#endif
+
 
 void SerialWorker::process()
 {

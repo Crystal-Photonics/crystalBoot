@@ -10,17 +10,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     on_btnRefresh_clicked();
+    qRegisterMetaType<rpcKeyStatus_t>("rpcKeyStatus_t");
 
     QStringList bdl;
     bdl << "75" << "300" << "1200" << "2400" << "4800" << "9600" << "14400" << "19200" << "28800" << "38400" << "57600" << "115200";
     ui->cmbBaud->addItems(bdl);
-    ui->cmbBaud->setCurrentIndex(7);
+    ui->cmbBaud->setCurrentIndex(11);
 
     qDebug() << "gui:" << QThread::currentThreadId();
 
 
     serialThread = new SerialThread(this);
-    connect(serialThread, SIGNAL(updateTemperature(float)), this, SLOT(updateTemperature(float)));
+    connect(serialThread, SIGNAL(updateADC(float)), this, SLOT(updateADC(float)));
+    connect(serialThread, SIGNAL(updateKeyState(rpcKeyStatus_t)), this, SLOT(updateKeyState(rpcKeyStatus_t)));
 }
 
 MainWindow::~MainWindow()
@@ -29,9 +31,29 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::updateTemperature(float temperature)
+void MainWindow::updateADC(float adcValue)
 {
-    ui->plainTextEdit->appendPlainText(QString::number(temperature));
+    ui->plainTextEdit->appendPlainText(QString::number(adcValue));
+}
+
+void MainWindow::updateKeyState(rpcKeyStatus_t keyState)
+{
+    QString statusStr;
+    switch (keyState){
+    case rpcKeyStatus_none:
+        statusStr = "none";
+        break;
+    case rpcKeyStatus_pressed:
+        statusStr = "pressed";
+        break;
+    case rpcKeyStatus_pressedLong:
+        statusStr = "pressed long";
+        break;
+    case rpcKeyStatus_released:
+        statusStr = "released";
+        break;
+    }
+    ui->lblKey->setText("key: "+statusStr);
 }
 
 void MainWindow::on_btnRefresh_clicked()
