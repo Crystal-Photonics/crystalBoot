@@ -19,3 +19,4 @@ buildtest
 /include/vc.h
 
 src/libraries/STM32L1xx_StdPeriph_Lib_V1.3.1/*
+src/libraries/FreeRTOSV8.2.1/*
