@@ -177,18 +177,26 @@ void taskADC(void *pvParameters) {
 
 		if( xSemaphoreTake( semaphoreADCReady, 1000 / portTICK_RATE_MS ) == pdTRUE )
 		{
-			uint16_t temperature_c = (110-30)* (adcValuesPlain[adsi_temperature-1] - adcCalibData.TS_CAL_1);
+			const int32_t VOLT_REFERENCE_mv = 3000;
+			const int32_t ADC_MAX_VALUE_DIGIT = 4095;
+
+			uint32_t vcc_mv = VOLT_REFERENCE_mv*adcCalibData.VREF;
+			vcc_mv /= adcValuesPlain[adsi_ref-1];
+
+			int32_t temperature_c = (int32_t)adcValuesPlain[adsi_temperature-1]*vcc_mv;
+			temperature_c /= VOLT_REFERENCE_mv;
+
+			temperature_c = (110-30)* (temperature_c - adcCalibData.TS_CAL_1);
 			temperature_c /= (adcCalibData.TS_CAL_2  - adcCalibData.TS_CAL_1);
 			temperature_c += 30;
 
-			uint32_t vcc_mv = 3000*adcCalibData.VREF;
-			vcc_mv /= adcValuesPlain[adsi_ref-1];
+
 
 			uint32_t adc1_mv = vcc_mv*adcValuesPlain[adsi_adc1-1];
-			adc1_mv /= 4095;
+			adc1_mv /= ADC_MAX_VALUE_DIGIT;
 
 			uint32_t adc2_mv = vcc_mv*adcValuesPlain[adsi_adc2-1];
-			adc2_mv /= 4095;
+			adc2_mv /= ADC_MAX_VALUE_DIGIT;
 
 			adcValues_smoothed_SMOOTHVALUE[adsi_temperature-1] += temperature_c;
 			adcValues_smoothed_SMOOTHVALUE[adsi_ref-1] += vcc_mv;

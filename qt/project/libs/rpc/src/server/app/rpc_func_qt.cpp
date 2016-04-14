@@ -13,6 +13,8 @@
 extern "C" void qtUpdateMCUADCValues(int16_t tempMCU, int16_t adc_vcc_mv, int16_t adc1, int16_t adc2){
     (void)tempMCU;
     (void)adc1;
+    (void)adc_vcc_mv;
+
     (void)adc2;
     //qDebug() << "adc" << tempMCU <<  adc1 << adc2;
     serialWorkerForRPCFunc->wrapUpdateADC((float) adc1 );
