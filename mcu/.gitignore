@@ -19,3 +19,5 @@ buildtest
 /include/vc.h
 
 src/libraries/STM32L1xx_StdPeriph_Lib_V1.3.1/*
+src/libraries/STM32Cube_FW_L1_V1.5.0/*
+src/libraries/FreeRTOSV8.2.1/*

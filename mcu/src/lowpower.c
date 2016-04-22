@@ -26,107 +26,20 @@
 
 
 
-SemaphoreHandle_t semaphoreWakeUp;
+
 
 void lowPowerInitPeriodicWakeUp(uint16_t period_s)
 {
 
-  NVIC_InitTypeDef NVIC_InitStructure;
-  EXTI_InitTypeDef EXTI_InitStructure;
+	HAL_NVIC_SetPriority(RTC_WKUP_IRQn,configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+1,0);
+	HAL_RTCEx_SetWakeUpTimer_IT(&hrtc,period_s-1,RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
 
-  /* Enable the PWR clock */
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
-
-  /* Allow access to RTC */
-  PWR_RTCAccessCmd(ENABLE);
-
-  /*
-  To enable the RTC Wakeup interrupt, the following sequence is required:
-  1. Configure and enable the EXTI Line 20 in interrupt mode and select the rising edge
-  sensitivity.
-  2. Configure and enable the RTC_WKUP IRQ channel in the NVIC.
-  3. Configure the RTC to generate the RTC wakeup timer event.
-
-  System reset, as well as low power modes (Sleep, Stop and Standby) have no influence on
-  the wakeup timer.
-  */
-  /* EXTI configuration *******************************************************/
-  EXTI_ClearITPendingBit(EXTI_Line20);
-  EXTI_InitStructure.EXTI_Line = EXTI_Line20;
-  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-  EXTI_Init(&EXTI_InitStructure);
-
-  /* Enable the RTC Wakeup Interrupt */
-  NVIC_InitStructure.NVIC_IRQChannel = RTC_WKUP_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+1;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
-
-  RTC_WakeUpCmd(DISABLE);
-  /* 3.1.3 from AN3371 using hardware RTC
-  WUCKSEL -> (only when RTC->CR WUTE = 0; RTC->ISR WUTWF = 1)
-  000: RTC/16 clock is selected
-  001: RTC/8 clock is selected
-  010: RTC/4 clock is selected
-  011: RTC/2 clock is selected
-  10x: ck_spre (usually 1 Hz) clock is selected
-  11x: ck_spre (usually 1 Hz) clock is selected and 216 is added to the WUT counter value
-  from 1s to 18 hours when WUCKSEL [2:1] = 10
-  */
-  /* Clear Wake-up flag */
-  PWR->CR |= PWR_CR_CWUF;
-
-  RTC_WakeUpClockConfig(RTC_WakeUpClock_CK_SPRE_16bits);
-  RTC_SetWakeUpCounter(period_s-1);
-  //The WUTF flag must then be cleared by software.
-  RTC_ClearITPendingBit(RTC_IT_WUT); //ClearITPendingBit clears also the flag
-  RTC_ClearFlag(RTC_FLAG_WUTF); //MANDATORY!
-  RTC_ITConfig(RTC_IT_WUT, ENABLE); //enable interrupt
-  RTC_WakeUpCmd(ENABLE);
-  PWR_RTCAccessCmd(DISABLE); //just in case
 }
 
 __IO uint8_t LowPowerStatus = 0x00;
 
 
 
-
-/**
- * @brief  Configures system clock after wake-up from STOP: enable HSE, PLL
- *         and select PLL as system clock source.
- * @param  None
- * @retval None
- */
-void IDD_Measurement_SYSCLKConfig_STOP(void)
-{
-	ErrorStatus HSEStartUpStatus;
-
-	/* Enable HSE */
-	RCC_HSEConfig(RCC_HSE_ON);
-
-	/* Wait till HSE is ready */
-	HSEStartUpStatus = RCC_WaitForHSEStartUp();
-
-	if (HSEStartUpStatus == SUCCESS)
-	{
-		/* Enable PLL */
-		RCC_PLLCmd(ENABLE);
-
-		/* Wait till PLL is ready */
-		while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
-		{}
-
-		/* Select PLL as system clock source */
-		RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-
-		/* Wait till PLL is used as system clock source */
-		while (RCC_GetSYSCLKSource() != 0x0C)
-		{}
-	}
-}
 
 
 /**

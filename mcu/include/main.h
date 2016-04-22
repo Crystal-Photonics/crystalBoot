@@ -19,9 +19,9 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include "semphr.h"
-#include "board.h"
 
+#include "board.h"
+#include "semphr.h"
 
 #define mainLED_TASK_STACK				( ( unsigned short ) 550 )
 #define mainKEY_TASK_STACK				( ( unsigned short ) 300 )

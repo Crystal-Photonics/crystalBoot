@@ -25,21 +25,21 @@ const pinGPIO_t gpioPins[] = {PIN_LED_BLUE, PIN_LED_RED,PIN_KEY_1,PIN_KEY_ONOFF,
 								PIN_PIO_DBG_TX,PIN_PIO_SDA,PIN_PIO_SCL,
 								PIN_ADC_1, PIN_ADC_2};
 
-const pinAlternateFunction_t afPins[] = {PIN_DBG_RX,PIN_DBG_TX,PIN_SDA,PIN_SCL,PIN_USB_N,PIN_USB_P };
+const pinGPIO_t afPins[] = {PIN_DBG_RX,PIN_DBG_TX,PIN_SDA,PIN_SCL,PIN_USB_N,PIN_USB_P };
 
 void boardPowerOn(void){
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
 
-    RCC_AHBPeriphClockLPModeCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-    RCC_AHBPeriphClockLPModeCmd(RCC_AHBPeriph_GPIOB, ENABLE);
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM9, ENABLE);
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM10, ENABLE);
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+	__GPIOA_CLK_ENABLE();
+	__GPIOB_CLK_ENABLE();
+	__GPIOC_CLK_ENABLE();
+
+	__GPIOA_CLK_SLEEP_ENABLE();
+	__GPIOB_CLK_SLEEP_ENABLE();
+
+	__TIM9_CLK_ENABLE();
+
+
 }
 
 void boardConfigurePIO(void){
@@ -51,7 +51,7 @@ void boardConfigurePIO(void){
 		boardInitPin(&gpioPins[i]);
 	}
 
-	for (i=0;i<sizeof(afPins)/sizeof(pinAlternateFunction_t);i++){
+	for (i=0;i<sizeof(afPins)/sizeof(pinGPIO_t);i++){
 		boardInitAFPin(&afPins[i]);
 	}
 }
@@ -65,27 +65,26 @@ void boardSetPinsToIntput(void){
 
 	for (size_t i=0;i<sizeof(gpio_pins_toinput)/sizeof(pinGPIO_t);i++){
 		boardInitPin(&gpio_pins_toinput[i]);
-		GPIO_ResetBits(gpio_pins_toinput[i].port, gpio_pins_toinput[i].pinDef.GPIO_Pin);
+		HAL_GPIO_WritePin(gpio_pins_toinput[i].port, gpio_pins_toinput[i].pinDef.Pin,RESET);
 	}
 
 }
 
 void boardReinitPins(void){
-	const pinAlternateFunction_t gpio_pins_tonormal[]={PIN_DBG_TX,PIN_SDA,PIN_SCL};
+	const pinGPIO_t gpio_pins_tonormal[]={PIN_DBG_TX,PIN_SDA,PIN_SCL};
 
-	for (size_t i=0;i<sizeof(gpio_pins_tonormal)/sizeof(pinAlternateFunction_t);i++){
+	for (size_t i=0;i<sizeof(gpio_pins_tonormal)/sizeof(pinGPIO_t);i++){
 		boardInitAFPin(&gpio_pins_tonormal[i]);
 	}
 
 }
 
 void boardInitPin(const pinGPIO_t *pin){
-	GPIO_Init(pin->port, (GPIO_InitTypeDef*) &pin->pinDef);
+	HAL_GPIO_Init(pin->port, (GPIO_InitTypeDef*) &pin->pinDef);
 }
 
-void boardInitAFPin(const pinAlternateFunction_t *pinAF){
-	GPIO_Init(pinAF->port,  (GPIO_InitTypeDef*) &pinAF->pinDef);
-	GPIO_PinAFConfig(pinAF->port, pinAF->pinSource, pinAF->af);
+void boardInitAFPin(const pinGPIO_t *pinAF){
+	HAL_GPIO_Init(pinAF->port,  (GPIO_InitTypeDef*) &pinAF->pinDef);
 }
 
 #if 1

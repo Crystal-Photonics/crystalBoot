@@ -104,7 +104,7 @@ static bool RTOSRunningFlag = false;
 /* The queue used to hold received characters. */
 static QueueHandle_t xRxedChars;
 static QueueHandle_t xCharsForTx;
-
+#if 0
 /**
   * @brief  Configures COM port.
   * @param  COM: Specifies the COM port to be configured.
@@ -132,7 +132,7 @@ void STM_EVAL_COMInit( USART_InitTypeDef* USART_InitStruct)
   /* Enable USART */
   USART_Cmd(COM_DBG_BASE, ENABLE);
 }
-
+#endif
 
 /*-----------------------------------------------------------*/
 
@@ -141,35 +141,32 @@ void STM_EVAL_COMInit( USART_InitTypeDef* USART_InitStruct)
  */
 xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned portBASE_TYPE uxQueueLength )
 {
-USART_InitTypeDef USART_InitStructure;
-xComPortHandle xReturn;
-NVIC_InitTypeDef NVIC_InitStructure;
+
+	xComPortHandle xReturn;
+
 
 	/* Create the queues used to hold Rx/Tx characters. */
 	xRxedChars = xQueueCreate( uxQueueLength, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
 	xCharsForTx = xQueueCreate( uxQueueLength + 1, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
-	
+
 	/* If the queues were created correctly then setup the serial port
 	hardware. */
 	if( ( xRxedChars != serINVALID_QUEUE ) && ( xCharsForTx != serINVALID_QUEUE ) )
 	{
-		USART_InitStructure.USART_BaudRate = ulWantedBaud;
-		USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-		USART_InitStructure.USART_StopBits = USART_StopBits_1;
-		USART_InitStructure.USART_Parity = USART_Parity_No;
-		USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-		USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-		
-		/* The Eval board COM2 is being used, which in reality is the STM32
-		USART3. */
-		STM_EVAL_COMInit(  &USART_InitStructure );
-		
-		NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = ISR_PRIORITY_SERIAL_DBG;
-		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; /* Not used as 4 bits are used for the pre-emption priority. */;
-		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-		NVIC_Init( &NVIC_InitStructure );
-		USART_ITConfig( USART1, USART_IT_RXNE, ENABLE );
+
+
+
+		huart1.Instance = COM_DBG_BASE;
+		huart1.Init.BaudRate = ulWantedBaud;
+		huart1.Init.WordLength = UART_WORDLENGTH_8B;
+		huart1.Init.StopBits = UART_STOPBITS_1;
+		huart1.Init.Parity = UART_PARITY_NONE;
+		huart1.Init.Mode = UART_MODE_TX_RX;
+		huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+		huart1.Init.OverSampling = UART_OVERSAMPLING_8;
+
+		HAL_UART_Init(&huart1);
+
 	}
 	else
 	{
@@ -229,10 +226,8 @@ signed char *pxNext;
 
 void xSerialPutCharPolling( xComPortHandle pxPort, signed char cOutChar ){
 
-	while (USART_GetFlagStatus(USART1, USART_FLAG_TXE)==RESET){
+	HAL_UART_Transmit(&huart1, (uint8_t*)&cOutChar, 1, HAL_MAX_DELAY);
 
-	}
-	USART_SendData( USART1, cOutChar );
 }
 
 signed portBASE_TYPE xSerialPutChar( xComPortHandle pxPort, signed char cOutChar, TickType_t xBlockTime )
@@ -243,7 +238,8 @@ signed portBASE_TYPE xSerialPutChar( xComPortHandle pxPort, signed char cOutChar
 		if( xQueueSend( xCharsForTx, &cOutChar, xBlockTime ) == pdPASS )
 		{
 			xReturn = pdPASS;
-			USART_ITConfig( USART1, USART_IT_TXE, ENABLE );
+			__HAL_UART_ENABLE_IT(&huart1, UART_IT_TXE);
+
 		}
 		else
 		{
@@ -269,32 +265,42 @@ void vSerialClose( xComPortHandle xPort )
 
 void USART1_IRQHandler( void )
 {
-portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-char cChar;
+	uint32_t tmp_flag = 0, tmp_it_source = 0;
+	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+	char cChar;
 
-	if( USART_GetITStatus( USART1, USART_IT_TXE ) == SET )
+	tmp_flag = __HAL_UART_GET_FLAG(&huart1, UART_FLAG_TXE);
+	tmp_it_source = __HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_TXE);
+	/* UART parity error interrupt occurred ------------------------------------*/
+	if((tmp_flag != RESET) && (tmp_it_source != RESET))
 	{
-		/* The interrupt was caused by the TX register becoming empty.  Are 
-		there any more characters to transmit? */
+		/* The interrupt was caused by the TX register becoming empty.  Are
+				there any more characters to transmit? */
 		if( xQueueReceiveFromISR( xCharsForTx, &cChar, &xHigherPriorityTaskWoken ) == pdTRUE )
 		{
 			/* A character was retrieved from the queue so can be sent to the
-			USART now. */
-			USART_SendData( USART1, cChar );
+					USART now. */
+			huart1.Instance->DR = cChar;
 		}
 		else
 		{
-			USART_ITConfig( USART1, USART_IT_TXE, DISABLE );
-		}		
+			__HAL_UART_DISABLE_IT(&huart1, UART_IT_TXE);
+		}
 	}
-	
-	if( USART_GetITStatus( USART1, USART_IT_RXNE ) == SET )
+
+
+	tmp_flag = __HAL_UART_GET_FLAG(&huart1, UART_FLAG_RXNE);
+	tmp_it_source = __HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_RXNE);
+	/* UART in mode Receiver ---------------------------------------------------*/
+	if((tmp_flag != RESET) && (tmp_it_source != RESET))
 	{
 		/* A character has been received on the USART, send it to the Rx
 		handler task. */
-		cChar = USART_ReceiveData( USART1 );
+		cChar = huart1.Instance->DR;
 		xQueueSendFromISR( xRxedChars, &cChar, &xHigherPriorityTaskWoken );
-	}	
+	}
+
+
 
 	/* If sending or receiving from a queue has caused a task to unblock, and
 	the unblocked task has a priority equal to or higher than the currently 

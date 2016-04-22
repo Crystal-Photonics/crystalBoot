@@ -2,13 +2,11 @@
 #     0 = turn off optimization. s = optimize for size.
 # 
 
-OPT = 3
+OPT = 0
 
-CORE = CORE_M3
-# ARM CPU type (cortex-m0, cortex-m3)
-CPU = cortex-m3
-STMCHIP = STM32L1XX_MD
-MCU = stm32l15xxB
+
+MCU = STM32L151xE
+
 
 HSE_VALUE=12000000
 
@@ -20,11 +18,11 @@ SRC = src
 # Libraries
 LIBRARIES = $(SRC)/libraries
 
-STD_PERIPHERAL_DRIVER = $(LIBRARIES)/STM32L1xx_StdPeriph_Lib_V1.3.1/Libraries/STM32L1xx_StdPeriph_Driver/
-CMSIS = $(LIBRARIES)/STM32L1xx_StdPeriph_Lib_V1.3.1/Libraries/CMSIS
+CMSIS = $(LIBRARIES)/STM32Cube_FW_L1_V1.5.0/Drivers/CMSIS
+HAL_DRIVER = $(LIBRARIES)/STM32Cube_FW_L1_V1.5.0/Drivers/STM32L1xx_HAL_Driver/
 
 FREERTOSDIR = $(LIBRARIES)/FreeRTOSV8.2.1
-FAT32DIR = $(LIBRARIES)/FatFs_R0.11/src
+
 
 # Define all C source files (dependencies are generated automatically)
 #
@@ -37,16 +35,21 @@ SOURCES += $(SRC)/task_key.c
 SOURCES += $(SRC)/task_adc.c
 SOURCES += $(SRC)/task_rpc_serial_in.c
 SOURCES += $(SRC)/syscalls.c
-SOURCES += $(SRC)/lowpower.c
-
-
-
-
 SOURCES += $(LIBRARIES)/serial.c
-SOURCES += $(LIBRARIES)/startup/startup_stm32l1xx_md.s
-SOURCES += $(LIBRARIES)/startup/system_stm32l1xx.c
+SOURCES += $(SRC)/chip_init.c
+SOURCES += $(SRC)/stm32l1xx_it.c
+SOURCES += $(SRC)/stm32l1xx_hal_msp.c
+SOURCES += $(SRC)/stm32l1xx_hal_timebase_TIM.c
+#SOURCES += $(SRC)/lowpower.c
 
-#C_SCR += modules/rpc/src/client/app/rpc_network_freertos.c
+
+
+
+SOURCES += $(CMSIS)/Device/ST/STM32L1xx/Source/Templates/gcc/startup_stm32l151xe.s
+SOURCES += $(CMSIS)/Device/ST/STM32L1xx/Source/Templates/system_stm32l1xx.c
+
+
+
 SOURCES += modules/rpc/src/client/generated_app/RPC_TRANSMISSION_mcu2qt.c
 SOURCES += modules/rpc/src/server/generated_app/RPC_TRANSMISSION_parser.c
 SOURCES += modules/rpc/src/server/app/rpc_service_freertos.c
@@ -56,10 +59,36 @@ SOURCES += modules/rpc/src/server/app/rpc_func_freertos.c
 SOURCES += modules/RPC-ChannelCodec/src/channel_codec/crc16.c
 SOURCES += modules/RPC-ChannelCodec/src/channel_codec/channel_codec.c
 
-ifeq (1,0)
 
-SOURCES += $(FAT32DIR)/ff.c
-endif
+
+
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_adc.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_adc_ex.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_cortex.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_dac.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_dac_ex.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_dma.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_flash.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_flash_ex.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_flash_ramfunc.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_gpio.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_i2c.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_pcd.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_pcd_ex.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_pwr.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_pwr_ex.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_rcc.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_rcc_ex.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_rtc.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_rtc_ex.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_spi.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_spi_ex.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_tim.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_tim_ex.c
+SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_uart.c
+
+
 
 ifeq (1,1)
 #free-rtos source code
@@ -73,41 +102,13 @@ SOURCES += $(FREERTOSDIR)/FreeRTOS/Source/timers.c
 SOURCES += $(FREERTOSDIR)/FreeRTOS/Source/portable/MemMang/heap_1.c
 endif
 
-#stm32l1xx library 
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/misc.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_adc.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_aes.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_aes_util.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_comp.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_crc.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_dac.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_dbgmcu.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_dma.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_exti.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_flash.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_flash_ramfunc.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_fsmc.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_gpio.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_i2c.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_iwdg.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_lcd.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_opamp.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_pwr.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_rcc.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_rtc.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_sdio.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_spi.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_syscfg.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_tim.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_usart.c
-SOURCES += $(STD_PERIPHERAL_DRIVER)/src/stm32l1xx_wwdg.c
-#SOURCES += $(LIBRARIES)/chip/stm32l1xx_clock_config.c
 
 OBJECTS  = $(addprefix $(OBJDIR)/,$(addsuffix .o,$(basename $(SOURCES))))
 
 DEPENDS  = $(addprefix $(OBJDIR)/,$(addsuffix .d,$(basename $(SOURCES))))
 
-DEFS = -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=$(HSE_VALUE) -D$(STMCHIP) $(USER_DEFS)
+DEFS =  -DHSE_VALUE=$(HSE_VALUE) $(USER_DEFS)
+DEFS += -D$(MCU)
 
 # Object files directory
 # Warning: this will be removed by make clean!
@@ -117,18 +118,18 @@ OBJDIR = buildarm
 TARGET = $(OBJDIR)/$(TARGETNAME)
 
 # Place -D, -U or -I options here for C and C++ sources
-#CPPFLAGS += -ISource
+
 CPPFLAGS += -Iinclude
 CPPFLAGS += -Imodules/rpc/include
 CPPFLAGS += -Imodules/RPC-ChannelCodec/include
 CPPFLAGS += -Imodules/RPC-ChannelCodec/include/errorlogger_dummy
+CPPFLAGS += -I$(HAL_DRIVER)/Inc
 
 CPPFLAGS += -I$(FREERTOSDIR)/FreeRTOS/Source/include
 CPPFLAGS += -I$(CMSIS)/Include
 CPPFLAGS += -I$(CMSIS)/Device/ST/STM32L1xx/Include
-CPPFLAGS += -I$(STD_PERIPHERAL_DRIVER)/inc
 CPPFLAGS += -I$(FREERTOSDIR)/FreeRTOS/Source/portable/GCC/ARM_CM3/
-
+CPPFLAGS += -I$(CMSIS)/RTOS/Template
 
 
 #---------------- Compiler Options C ----------------
@@ -191,7 +192,7 @@ LDFLAGS += -lm
 LDFLAGS += --specs=nano.specs
 LDFLAGS += -Wl,-Map=$(TARGET).map,--cref
 LDFLAGS += -Wl,--gc-sections
-LDFLAGS += -T$(LIBRARIES)/startup/ldscripts/$(MCU).ld
+LDFLAGS += -T$(CMSIS)/Device/ST/STM32L1xx/Source/Templates/gcc/linker/$(MCU)_FLASH.ld
 
 #============================================================================
 

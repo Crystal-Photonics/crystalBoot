@@ -19,9 +19,11 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
+#ifndef STM32L151xE
+#define STM32L151xE
+#endif
 
 
-#include "stm32l1xx_conf.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -34,75 +36,80 @@
 #include <semphr.h>
 #endif
 
+#include "stm32l1xx_hal.h"
+#include "chip_init.h"
+
 /** Name of the board */
 #define BOARD_NAME "rpcFREERTOS_TEMPLATE"
 
 #define rpcFREERTOS_TEMPLATE
 
 //A:
-#define ADC_CHAN_1 ADC_Channel_10
-#define ADC_CHAN_2 ADC_Channel_1
+#define ADC_CHAN_1 ADC_CHANNEL_10
+#define ADC_CHAN_2 ADC_CHANNEL_1
 
 
 typedef struct {
 	GPIO_InitTypeDef pinDef;
 	GPIO_TypeDef * port;
 } pinGPIO_t;
-
+/*
 typedef struct {
 	GPIO_InitTypeDef pinDef;
 	GPIO_TypeDef * port;
 	uint16_t pinSource;
 	uint8_t af;
 } pinAlternateFunction_t;
+*/
+
 
 typedef enum{kid_none,  kid_key1, kid_onoff, kid_KEYCOUNT}key_id_t;
 typedef enum{lid_none, lid_red, lid_blue, lid_LEDCOUNT}led_id_t;
 typedef enum{les_none, les_on, les_off}led_state_t;
 
 
-#define PIN_LED_RED   			{.pinDef = {.GPIO_Pin = GPIO_Pin_7, .GPIO_Mode=GPIO_Mode_OUT, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP, .GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOC}
-#define SET_LED_RED()			GPIO_SetBits(GPIOC, GPIO_Pin_7)
-#define CLEAR_LED_RED()			GPIO_ResetBits(GPIOC, GPIO_Pin_7)
+#define PIN_LED_RED   			{.pinDef = {.Pin = GPIO_PIN_7, .Mode=GPIO_MODE_OUTPUT_PP, .Speed = GPIO_SPEED_FREQ_MEDIUM,   .Pull=GPIO_NOPULL }, .port = GPIOC}
+#define SET_LED_RED()			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7,GPIO_PIN_SET)
+#define CLEAR_LED_RED()			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7,GPIO_PIN_RESET)
 
-#define PIN_LED_BLUE   			{.pinDef = {.GPIO_Pin = GPIO_Pin_6, .GPIO_Mode=GPIO_Mode_OUT, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP, .GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOC}
-#define SET_LED_BLUE()			GPIO_SetBits(GPIOC, GPIO_Pin_6)
-#define CLEAR_LED_BLUE()		GPIO_ResetBits(GPIOC, GPIO_Pin_6)
+#define PIN_LED_BLUE   			{.pinDef = {.Pin = GPIO_PIN_6, .Mode=GPIO_MODE_OUTPUT_PP, .Speed = GPIO_SPEED_FREQ_MEDIUM , .Pull=GPIO_NOPULL }, .port = GPIOC}
+#define SET_LED_BLUE()			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6,GPIO_PIN_SET)
+#define CLEAR_LED_BLUE()		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6,GPIO_PIN_RESET)
 
-#define PIN_LED_GREEN   			{.pinDef = {.GPIO_Pin = GPIO_Pin_6, .GPIO_Mode=GPIO_Mode_OUT, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP, .GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOC}
-#define SET_LED_GREEN()			GPIO_SetBits(GPIOC, GPIO_Pin_6)
-#define CLEAR_LED_GREEN()		GPIO_ResetBits(GPIOC, GPIO_Pin_6)
+#define PIN_LED_GREEN   			{.pinDef = {.Pin = GPIO_PIN_6, .Mode=GPIO_MODE_OUTPUT_PP, .Speed = GPIO_SPEED_FREQ_MEDIUM,  .Pull=GPIO_NOPULL  }, .port = GPIOC}
+#define SET_LED_GREEN()			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6,GPIO_PIN_SET)
+#define CLEAR_LED_GREEN()		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6,GPIO_PIN_RESET)
 
-#define PIN_KEY_1   			{.pinDef = {.GPIO_Pin = GPIO_Pin_10, .GPIO_Mode=GPIO_Mode_IN, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP, .GPIO_PuPd=GPIO_PuPd_DOWN }, .port = GPIOC}
-#define GET_KEY_1()				GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_10)
+#define PIN_KEY_1   			{.pinDef = {.Pin = GPIO_PIN_10, .Mode=GPIO_MODE_INPUT, .Speed = GPIO_SPEED_FREQ_MEDIUM,   .Pull=GPIO_PULLDOWN }, .port = GPIOC}
+#define GET_KEY_1()				HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_10)
 
-#define PIN_KEY_ONOFF  			{.pinDef = {.GPIO_Pin = GPIO_Pin_11, .GPIO_Mode=GPIO_Mode_IN, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP, .GPIO_PuPd=GPIO_PuPd_DOWN }, .port = GPIOC}
-#define GET_KEYONOFF()			GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_11)
-
-
-
-#define PIN_DBG_RX 				{.pinSource = GPIO_PinSource10, .pinDef = {.GPIO_Pin = GPIO_Pin_10, .GPIO_Mode=GPIO_Mode_AF, .GPIO_Speed= GPIO_Speed_10MHz, .GPIO_OType = GPIO_OType_PP,.GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOA, .af=GPIO_AF_USART1}
-#define PIN_DBG_TX 				{.pinSource = GPIO_PinSource9,  .pinDef = {.GPIO_Pin = GPIO_Pin_9 , .GPIO_Mode=GPIO_Mode_AF, .GPIO_Speed= GPIO_Speed_10MHz, .GPIO_OType = GPIO_OType_PP,.GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOA, .af=GPIO_AF_USART1}
-
-#define PIN_PIO_DBG_TX 			{.pinDef = {.GPIO_Pin = GPIO_Pin_9 , .GPIO_Mode=GPIO_Mode_IN, .GPIO_Speed= GPIO_Speed_10MHz, .GPIO_OType = GPIO_OType_PP,.GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOA}
-#define SET_PIO_DBG_TX()		GPIO_SetBits(GPIOA, GPIO_Pin_9)
-#define CLEAR_PIO_DBG_TX()		GPIO_ResetBits(GPIOA, GPIO_Pin_9)
-
-#define PIN_SDA   				{.pinSource = GPIO_PinSource11, .pinDef = {.GPIO_Pin = GPIO_Pin_11, .GPIO_Mode=GPIO_Mode_AF, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP,.GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOB, .af=GPIO_AF_I2C2}
-#define PIN_SCL   				{.pinSource = GPIO_PinSource10, .pinDef = {.GPIO_Pin = GPIO_Pin_10, .GPIO_Mode=GPIO_Mode_AF, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP,.GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOB, .af=GPIO_AF_I2C2}
-
-#define PIN_PIO_SDA   			{.pinDef = {.GPIO_Pin = GPIO_Pin_11, .GPIO_Mode=GPIO_Mode_OUT, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP,.GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOB}
-#define PIN_PIO_SCL   			{.pinDef = {.GPIO_Pin = GPIO_Pin_10, .GPIO_Mode=GPIO_Mode_OUT, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP,.GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOB}
+#define PIN_KEY_ONOFF  			{.pinDef = {.Pin = GPIO_PIN_11, .Mode=GPIO_MODE_INPUT, .Speed = GPIO_SPEED_FREQ_MEDIUM,   .Pull=GPIO_PULLDOWN }, .port = GPIOC}
+#define GET_KEYONOFF()			HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_11)
 
 
 
+#define PIN_DBG_RX 				{.pinDef = {.Pin = GPIO_PIN_10, .Mode=GPIO_MODE_AF_PP, .Speed= GPIO_SPEED_FREQ_HIGH,  .Pull=GPIO_NOPULL  , .Alternate= GPIO_AF7_USART1}, .port = GPIOA}
+#define PIN_DBG_TX 				{.pinDef = {.Pin = GPIO_PIN_9 , .Mode=GPIO_MODE_AF_PP, .Speed= GPIO_SPEED_FREQ_HIGH,  .Pull=GPIO_NOPULL , .Alternate= GPIO_AF7_USART1 },  .port = GPIOA}
 
-#define PIN_USB_N   			{.pinSource = GPIO_PinSource11, .pinDef = {.GPIO_Pin = GPIO_Pin_11, .GPIO_Mode=GPIO_Mode_AF, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP,.GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOA, .af=GPIO_AF_USB}
-#define PIN_USB_P   			{.pinSource = GPIO_PinSource12, .pinDef = {.GPIO_Pin = GPIO_Pin_12, .GPIO_Mode=GPIO_Mode_AF, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP,.GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOA, .af=GPIO_AF_USB}
+#define PIN_PIO_DBG_TX 			{.pinDef = {.Pin = GPIO_PIN_9 , .Mode=GPIO_MODE_INPUT, .Speed= GPIO_SPEED_FREQ_HIGH,  .Pull=GPIO_PULLUP , .Alternate= GPIO_AF4_I2C2 }, .port = GPIOA}
+#define SET_PIO_DBG_TX()		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9,GPIO_PIN_SET)
+#define CLEAR_PIO_DBG_TX()		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9,GPIO_PIN_RESET)
+
+#define PIN_SDA   				{.pinDef = {.Pin = GPIO_PIN_11, .Mode=GPIO_MODE_AF_OD, .Speed = GPIO_SPEED_FREQ_MEDIUM,  .Pull=GPIO_NOPULL, .Alternate= GPIO_AF4_I2C2 }, .port = GPIOB}
+#define PIN_SCL   				{.pinDef = {.Pin = GPIO_PIN_10, .Mode=GPIO_MODE_AF_OD, .Speed = GPIO_SPEED_FREQ_MEDIUM , .Pull=GPIO_NOPULL, .Alternate= GPIO_AF4_I2C2 }, .port = GPIOB}
+
+#define PIN_PIO_SDA   			{.pinDef = {.Pin = GPIO_PIN_11, .Mode=GPIO_MODE_OUTPUT_OD, .Speed = GPIO_SPEED_FREQ_MEDIUM,  .Pull=GPIO_NOPULL  }, .port = GPIOB}
+#define PIN_PIO_SCL   			{.pinDef = {.Pin = GPIO_PIN_10, .Mode=GPIO_MODE_OUTPUT_OD, .Speed = GPIO_SPEED_FREQ_MEDIUM , .Pull=GPIO_NOPULL  }, .port = GPIOB}
 
 
-#define PIN_ADC_1   			{.pinDef = {.GPIO_Pin = GPIO_Pin_1, .GPIO_Mode=GPIO_Mode_AN, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP, .GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOA}
-#define PIN_ADC_2   			{.pinDef = {.GPIO_Pin = GPIO_Pin_0, .GPIO_Mode=GPIO_Mode_AN, .GPIO_Speed= GPIO_Speed_2MHz, .GPIO_OType = GPIO_OType_PP, .GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOC}
+
+
+#define PIN_USB_N   			{.pinDef = {.Pin = GPIO_PIN_11, .Mode=GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_FREQ_MEDIUM,  .Pull=GPIO_NOPULL  }, .port = GPIOA }
+#define PIN_USB_P   			{.pinDef = {.Pin = GPIO_PIN_12, .Mode=GPIO_MODE_AF_PP, .Speed = GPIO_SPEED_FREQ_MEDIUM,  .Pull=GPIO_NOPULL  }, .port = GPIOA}
+
+
+#define PIN_ADC_1   			{.pinDef = {.Pin = GPIO_PIN_1, .Mode=GPIO_MODE_ANALOG, .Speed = GPIO_SPEED_FREQ_MEDIUM,   .Pull=GPIO_NOPULL  }, .port = GPIOA}
+#define PIN_ADC_2   			{.pinDef = {.Pin = GPIO_PIN_0, .Mode=GPIO_MODE_ANALOG, .Speed = GPIO_SPEED_FREQ_MEDIUM ,  .Pull=GPIO_NOPULL  }, .port = GPIOC}
 
 
 
@@ -113,7 +120,7 @@ typedef enum{les_none, les_on, les_off}led_state_t;
 
 void boardConfigurePIO(void);
 void boardPowerOnPIO(void);
-void boardInitAFPin(const pinAlternateFunction_t *pinAF);
+void boardInitAFPin(const pinGPIO_t *pinAF);
 void boardInitPin(const pinGPIO_t *pin);
 
 void boardSetPinsToIntput(void);

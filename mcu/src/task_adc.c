@@ -52,6 +52,7 @@ static SemaphoreHandle_t semaphoreADCReady;
 uint32_t ubat_avgsum;
 uint16_t adcValuesPlain[adsi_max-1];
 
+const uint32_t adcCHANNELS[] = {ADC_CHANNEL_VREFINT,ADC_CHANNEL_TEMPSENSOR,ADC_CHAN_1,ADC_CHAN_2};
 
 volatile adc_sequence_index_t adcSequenceIndex;
 
@@ -61,7 +62,7 @@ void getFactoryTSCalibData(TSCALIB_TypeDef* data)
 {
 	uint32_t deviceID;
 
-	deviceID = DBGMCU_GetDEVID();
+	deviceID = HAL_GetDEVID();
 
 	if (deviceID == 0x427) *data = *FACTORY_TSCALIB_MDP_DATA;
 	else if (deviceID == 0x437) *data = *FACTORY_TSCALIB_MDP_DATA;
@@ -92,72 +93,49 @@ ErrorStatus testFactoryCalibData(void)
   */
 void ADC_Config(void)
 {
-	ADC_InitTypeDef ADC_InitStructure;
-	GPIO_InitTypeDef GPIO_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
+
+
+
+
+	ADC_ChannelConfTypeDef sConfig;
 
 	semaphoreADCReady = xSemaphoreCreateBinary(  );
-
-	/* Enable The HSI (16Mhz) */
-	RCC_HSICmd(ENABLE);
-
-	/* Check that HSI oscillator is ready */
-	while(RCC_GetFlagStatus(RCC_FLAG_HSIRDY) == RESET);
-
-	/* Enable ADC1 clock */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-
-	ADC_StructInit(&ADC_InitStructure);
-	ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
-	ADC_InitStructure.ADC_ScanConvMode = ENABLE;
-	ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
-	ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
-	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-	ADC_InitStructure.ADC_NbrOfConversion = adsi_max-1;
-	ADC_Init(ADC1, &ADC_InitStructure);
-
-	/* ADC1 regular channel5 or channel1 configuration */
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_Vrefint, adsi_ref, ADC_SampleTime_192Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_TempSensor, adsi_temperature, ADC_SampleTime_192Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_CHAN_1, adsi_adc1, ADC_SampleTime_192Cycles);
-	ADC_RegularChannelConfig(ADC1, ADC_CHAN_2, adsi_adc2, ADC_SampleTime_192Cycles);
-
-	/* Define delay between ADC1 conversions */
-	ADC_DelaySelectionConfig(ADC1, ADC_DelayLength_Freeze);
-
-	/* Enable ADC1 Power Down during Delay */
-	ADC_PowerDownCmd(ADC1, ADC_PowerDown_Idle_Delay, ENABLE);
-
-	ADC_TempSensorVrefintCmd(ENABLE);
-
-	/* Configure and enable ADC1 interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = ADC1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = ISR_PRIORITY_ADC;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-	/* Enable EOC interrupt */
-	ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
-
-	/* Enable ADC1 */
-	ADC_Cmd(ADC1, ENABLE);
-
-	/* Wait until ADC1 ON status */
-	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_ADONS) == RESET)
-	{
-	}
 
 	if ( testFactoryCalibData() == SUCCESS )
 		getFactoryTSCalibData(&adcCalibData);
 
 
+	hadc.Instance = ADC1;
+	hadc.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+	hadc.Init.Resolution = ADC_RESOLUTION_12B;
+	hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	hadc.Init.ScanConvMode = ADC_SCAN_ENABLE;
+	hadc.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+	hadc.Init.LowPowerAutoWait = ADC_AUTOWAIT_UNTIL_DATA_READ;
+	hadc.Init.LowPowerAutoPowerOff = ADC_AUTOPOWEROFF_IDLE_DELAY_PHASES;
+	hadc.Init.ChannelsBank = ADC_CHANNELS_BANK_A;
+	hadc.Init.ContinuousConvMode = DISABLE;
+	hadc.Init.NbrOfConversion = adsi_max-1;
+	hadc.Init.DiscontinuousConvMode = DISABLE;
+	hadc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+	hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+	hadc.Init.DMAContinuousRequests = DISABLE;
+	HAL_ADC_Init(&hadc);
+
+	for (int i = 0; i<adsi_max-1;i++ ){
+		sConfig.Channel = adcCHANNELS[i];
+		sConfig.Rank = i+1;
+		sConfig.SamplingTime = ADC_SAMPLETIME_192CYCLES;
+		HAL_ADC_ConfigChannel(&hadc, &sConfig);
+	}
+
+
 
 	adcSequenceIndex = 1;
-	ADC_ClearITPendingBit(ADC1, ADC_IT_EOC);
 
-	ADC_EOCOnEachRegularChannelCmd(ADC1,ENABLE);
-	ADC_SoftwareStartConv(ADC1);
+	HAL_ADC_Start_IT(&hadc);
+
+
 }
 
 
@@ -212,7 +190,7 @@ void taskADC(void *pvParameters) {
 
 			qtUpdateMCUADCValues(adcValues_smoothed[adsi_temperature-1], adcValues_smoothed[adsi_ref-1], adcValues_smoothed[adsi_adc1-1], adcValues_smoothed[adsi_adc2-1]);
 			vTaskDelay(( 50 / portTICK_RATE_MS ));
-			ADC_SoftwareStartConv(ADC1);
+			HAL_ADC_Start_IT(&hadc);
 		}
 	}
 }
@@ -224,18 +202,21 @@ void taskADC(void *pvParameters) {
   */
 void ADC1_IRQHandler(void)
 {
-	if(ADC_GetITStatus(ADC1, ADC_IT_EOC) != RESET)
-	{
-		portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+	  if(__HAL_ADC_GET_IT_SOURCE(&hadc, ADC_IT_EOC))
+	  {
+	    if(__HAL_ADC_GET_FLAG(&hadc, ADC_FLAG_EOC) ){
+			portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
-		ADC_ClearITPendingBit(ADC1, ADC_IT_EOC);
 
-		adcValuesPlain[adcSequenceIndex-1] = ADC_GetConversionValue(ADC1);
-		adcSequenceIndex++;
-		if(adcSequenceIndex >= adsi_max){
-			xSemaphoreGiveFromISR(semaphoreADCReady,&xHigherPriorityTaskWoken);
-			adcSequenceIndex = 1;
-		}
-		portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
-	}
+			adcValuesPlain[adcSequenceIndex-1] = HAL_ADC_GetValue(&hadc);
+			adcSequenceIndex++;
+			if(adcSequenceIndex >= adsi_max){
+				xSemaphoreGiveFromISR(semaphoreADCReady,&xHigherPriorityTaskWoken);
+				adcSequenceIndex = 1;
+			}
+			__HAL_ADC_CLEAR_FLAG(&hadc, ADC_FLAG_STRT | ADC_FLAG_EOC);
+			portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
+	    }
+	  }
+
 }

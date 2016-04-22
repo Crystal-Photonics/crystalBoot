@@ -21,6 +21,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
+
 #include "board.h"
 #include "serial.h"
 
@@ -42,6 +43,7 @@
 
 resetReason_t mainResetReason;
 TaskHandle_t	taskHandles[taskHandleID_count];
+SemaphoreHandle_t semaphoreWakeUp;
 
 void mainSwitchIntoLowPower(void){
 
@@ -53,151 +55,44 @@ void mainSwitchIntoLowPower(void){
 }
 
 
-/**
-  * @brief  Configure the RTC peripheral by selecting the clock source.
-  * @param  None
-  * @retval None
-  */
-void RTC_Config(void)
-{
-	  RTC_InitTypeDef RTC_InitStructure;
-
-	/* Enable the PWR clock */
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
-
-	/* Allow access to RTC */
-	PWR_RTCAccessCmd(ENABLE);
-
-#if defined (RTC_CLOCK_SOURCE_LSI)  /* LSI used as RTC source clock*/
-	/* The RTC Clock may varies due to LSI frequency dispersion. */
-	/* Enable the LSI OSC */
-	RCC_LSICmd(ENABLE);
-
-	/* Wait till LSI is ready */
-	while(RCC_GetFlagStatus(RCC_FLAG_LSIRDY) == RESET)
-	{
-	}
-
-	/* Select the RTC Clock Source */
-	RCC_RTCCLKConfig(RCC_RTCCLKSource_LSI);
-
-	SynchPrediv = 0xFF;
-	AsynchPrediv = 0x7F;
-
-#elif defined (RTC_CLOCK_SOURCE_LSE) /* LSE used as RTC source clock */
-	/* Enable the LSE OSC */
-	RCC_LSEConfig(RCC_LSE_ON);
-
-	/* Wait till LSE is ready */
-	while(RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET)
-	{
-	}
-
-	/* Select the RTC Clock Source */
-	RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
-
-	  /* Calendar Configuration */
-	#if 1
-	  RTC_InitStructure.RTC_AsynchPrediv = 127;
-	  RTC_InitStructure.RTC_SynchPrediv =  255; //=1Hz
-	  RTC_InitStructure.RTC_HourFormat = RTC_HourFormat_24;
-	  RTC_Init(&RTC_InitStructure);
-	#endif
-
-#else
-#error Please select the RTC Clock source inside the main.c file
-#endif /* RTC_CLOCK_SOURCE_LSI */
-
-	/* Enable the RTC Clock */
-	RCC_RTCCLKCmd(ENABLE);
-
-	/* Wait for RTC APB registers synchronisation */
-	RTC_WaitForSynchro();
-	PWR_RTCAccessCmd(ENABLE);
-}
-
-
-
 void RTC_SetToDefaulDate(void)
 {
-	RTC_TimeTypeDef RTC_TimeStructure;
-	RTC_DateTypeDef RTC_DateStructure;
-	/* Allow access to RTC */
-	PWR_RTCAccessCmd(ENABLE);
+	  RTC_TimeTypeDef sTime;
+	  RTC_DateTypeDef sDate;
 
-	RTC_TimeStructure.RTC_H12     = RTC_H12_AM;
-	RTC_TimeStructure.RTC_Hours = 0;
-	RTC_TimeStructure.RTC_Minutes = 0;
-	RTC_TimeStructure.RTC_Seconds = 0;
-	RTC_SetTime(RTC_Format_BCD, &RTC_TimeStructure);
+	  sTime.Hours = 0x0;
+	  sTime.Minutes = 0x0;
+	  sTime.Seconds = 0x0;
+	  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+	  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+	  HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
 
-	RTC_DateStructure.RTC_WeekDay = 3;
-	RTC_DateStructure.RTC_Month = 01;
-	RTC_DateStructure.RTC_Date = 01;
-	RTC_DateStructure.RTC_Year = 0x15;
-	RTC_SetDate(RTC_Format_BCD, &RTC_DateStructure);
-	PWR_RTCAccessCmd(DISABLE);
+	  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+	  sDate.Month = RTC_MONTH_JANUARY;
+	  sDate.Date = 0x1;
+	  sDate.Year = 0x0;
+
+	  HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
 }
 
 
 
 
 void mainBackup_SetLEDStatus(uint32_t ledStatus){
-	PWR_RTCAccessCmd(ENABLE);
-	RTC_WriteBackupRegister(RTC_BKP_DR0,ledStatus);
-	PWR_RTCAccessCmd(DISABLE);
+	HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,ledStatus);
 }
 
 uint32_t mainBackup_GetLEDStatus(void){
 	uint32_t result;
-	result = RTC_ReadBackupRegister(RTC_BKP_DR0);
+	result = HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0);
 	return result;
 }
 
 
 
 void initRTCInterrupt(){
-	  NVIC_InitTypeDef NVIC_InitStructure;
-	  EXTI_InitTypeDef EXTI_InitStructure;
-
-	  PWR_RTCAccessCmd(ENABLE);
-
-	  EXTI_ClearITPendingBit(EXTI_Line20);
-	  EXTI_InitStructure.EXTI_Line = EXTI_Line20;
-	  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-	  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	  EXTI_Init(&EXTI_InitStructure);
-
-	  /* Enable the RTC Wakeup Interrupt */
-	  NVIC_InitStructure.NVIC_IRQChannel = RTC_WKUP_IRQn;
-	  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority =  configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+1;
-	  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	  NVIC_Init(&NVIC_InitStructure);
-
-	 // RTC_WakeUpCmd(DISABLE);
-	  /* 3.1.3 from AN3371 using hardware RTC
-	  WUCKSEL -> (only when RTC->CR WUTE = 0; RTC->ISR WUTWF = 1)
-	  000: RTC/16 clock is selected
-	  001: RTC/8 clock is selected
-	  010: RTC/4 clock is selected
-	  011: RTC/2 clock is selected
-	  10x: ck_spre (usually 1 Hz) clock is selected
-	  11x: ck_spre (usually 1 Hz) clock is selected and 216 is added to the WUT counter value
-	  from 1s to 18 hours when WUCKSEL [2:1] = 10
-	  */
-	  /* Clear Wake-up flag */
-	  //PWR->CR |= PWR_CR_CWUF;
-
-	  //RTC_WakeUpClockConfig(RTC_WakeUpClock_CK_SPRE_16bits);
-	  //RTC_SetWakeUpCounter(period_s-1);
-	  //The WUTF flag must then be cleared by software.
-	  RTC_ClearITPendingBit(RTC_IT_WUT); //ClearITPendingBit clears also the flag
-	  RTC_ClearFlag(RTC_FLAG_WUTF); //MANDATORY!
-	  RTC_ITConfig(RTC_IT_WUT, ENABLE); //enable interrupt
-	  //RTC_WakeUpCmd(ENABLE);
-	  PWR_RTCAccessCmd(DISABLE); //just in case
+	HAL_NVIC_SetPriority(RTC_WKUP_IRQn,configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+1,0);
+	HAL_RTCEx_SetWakeUpTimer_IT(&hrtc,1000,RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
 }
 
 void keyPressHandle (key_event_t event, key_id_t id){
@@ -245,18 +140,21 @@ int main(void)
 	int n;
 	bool hardreset=false;
 	uint32_t ledstatus;
-	/* Configure the hardware ready to run the test. */
-	NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
+	HAL_Init();
+
+	SystemClock_Config();
+
 	boardConfigurePIO();
+
 #if 0
 	for (;;){
 		static uint8_t ledstatus = 0;
 		if (ledstatus & 1){
-			SET_LED_BLUE();
-			SET_LED_RED();
-		}else{
 			CLEAR_LED_BLUE();
 			CLEAR_LED_RED();
+		}else{
+			SET_LED_BLUE();
+			SET_LED_RED();
 		}
 		ledstatus++;
 		for (int i=0; i<250000; i++);
@@ -288,17 +186,18 @@ int main(void)
 		}
 
 		if(mainResetReason == rer_rtc){
-			RTC_WakeUpCmd(DISABLE);
+			HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
+
 		}
 
 	}
 #endif
 	if(hardreset){
 		mainResetReason = rer_reset;
-		RTC_Config();
+		MX_RTC_Init();
 		RTC_SetToDefaulDate();
 		for (uint32_t i = 0; i < RTC_BKP_DR19;i++){
-			RTC_WriteBackupRegister(i,0);
+			HAL_RTCEx_BKUPWrite(&hrtc,i,0);
 		}
 
 	}
@@ -307,9 +206,7 @@ int main(void)
 	PWR->CR |= PWR_CR_CSBF;//reset standby flag
 	PWR->CR |= PWR_CR_CWUF;
 
-	PWR_RTCAccessCmd(ENABLE);
-	RCC_LSEConfig( ENABLE );
-	PWR_RTCAccessCmd(DISABLE);
+
 	keyInit();
 
 	keyRegisterHandle(&keyPressHandle);
@@ -421,8 +318,8 @@ void vApplicationStackOverflowHook( xTaskHandle pxTask, signed char *pcTaskName 
 			// waste time
 			for (int i=0; i<250000; i++);
 			{}
-			GPIO_ToggleBits(GPIOA, GPIO_Pin_8);
-			GPIO_ToggleBits(GPIOB, GPIO_Pin_7);
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
 		}
 	}
 }
