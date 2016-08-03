@@ -37,7 +37,7 @@
 #include "lowpower.h"
 #include "vc.h"
 
-
+channel_codec_instance_t cc_instances[channel_codec_comport_COUNT];
 
 #define RTC_CLOCK_SOURCE_LSE 1
 
@@ -125,9 +125,9 @@ void keyPressHandle (key_event_t event, key_id_t id){
 
 
 
-	RPC_TRANSMISSION_RESULT result = qtKeyPressed(keyStatus);
+	RPC_RESULT result = qtKeyPressed(keyStatus);
 
-	if (result == RPC_TRANSMISSION_SUCCESS){
+	if (result == RPC_SUCCESS){
 		ledPatternSetToBlink(lid_red, lpp_priority_1, 1, 10, 10, 3);
 	}else {
 		ledPatternSetToOff(lid_red, lpp_priority_1);

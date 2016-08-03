@@ -5,18 +5,18 @@
  *      Author: arne
  */
 
-#include"../../../include/rpc_transmission/server/generated_general/RPC_TRANSMISSION_types.h"
+#include"../../../include/rpc_transmission/server/generated_general/RPC_types.h"
 #include"../../../include/rpc_transmission/server/generated_general/RPC_TRANSMISSION_network.h"
 #include "errorlogger/generic_eeprom_errorlogger.h"
 #include "channel_codec/channel_codec.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
-
+#include "main.h"
 
 static const uint16_t MAX_LOCKTIME_ms = 10*1000;
 
-SemaphoreHandle_t  rpc_transmission_mutexes[RPC_TRANSMISSION_MUTEX_COUNT];
+SemaphoreHandle_t  rpc_transmission_mutexes[RPC_MUTEX_COUNT];
 
 
 
@@ -24,14 +24,14 @@ SemaphoreHandle_t  rpc_transmission_mutexes[RPC_TRANSMISSION_MUTEX_COUNT];
 
 /* Initializes all rpc mutexes. */
 void RPC_TRANSMISSION_mutex_init(void){
-	for(int i = 0; i<RPC_TRANSMISSION_MUTEX_COUNT;i++){
+	for(int i = 0; i<RPC_MUTEX_COUNT;i++){
 		rpc_transmission_mutexes[i] = xSemaphoreCreateBinary();
 		RPC_TRANSMISSION_mutex_unlock(i);
 	}
 }
 
 /* Locks the mutex. If it is already locked it yields until it can lock the mutex. */
-void RPC_TRANSMISSION_mutex_lock(RPC_TRANSMISSION_mutex_id mutex_id){
+void RPC_TRANSMISSION_mutex_lock(RPC_mutex_id mutex_id){
 	//printf("lock %d\n",mutex_id);
 	if( xSemaphoreTake( rpc_transmission_mutexes[mutex_id], MAX_LOCKTIME_ms ) == pdTRUE ){
 			//return 1;
@@ -42,12 +42,12 @@ void RPC_TRANSMISSION_mutex_lock(RPC_TRANSMISSION_mutex_id mutex_id){
 }
 
 /* Unlocks the mutex. The mutex is locked when the function is called. */
-void RPC_TRANSMISSION_mutex_unlock(RPC_TRANSMISSION_mutex_id mutex_id){
+void RPC_TRANSMISSION_mutex_unlock(RPC_mutex_id mutex_id){
 	//printf("unlock %d\n",mutex_id);
 	xSemaphoreGive( rpc_transmission_mutexes[mutex_id]);
 }
 
-char RPC_TRANSMISSION_mutex_lock_timeout(RPC_TRANSMISSION_mutex_id mutex_id){
+char RPC_TRANSMISSION_mutex_lock_timeout(RPC_mutex_id mutex_id){
 	const int timeout_ms = 1000;
 	//printf("lock timed %d\n",mutex_id);
 	if( xSemaphoreTake( rpc_transmission_mutexes[mutex_id], timeout_ms / portTICK_RATE_MS ) == pdTRUE ){
@@ -64,7 +64,7 @@ char RPC_TRANSMISSION_mutex_lock_timeout(RPC_TRANSMISSION_mutex_id mutex_id){
 		    buffer or write a preamble. The implementation can be empty if you do not
 		    need to do that. */
 void RPC_TRANSMISSION_message_start(size_t size){
-	channel_start_message_from_RPC(size);
+	channel_start_message_from_RPC(&cc_instances[channel_codec_comport_transmission],size);
 }
 
 /* Pushes a byte to be sent via network. You should put all the pushed bytes
@@ -72,7 +72,7 @@ void RPC_TRANSMISSION_message_start(size_t size){
 		   out of buffer space you can send multiple partial messages as long as the
 		   other side puts them back together. */
 void RPC_TRANSMISSION_message_push_byte(unsigned char byte){
-	channel_push_byte_from_RPC(byte);
+	channel_push_byte_from_RPC(&cc_instances[channel_codec_comport_transmission],byte);
 }
 
 /* This function is called when a complete message has been pushed using
@@ -81,9 +81,57 @@ void RPC_TRANSMISSION_message_push_byte(unsigned char byte){
 		   you may have allocated in the RPC_TRANSMISSION_message_start function.
 		   RPC_TRANSMISSION_message_commit should return RPC_TRANSMISSION_SUCCESS if the buffer has been successfully
 		   sent and RPC_TRANSMISSION_FAILURE otherwise. */
-RPC_TRANSMISSION_RESULT RPC_TRANSMISSION_message_commit(void){
-	return channel_commit_from_RPC();
+RPC_RESULT RPC_TRANSMISSION_message_commit(void){
+	return channel_commit_from_RPC(&cc_instances[channel_codec_comport_transmission]);
 }
 
 
+
+RPC_SIZE_RESULT RPC_CHANNEL_CODEC_get_request_size(channel_codec_instance_t *instance, const void *buffer, size_t size_bytes){
+	if (instance->aux.port == channel_codec_comport_transmission){
+		return RPC_TRANSMISSION_get_request_size(buffer, size_bytes);
+	}else{
+		RPC_SIZE_RESULT result;
+		result.size = 0;
+		result.result = RPC_FAILURE;
+		assert(0);
+		return result;
+	}
+}
+
+RPC_SIZE_RESULT RPC_CHANNEL_CODEC_get_answer_length(channel_codec_instance_t *instance, const void *buffer, size_t size_bytes){
+	if (instance->aux.port == channel_codec_comport_transmission){
+		return RPC_TRANSMISSION_get_answer_length(buffer, size_bytes);
+	}else{
+		RPC_SIZE_RESULT result;
+		result.size = 0;
+		result.result = RPC_FAILURE;
+		assert(0);
+		return result;
+	}
+}
+
+void RPC_CHANNEL_CODEC_parse_request(channel_codec_instance_t *instance, const void *buffer, size_t size_bytes){
+	if (instance->aux.port == channel_codec_comport_transmission){
+		RPC_TRANSMISSION_parse_request(buffer, size_bytes);
+	}else{
+		assert(0);
+	}
+}
+
+void RPC_CHANNEL_CODEC_parse_answer(channel_codec_instance_t *instance, const void *buffer, size_t size_bytes){
+	if (instance->aux.port == channel_codec_comport_transmission){
+		RPC_TRANSMISSION_parse_answer(buffer, size_bytes);
+	}else{
+		assert(0);
+	}
+}
+
+void RPC_CHANNEL_CODEC_parser_init(channel_codec_instance_t *instance){
+	if (instance->aux.port == channel_codec_comport_transmission){
+		RPC_TRANSMISSION_Parser_init();
+	}else{
+		assert(0);
+	}
+}
 

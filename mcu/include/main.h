@@ -22,6 +22,7 @@
 
 #include "board.h"
 #include "semphr.h"
+#include "channel_codec/channel_codec_types.h"
 
 #define mainLED_TASK_STACK				( ( unsigned short ) 550 )
 #define mainKEY_TASK_STACK				( ( unsigned short ) 300 )
@@ -54,7 +55,7 @@ extern xSemaphoreHandle xSemaphores[semCount];
 typedef enum{rer_none,rer_reset,rer_rtc,rer_wupin1_USB,rer_wupin2_ONOFFKEY} resetReason_t;
 
 extern resetReason_t mainResetReason;
-
+extern channel_codec_instance_t cc_instances[channel_codec_comport_COUNT];
 
 
 #endif /* MAIN_H_ */

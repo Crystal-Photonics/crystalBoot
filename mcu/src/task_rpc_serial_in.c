@@ -27,23 +27,37 @@
 #include "main.h"
 #include "serial.h"
 
+#define CHANNEL_CODEC_TX_BUFFER_SIZE 64
+#define CHANNEL_CODEC_RX_BUFFER_SIZE 64
+
+
+static char cc_rxBuffers[channel_codec_comport_COUNT][CHANNEL_CODEC_RX_BUFFER_SIZE];
+static char cc_txBuffers[channel_codec_comport_COUNT][CHANNEL_CODEC_TX_BUFFER_SIZE];
+
 void ChannelCodec_errorHandler(channelCodecErrorNum_t ErrNum){
 	(void)ErrNum;
 
 }
 
 
-RPC_TRANSMISSION_RESULT phyPushDataBuffer(const char *buffer, size_t length){
-	vSerialPutString(serCOM_DBG, buffer,  length);
-	return RPC_TRANSMISSION_SUCCESS;
+
+RPC_RESULT phyPushDataBuffer(channel_codec_instance_t *instance,  const char *buffer, size_t length){
+	if (instance->aux.port == channel_codec_comport_transmission){
+		vSerialPutString(serCOM_DBG, buffer,  length);
+	}
+	return RPC_SUCCESS;
 }
 
 void taskRPCSerialIn(void *pvParameters) {
 
 	signed char  inByte;
-	channel_init();
 
 
+	cc_instances[channel_codec_comport_transmission].aux.port = channel_codec_comport_transmission;
+
+	channel_init_instance(&cc_instances[channel_codec_comport_transmission],
+									 cc_rxBuffers[channel_codec_comport_transmission],CHANNEL_CODEC_RX_BUFFER_SIZE,
+									 cc_txBuffers[channel_codec_comport_transmission],CHANNEL_CODEC_TX_BUFFER_SIZE);
 
     for (int i = 0;i < taskHandleID_count; i++){
     	if (i != taskHandleID_RPCSerialIn)
@@ -54,7 +68,7 @@ void taskRPCSerialIn(void *pvParameters) {
     vTaskDelay(( 50 / portTICK_RATE_MS ));
 	for (;;) {
 		if (xSerialGetChar( serCOM_DBG, &inByte, 100 / portTICK_RATE_MS ) == pdTRUE){
-			channel_push_byte_to_RPC(inByte);
+			channel_push_byte_to_RPC(&cc_instances[channel_codec_comport_transmission],inByte);
 		}
 	}
 }
