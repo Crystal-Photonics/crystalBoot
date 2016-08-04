@@ -3,8 +3,11 @@
 
 #include <QMainWindow>
 #include "serialworker.h"
+#include "channel_codec/channel_codec_types.h"
 
 #include "rpc_transmission/server/app/mcu2qt.h"
+extern channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
+
 
 namespace Ui {
 class MainWindow;

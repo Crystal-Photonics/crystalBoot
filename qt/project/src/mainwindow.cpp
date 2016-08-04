@@ -4,6 +4,9 @@
 #include <QStringList>
 #include <QDebug>
 
+
+channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)

@@ -39,12 +39,16 @@ SOURCES += ../libs/RPC-ChannelCodec/src/channel_codec/channel_codec.c
 SOURCES += ../libs/RPC-ChannelCodec/src/channel_codec/crc16.c
 
 HEADERS += ../libs/RPC-ChannelCodec/include/channel_codec/channel_codec.h
+HEADERS += ../libs/RPC-ChannelCodec/include/channel_codec/channel_codec_types.h
+HEADERS += ../libs/rpc/include/channel_codec/channel_codec_config.h
 
-INCLUDEPATH += ../libs/RPC-ChannelCodec/include
+
 INCLUDEPATH += ../libs/RPC-ChannelCodec/include/errorlogger_dummy
-INCLUDEPATH += ../libs/RPC-ChannelCodec/tests/include
+#INCLUDEPATH += ../libs/RPC-ChannelCodec/tests/include
 
 INCLUDEPATH += ../libs/rpc/include/
+INCLUDEPATH += ../libs/rpc/include/rpc_transmission/client/generated_app
+
 
 FORMS    += mainwindow.ui
 

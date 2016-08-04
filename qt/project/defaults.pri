@@ -18,6 +18,7 @@ CONFIG += warn
 
 INCLUDEPATH += $$PWD/libs/build/qtserialport/debug/include/
 INCLUDEPATH += ../libs/rpc/include/
+INCLUDEPATH += ../libs/RPC-ChannelCodec/include/
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += serialport
 

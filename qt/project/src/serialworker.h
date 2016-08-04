@@ -6,12 +6,12 @@
 #include <QtSerialPort/QSerialPort>
 #include "rpc_transmission/server/app/mcu2qt.h"
 
-
+struct SerialThread;
 class SerialWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit SerialWorker(QObject *parent = 0);
+    explicit SerialWorker(SerialThread* serialThread, QObject *parent = 0);
     void wrapUpdateADC(float adc1);
     void wrapUpdateKeyState(rpcKeyStatus_t keyState);
 
@@ -39,7 +39,7 @@ private:
 
 };
 
-class SerialThread : public QObject
+struct SerialThread : public QObject
 {
     Q_OBJECT
 public:
