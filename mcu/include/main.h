@@ -52,7 +52,16 @@ void HALTAndBlink(void);
 extern TaskHandle_t	taskHandles[taskHandleID_count];
 
 extern xSemaphoreHandle xSemaphores[semCount];
-typedef enum{rer_none,rer_reset,rer_rtc,rer_wupin1_USB,rer_wupin2_ONOFFKEY} resetReason_t;
+typedef enum{rer_none,
+	rer_resetPin,
+	rer_powerOnReset,
+	rer_independendWatchdog,
+	rer_windowWatchdog,
+	rer_softwareReset,
+	rer_rtc,
+	rer_wupin1_USB,
+	rer_wupin2_ONOFFKEY,
+	} resetReason_t;
 
 extern resetReason_t mainResetReason;
 extern channel_codec_instance_t cc_instances[channel_codec_comport_COUNT];

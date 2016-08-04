@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <inttypes.h>
+#include <assert.h>
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
@@ -135,6 +136,124 @@ void keyPressHandle (key_event_t event, key_id_t id){
 
 }
 
+static void printResetReason_t(resetReason_t reason){
+	switch(reason){
+	case rer_resetPin:
+		printf("Reset reason: NRST Pin or Debugger\n");
+		break;
+	case rer_powerOnReset:
+		printf("Reset reason: Power On Reset\n");
+		break;
+	case rer_softwareReset:
+		printf("Reset reason: software reset\n");
+		break;
+	case rer_independendWatchdog:
+		printf("Reset reason: independend Watchdog reset\n");
+		break;
+	case rer_windowWatchdog:
+		printf("Reset reason: windowed Watchdog reset\n");
+		break;
+	case rer_rtc:
+		printf("Reset reason: rtc wakeup reset\n");
+		break;
+	case rer_wupin1_USB:
+		printf("Reset reason: rer_wupin1_USB reset\n");
+		break;
+	case rer_wupin2_ONOFFKEY:
+		printf("Reset reason: rer_wupin2_ONOFFKEY reset\n");
+		break;
+	case rer_none:
+		printf("Reset reason: unknown reset\n");
+		break;
+
+	}
+}
+
+
+static resetReason_t mainTestResetSource(void){
+	// test the reset flags in order because the pin reset is always set.
+	//http://www.micromouseonline.com/2012/03/29/stm32-reset-source/
+	uint32_t rcc_csr = RCC->CSR;
+	uint32_t pwr_csr = PWR->CSR;
+	printf("reset reason PWR_CSR 0x%08"PRIX32 " RCC_CSR 0x%08"PRIX32 " RTC_ISR 0x%08"PRIX32"\n",rcc_csr,pwr_csr,RTC->ISR);
+	resetReason_t result = rer_none;
+	if ((pwr_csr & PWR_CSR_WUF) && (pwr_csr & PWR_CSR_SBF)){
+		//PWR_CSR_WUF: Wakeup flag
+		//	This bit is set by hardware and cleared by a system reset or by setting the CWUF bit in the
+		//	PWR power control register (PWR_CR)
+		//	0: No wakeup event occurred
+		//	1: A wakeup event was received from the WKUP pin or from the RTC alarm (Alarm A or
+		//	Alarm B), RTC Tamper event, RTC TimeStamp event or RTC Wakeup).
+
+		//PWR_CSR_SBF: Standby flag
+		//	This bit is set by hardware and cleared only by a POR/PDR (power on reset/power down reset)
+		//	or by setting the CSBF bit in the PWR power control register (PWR_CR)
+		//	0: Device has not been in Standby mode
+		//	1: Device has been in Standby mode
+
+		//probe was in standbymode
+		  if (GET_KEYONOFF()){
+			  result = rer_wupin2_ONOFFKEY; //works
+
+			  while(GET_KEYONOFF()){ //lets wait until key released
+
+			  }
+
+		  }else if(RTC->ISR & RTC_ISR_WUTF){
+			  result = rer_rtc; 			//works
+			  HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
+		  }else{
+
+			  result = rer_none;
+			  //assert(0);
+		  }
+
+	}else if  ( rcc_csr & RCC_CSR_LPWRRSTF){
+
+		//Low-power management reset
+		//	There are two ways to generate a low-power management reset:
+		//
+		//	1.Reset generated when entering Standby mode:
+		//		This type of reset is enabled by resetting nRST_STDBY bit in user option bytes. In this
+		//		case, whenever a Standby mode entry sequence is successfully executed, the device
+		//		is reset instead of entering Standby mode.
+		//
+		//	2. Reset when entering Stop mode:
+		//		This type of reset is enabled by resetting nRST_STOP bit in user option bytes. In this
+		//		case, whenever a Stop mode entry sequence
+
+		//shouldnt happen..
+		result = rer_none;
+		assert(0);
+
+
+	}else if  ( rcc_csr & RCC_CSR_IWDGRSTF){
+		result = rer_independendWatchdog;
+	}else if  ( rcc_csr & RCC_CSR_WWDGRSTF){
+		result = rer_windowWatchdog;
+	}else if  ( rcc_csr & RCC_CSR_SFTRSTF){
+		result = rer_softwareReset;
+	} else if  ( rcc_csr & RCC_CSR_PORRSTF){
+		 result = rer_powerOnReset;  //works
+	} else if  (rcc_csr & RCC_CSR_PINRSTF){
+		 result = rer_resetPin;   //works
+	} else {
+		result = rer_none;
+		assert(0);
+	}
+
+	RCC->CSR |= RCC_CSR_RMVF; 				//Remove reset flag
+	PWR->CR |= PWR_CR_CSBF | PWR_CR_CWUF;  	// Clear Wakeup Flag  Clear Standby Flag
+	HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);	//System reset, as well as low-power modes (Sleep, Stop and Standby) have no influence on the wakeup timer.
+
+	return result;
+}
+
+bool mainTestCurrentTaskID(t_taskHandleID handleID){
+	bool result = xTaskGetCurrentTaskHandle() == taskHandles[handleID];
+	return result;
+}
+
 int main(void)
 {
 	int n;
@@ -167,33 +286,15 @@ int main(void)
 	semaphoreWakeUp = xSemaphoreCreateBinary();
 	RPC_TRANSMISSION_mutex_init();
 
+	mainResetReason = mainTestResetSource();
+	printResetReason_t(mainResetReason);
     printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR,hardreset);
     printf("githash = %X\n", GITHASH);
     printf("gitdate = %s %u\n", GITDATE, GITUNIX);
-    RCC->CSR |=RCC_CSR_RMVF;
-#if 1
-    if (PWR->CSR & PWR_CSR_WUF){
-		for (int i=0; i<2500; i++);
+    if(mainResetReason == rer_rtc){
+    	HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
 
-		mainResetReason = rer_rtc;
-		if (GET_KEYONOFF()){
-			mainResetReason = rer_wupin2_ONOFFKEY;
-			SET_LED_GREEN();
-			while(GET_KEYONOFF()){}	//wait until key released
-			CLEAR_LED_GREEN();
-
-			initRTCInterrupt();
-		}
-
-		if(mainResetReason == rer_rtc){
-			HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
-
-		}
-
-	}
-#endif
-	if(hardreset){
-		mainResetReason = rer_reset;
+    }else if(mainResetReason == rer_resetPin){
 		MX_RTC_Init();
 		RTC_SetToDefaulDate();
 		for (uint32_t i = 0; i < RTC_BKP_DR19;i++){
@@ -201,10 +302,6 @@ int main(void)
 		}
 
 	}
-
-
-	PWR->CR |= PWR_CR_CSBF;//reset standby flag
-	PWR->CR |= PWR_CR_CWUF;
 
 
 	keyInit();
