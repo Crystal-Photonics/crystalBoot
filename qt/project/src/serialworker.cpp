@@ -34,8 +34,9 @@ extern "C" RPC_RESULT phyPushDataBuffer(channel_codec_instance_t *instance, cons
     return RPC_SUCCESS;
 }
 
-extern "C" void ChannelCodec_errorHandler(channelCodecErrorNum_t ErrNum){
+extern "C" void ChannelCodec_errorHandler(channel_codec_instance_t *instance, channelCodecErrorNum_t ErrNum){
     (void)ErrNum;
+    (void)instance;
 }
 
 SerialThread::SerialThread(QObject *parent) :

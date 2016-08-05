@@ -34,8 +34,9 @@
 static char cc_rxBuffers[channel_codec_comport_COUNT][CHANNEL_CODEC_RX_BUFFER_SIZE];
 static char cc_txBuffers[channel_codec_comport_COUNT][CHANNEL_CODEC_TX_BUFFER_SIZE];
 
-void ChannelCodec_errorHandler(channelCodecErrorNum_t ErrNum){
+void ChannelCodec_errorHandler(channel_codec_instance_t *instance,  channelCodecErrorNum_t ErrNum){
 	(void)ErrNum;
+	(void)instance;
 
 }
 
