@@ -32,14 +32,14 @@ HEADERS += ../libs/rpc/include/rpc_transmission/client/generated_app/RPC_TRANSMI
 
 HEADERS += ../libs/rpc/include/rpc_transmission/server/generated_general/RPC_TRANSMISSION_network.h
 HEADERS += ../libs/rpc/include/rpc_transmission/server/generated_general/RPC_TRANSMISSION_parser.h
-HEADERS += ../libs/rpc/include/rpc_transmission/server/generated_general/RPC_TRANSMISSION_types.h
+HEADERS += ../libs/rpc/include/rpc_transmission/server/generated_general/RPC_types.h
 HEADERS += ../libs/rpc/include/rpc_transmission/server/app/mcu2qt.h
 
 SOURCES += ../libs/RPC-ChannelCodec/src/channel_codec/channel_codec.c
 SOURCES += ../libs/RPC-ChannelCodec/src/channel_codec/crc16.c
 
 HEADERS += ../libs/RPC-ChannelCodec/include/channel_codec/channel_codec.h
-HEADERS += ../libs/RPC-ChannelCodec/include/channel_codec/channel_codec_types.h
+HEADERS +=
 HEADERS += ../libs/rpc/include/channel_codec/channel_codec_config.h
 
 
