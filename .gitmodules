@@ -13,3 +13,9 @@
 [submodule "qt/project/libs/qtserialport"]
 	path = qt/project/libs/qtserialport
 	url = git://code.qt.io/qt/qtserialport.git
+
+[submodule "mcu/modules/RPC-ChannelCodec"]
+
+	path = mcu/modules/RPC-ChannelCodec
+	
+	url = https://github.com/Crystal-Photonics/RPC-ChannelCodec.git

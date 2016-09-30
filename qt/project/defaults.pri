@@ -17,12 +17,13 @@ CONFIG += c++14
 CONFIG += warn
 
 INCLUDEPATH += $$PWD/libs/build/qtserialport/debug/include/
+INCLUDEPATH += ../libs/rpc/include/
+INCLUDEPATH += ../libs/RPC-ChannelCodec/include/
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += serialport
 
-lessThan(QT_MAJOR_VERSION, 5)
-{
-    message(qt version: $$QT_MAJOR_VERSION)
+lessThan(QT_MAJOR_VERSION, 5){
+    #message(qt version: $$QT_MAJOR_VERSION)
     #working with QT4 or less?
     CONFIG( debug, debug|release ) {
         LIBS += -L$$PWD/libs/build/qtserialport/debug/src/serialport/

@@ -2,53 +2,67 @@
 #include <thread>
 #include <chrono>
 #include "serialworker.h"
-#include "channel_codec/channel_codec.h"
+#include "mainwindow.h"
+
 #include "errorlogger/generic_eeprom_errorlogger.h"
 #include "rpc_transmission/client/generated_app/RPC_TRANSMISSION_qt2mcu.h"
+#include "channel_codec/channel_codec.h"
 
-SerialThread* globSerialThread;
 
 SerialWorker *serialWorkerForRPCFunc = NULL;
 
 
-extern "C" RPC_TRANSMISSION_RESULT phyPushDataBuffer(const char *buffer, size_t length){
-    QByteArray data = QByteArray(buffer,length);
-    globSerialThread->sendByteData(data);
-    return RPC_TRANSMISSION_SUCCESS;
+#define CHANNEL_CODEC_TX_BUFFER_SIZE 64
+#define CHANNEL_CODEC_RX_BUFFER_SIZE 64
+
+
+char channel_codec_rxbuffer[channel_codec_comport_COUNT][CHANNEL_CODEC_RX_BUFFER_SIZE];
+char channel_codec_txbuffer[channel_codec_comport_COUNT][CHANNEL_CODEC_TX_BUFFER_SIZE];
+
+
+extern "C" RPC_RESULT phyPushDataBuffer(channel_codec_instance_t *instance, const char *buffer, size_t length){
+
+    if (instance->aux.portindex == channel_codec_comport_transmission){
+        QByteArray data = QByteArray(buffer,length);
+        SerialThread *serialthread = instance->aux.serialthread;
+        assert(serialthread);
+        if (serialthread){
+            serialthread->sendByteData(data);
+        }
+
+    }
+    return RPC_SUCCESS;
 }
 
-extern "C" void ChannelCodec_errorHandler(channelCodecErrorNum_t ErrNum){
+extern "C" void ChannelCodec_errorHandler(channel_codec_instance_t *instance, channelCodecErrorNum_t ErrNum){
     (void)ErrNum;
+    (void)instance;
 }
 
 SerialThread::SerialThread(QObject *parent) :
     QObject(parent)
 {
-    channel_init();
+
     thread = new QThread();
-    serialport = new QSerialPort();
-    globSerialThread = this;
-    serialWorker = new SerialWorker(serialport);
+
+    serialWorker = new SerialWorker(this);
     serialWorkerForRPCFunc = serialWorker;
     serialWorker->moveToThread(thread);
-    serialport->moveToThread(thread);
-
-
 
     connect(thread, SIGNAL(started()), serialWorker, SLOT(process()));
     connect(serialWorker, SIGNAL(finished()), thread, SLOT(quit()));
     connect(serialWorker, SIGNAL(finished()), serialWorker, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
-    connect(serialport,SIGNAL(readyRead()),serialWorker,SLOT(on_readyRead()));
-    connect(serialWorker,SIGNAL(updateTemperature(float)),this,SIGNAL(updateTemperature(float)));
-#if 1
+
+    connect(serialWorker,SIGNAL(updateADC(float)),this,SIGNAL(updateADC(float)));
+    connect(serialWorker,SIGNAL(updateKeyState(rpcKeyStatus_t)),this,SIGNAL(updateKeyState(rpcKeyStatus_t)));
 
     connect(this, SIGNAL(openPort(QString, int)), serialWorker, SLOT(openPort(QString, int)));
     connect(this, SIGNAL(closePort()), serialWorker, SLOT(closePort()));
     connect(this, SIGNAL(isPortOpened()), serialWorker, SLOT(isPortOpened()));
     connect(this, SIGNAL(sendData(QByteArray)), serialWorker, SLOT(sendData(QByteArray)));
-#endif
+
 
 
     thread->start();
@@ -57,43 +71,55 @@ SerialThread::SerialThread(QObject *parent) :
 
 void SerialThread::open(QString name, int baudrate)
 {
-#if 0
-    serialport->setPortName(name);
-    serialport->setBaudRate(baudrate);
-    serialport->setFlowControl(QSerialPort::NoFlowControl);
-    serialport->open(QIODevice::ReadWrite);
-#else
+
     emit openPort(name,baudrate);
-#endif
+
 }
 
 void SerialThread::close()
 {
-#if 0
-    serialport->close();
-#else
+
     emit closePort();
-#endif
+
 }
 
 bool SerialThread::isOpen()
 {
     bool result;
-#if 0
-    result = serialport->isOpen();
-#else
     result = emit isPortOpened();
-#endif
     return result;
 }
 
 void SerialThread::rpcSetTemperature(float temperature)
 {
-    u_int16_t temp_returnvalue;
-    RPC_TRANSMISSION_RESULT result;
-    result = mcuSetMCUTargetTemperature(&temp_returnvalue, temperature);
-    qDebug() << "sending data return: " << temp_returnvalue << " with success: "<< result;
-    qDebug()<<"rpcSetTemperature threadid "<<QThread::currentThreadId();
+    uint16_t temp_returnvalue;
+    RPC_RESULT result;
+    rpcLEDStatus_t ledStatus = rpcLEDStatus_none;
+    if (temperature > 10){
+        ledStatus = rpcLEDStatus_on;
+    }else{
+        ledStatus = rpcLEDStatus_off;
+    }
+
+    result = mcuSetLEDStatus(&temp_returnvalue, ledStatus);
+    QString resultstr;
+    switch(result){
+    case RPC_SUCCESS:
+        resultstr = "RPC_SUCCESS";
+        break;
+    case RPC_FAILURE:
+        resultstr = "RPC_FAILURE";
+        break;
+    case RPC_COMMAND_UNKNOWN:
+        resultstr = "RPC_COMMAND_UNKNOWN";
+        break;
+    case RPC_COMMAND_INCOMPLETE:
+        resultstr = "RPC_COMMAND_INCOMPLETE";
+        break;
+    }
+
+    qDebug() << "sending data return: " << temp_returnvalue << " with : "<< resultstr;
+    //qDebug()<<" rpcSetTemperature threadid "<<QThread::currentThreadId();
 }
 
 void SerialThread::sendByteData(QByteArray data)
@@ -103,18 +129,31 @@ void SerialThread::sendByteData(QByteArray data)
 
 
 
-SerialWorker::SerialWorker(QSerialPort *serialport, QObject *parent):
+SerialWorker::SerialWorker(SerialThread *serialThread, QObject *parent):
     QObject(parent)
 {
-    this->serialport = serialport;
+    serialport = new QSerialPort(this);
+    connect(serialport,SIGNAL(readyRead()),this,SLOT(on_readyRead()));
+
+
+    channel_codec_instance[channel_codec_comport_transmission].aux.portindex = channel_codec_comport_transmission;
+    channel_codec_instance[channel_codec_comport_transmission].aux.serialthread = serialThread;
+    channel_init_instance(&channel_codec_instance[channel_codec_comport_transmission],
+                                     channel_codec_rxbuffer[channel_codec_comport_transmission],CHANNEL_CODEC_RX_BUFFER_SIZE,
+                                     channel_codec_txbuffer[channel_codec_comport_transmission],CHANNEL_CODEC_TX_BUFFER_SIZE);
+
 }
 
-void SerialWorker::wrapUpdateTemperature(float temperature)
+void SerialWorker::wrapUpdateADC(float adc1)
 {
-    emit updateTemperature(temperature);
+    emit updateADC(adc1);
 }
 
-#if 1
+void SerialWorker::wrapUpdateKeyState(rpcKeyStatus_t keyState)
+{
+    emit updateKeyState(keyState);
+}
+
 void SerialWorker::openPort(QString name, int baudrate)
 {
     serialport->setPortName(name);
@@ -137,7 +176,7 @@ void SerialWorker::sendData(QByteArray data)
 {
     serialport->write(data);
 }
-#endif
+
 
 void SerialWorker::process()
 {
@@ -155,7 +194,7 @@ void SerialWorker::on_readyRead()
         qDebug() << "Rechner langsam";
     }
     for (int i=0;i<inbuffer.count();i++){
-        channel_push_byte_to_RPC(inbuffer[i]);
+        channel_push_byte_to_RPC(&channel_codec_instance[channel_codec_comport_transmission], inbuffer[i]);
         if (inbuffer[i] == '\n'){
            // qDebug() << linebuffer;
 

@@ -10,10 +10,35 @@
 #include "serialworker.h"
 
 
-extern "C" void qtUpdateRealTemperature(int16_t tempThermo, int16_t tempJunction, int16_t tempTarget,  int16_t tempError){
-    float tc = tempThermo/4.0;
-    float cj = tempJunction/16.0;
-    qDebug() << "temperature" << QString("%1").arg(tc,8,'f',2) <<  QString("%1").arg(cj,8,'f',3) << tempTarget << tempError;
-    serialWorkerForRPCFunc->wrapUpdateTemperature((float) tc );
+extern "C" void qtUpdateMCUADCValues(int16_t tempMCU, int16_t adc_vcc_mv, int16_t adc1, int16_t adc2){
+    (void)tempMCU;
+    (void)adc1;
+    (void)adc_vcc_mv;
+
+    (void)adc2;
+    //qDebug() << "adc" << tempMCU <<  adc1 << adc2;
+    serialWorkerForRPCFunc->wrapUpdateADC((float) adc1 );
 }
+
+extern "C" void qtKeyPressed(rpcKeyStatus_t keyStatus){
+    QString statusStr;
+    switch (keyStatus){
+    case rpcKeyStatus_none:
+        statusStr = "none";
+        break;
+    case rpcKeyStatus_pressed:
+        statusStr = "pressed";
+        break;
+    case rpcKeyStatus_pressedLong:
+        statusStr = "pressed long";
+        break;
+    case rpcKeyStatus_released:
+        statusStr = "released";
+        break;
+    }
+
+    qDebug() << "key pressed" << statusStr;
+    serialWorkerForRPCFunc->wrapUpdateKeyState(keyStatus);
+}
+
 
