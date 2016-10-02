@@ -102,8 +102,8 @@ qt/project/libs/rpc/src/client/generated_app/
 qt/project/libs/rpc/include/rpc_transmission/server/generated_general/
 qt/project/libs/rpc/include/rpc_transmission/client/
 
-mcu/libs/rpc/doc
-mcu/libs/rpc/src/server/generated_app/
-mcu/libs/rpc/src/client/generated_app/
-mcu/libs/rpc/include/rpc_transmission/server/generated_general/
-mcu/libs/rpc/include/rpc_transmission/client/
+mcu/modules/rpc/doc
+mcu/modules/rpc/src/server/generated_app/
+mcu/modules/rpc/src/client/generated_app/
+mcu/modules/rpc/include/rpc_transmission/server/generated_general/
+mcu/modules/rpc/include/rpc_transmission/client/
