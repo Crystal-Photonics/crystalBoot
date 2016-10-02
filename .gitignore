@@ -89,6 +89,8 @@ local.properties
 # STS (Spring Tool Suite)
 .springBeans
 
+#dolphin file manager
+.directory
 # Code Recommenders
 .recommenders/
 
