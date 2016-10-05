@@ -1,0 +1,396 @@
+The system is: Windows - 6.1 - AMD64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/gcc.exe 
+Build flags: 
+Id flags: 
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.exe"
+
+The C compiler identification is GNU, found in "C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/3.1.3/CompilerIdC/a.exe"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/g++.exe 
+Build flags: 
+Id flags: 
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.exe"
+
+The CXX compiler identification is GNU, found in "C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/3.1.3/CompilerIdCXX/a.exe"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe" "cmTryCompileExec258652311/fast"
+C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe -f CMakeFiles\cmTryCompileExec258652311.dir\build.make CMakeFiles/cmTryCompileExec258652311.dir/build
+mingw32-make.exe[1]: Entering directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_progress_report C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec258652311.dir/testCCompiler.c.obj
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe    -o CMakeFiles\cmTryCompileExec258652311.dir\testCCompiler.c.obj   -c C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\testCCompiler.c
+Linking C executable cmTryCompileExec258652311.exe
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTryCompileExec258652311.dir\link.txt --verbose=1
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E remove -f CMakeFiles\cmTryCompileExec258652311.dir/objects.a
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ar.exe cr CMakeFiles\cmTryCompileExec258652311.dir/objects.a @CMakeFiles\cmTryCompileExec258652311.dir\objects1.rsp
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe      -Wl,--whole-archive CMakeFiles\cmTryCompileExec258652311.dir/objects.a -Wl,--no-whole-archive  -o cmTryCompileExec258652311.exe -Wl,--out-implib,libcmTryCompileExec258652311.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\cmTryCompileExec258652311.dir\linklibs.rsp
+mingw32-make.exe[1]: Leaving directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe" "cmTryCompileExec2281564810/fast"
+C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe -f CMakeFiles\cmTryCompileExec2281564810.dir\build.make CMakeFiles/cmTryCompileExec2281564810.dir/build
+mingw32-make.exe[1]: Entering directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_progress_report C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec2281564810.dir/CMakeCCompilerABI.c.obj
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe    -o CMakeFiles\cmTryCompileExec2281564810.dir\CMakeCCompilerABI.c.obj   -c "C:\Program Files (x86)\CMake\share\cmake-3.1\Modules\CMakeCCompilerABI.c"
+Linking C executable cmTryCompileExec2281564810.exe
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTryCompileExec2281564810.dir\link.txt --verbose=1
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E remove -f CMakeFiles\cmTryCompileExec2281564810.dir/objects.a
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ar.exe cr CMakeFiles\cmTryCompileExec2281564810.dir/objects.a @CMakeFiles\cmTryCompileExec2281564810.dir\objects1.rsp
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe     -v -Wl,--whole-archive CMakeFiles\cmTryCompileExec2281564810.dir/objects.a -Wl,--no-whole-archive  -o cmTryCompileExec2281564810.exe -Wl,--out-implib,libcmTryCompileExec2281564810.dll.a -Wl,--major-image-version,0,--minor-image-version,0   
+Using built-in specs.
+COLLECT_GCC=C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe
+COLLECT_LTO_WRAPPER=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/lto-wrapper.exe
+Target: i686-w64-mingw32
+Configured with: ../../../src/gcc-4.9.1/configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --target=i686-w64-mingw32 --prefix=/mingw32 --with-sysroot=/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32 --with-gxx-include-dir=/mingw32/i686-w64-mingw32/include/c++ --enable-shared --enable-static --disable-multilib --enable-languages=ada,c,c++,fortran,objc,obj-c++,lto --enable-libstdcxx-time=yes --enable-threads=posix --enable-libgomp --enable-libatomic --enable-lto --enable-graphite --enable-checking=release --enable-fully-dynamic-string --enable-version-specific-runtime-libs --disable-sjlj-exceptions --with-dwarf2 --disable-isl-version-check --disable-cloog-version-check --disable-libstdcxx-pch --disable-libstdcxx-debug --enable-bootstrap --disable-rpath --disable-win32-registry --disable-nls --disable-werror --disable-symvers --with-gnu-as --with-gnu-ld --with-arch=i686 --with-tune=generic --with-libiconv --with-system-zlib --with-gmp=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-mpfr=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-mpc=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-isl=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-cloog=/c/mingw491/prerequisites/i686-w64-mingw32-static --enable-cloog-backend=isl --with-pkgversion='i686-posix-dwarf-rev2, Built by MinGW-W64 project' --with-bugurl=http://sourceforge.net/projects/mingw-w64 CFLAGS='-O2 -pipe -I/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/include -I/c/mingw491/prerequisites/i686-zlib-static/include -I/c/mingw491/prerequisites/i686-w64-mingw32-static/include' CXXFLAGS='-O2 -pipe -I/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/include -I/c/mingw491/prerequisites/i686-zlib-static/include -I/c/mingw491/prerequisites/i686-w64-mingw32-static/include' CPPFLAGS= LDFLAGS='-pipe -L/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/lib -L/c/mingw491/prerequisites/i686-zlib-static/lib -L/c/mingw491/prerequisites/i686-w64-mingw32-static/lib -Wl,--large-address-aware'
+Thread model: posix
+gcc version 4.9.1 (i686-posix-dwarf-rev2, Built by MinGW-W64 project) 
+COMPILER_PATH=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/bin/
+LIBRARY_PATH=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTryCompileExec2281564810.exe' '-mtune=generic' '-march=i686'
+ C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/collect2.exe -plugin C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/liblto_plugin-0.dll -plugin-opt=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/lto-wrapper.exe -plugin-opt=-fresolution=C:\Users\ark\AppData\Local\Temp\ccRdYYbQ.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-liconv -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt --sysroot=C:/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32 -m i386pe -Bdynamic -o cmTryCompileExec2281564810.exe C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib/crt2.o C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtbegin.o -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1 -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../.. --whole-archive CMakeFiles\cmTryCompileExec2281564810.dir/objects.a --no-whole-archive --out-implib libcmTryCompileExec2281564810.dll.a --major-image-version 0 --minor-image-version 0 -lmingw32 -lgcc -lgcc_eh -lmoldname -lmingwex -lmsvcrt -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -liconv -lmingw32 -lgcc -lgcc_eh -lmoldname -lmingwex -lmsvcrt C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtend.o
+mingw32-make.exe[1]: Leaving directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld\.exe|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe" "cmTryCompileExec2281564810/fast"]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe -f CMakeFiles\cmTryCompileExec2281564810.dir\build.make CMakeFiles/cmTryCompileExec2281564810.dir/build]
+  ignore line: [mingw32-make.exe[1]: Entering directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp']
+  ignore line: ["C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_progress_report C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\CMakeFiles 1]
+  ignore line: [Building C object CMakeFiles/cmTryCompileExec2281564810.dir/CMakeCCompilerABI.c.obj]
+  ignore line: [C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe    -o CMakeFiles\cmTryCompileExec2281564810.dir\CMakeCCompilerABI.c.obj   -c "C:\Program Files (x86)\CMake\share\cmake-3.1\Modules\CMakeCCompilerABI.c"]
+  ignore line: [Linking C executable cmTryCompileExec2281564810.exe]
+  ignore line: ["C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTryCompileExec2281564810.dir\link.txt --verbose=1]
+  ignore line: ["C:\Program Files (x86)\CMake\bin\cmake.exe" -E remove -f CMakeFiles\cmTryCompileExec2281564810.dir/objects.a]
+  ignore line: [C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ar.exe cr CMakeFiles\cmTryCompileExec2281564810.dir/objects.a @CMakeFiles\cmTryCompileExec2281564810.dir\objects1.rsp]
+  ignore line: [C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe     -v -Wl,--whole-archive CMakeFiles\cmTryCompileExec2281564810.dir/objects.a -Wl,--no-whole-archive  -o cmTryCompileExec2281564810.exe -Wl,--out-implib,libcmTryCompileExec2281564810.dll.a -Wl,--major-image-version,0,--minor-image-version,0   ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe]
+  ignore line: [COLLECT_LTO_WRAPPER=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/lto-wrapper.exe]
+  ignore line: [Target: i686-w64-mingw32]
+  ignore line: [Configured with: ../../../src/gcc-4.9.1/configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --target=i686-w64-mingw32 --prefix=/mingw32 --with-sysroot=/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32 --with-gxx-include-dir=/mingw32/i686-w64-mingw32/include/c++ --enable-shared --enable-static --disable-multilib --enable-languages=ada,c,c++,fortran,objc,obj-c++,lto --enable-libstdcxx-time=yes --enable-threads=posix --enable-libgomp --enable-libatomic --enable-lto --enable-graphite --enable-checking=release --enable-fully-dynamic-string --enable-version-specific-runtime-libs --disable-sjlj-exceptions --with-dwarf2 --disable-isl-version-check --disable-cloog-version-check --disable-libstdcxx-pch --disable-libstdcxx-debug --enable-bootstrap --disable-rpath --disable-win32-registry --disable-nls --disable-werror --disable-symvers --with-gnu-as --with-gnu-ld --with-arch=i686 --with-tune=generic --with-libiconv --with-system-zlib --with-gmp=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-mpfr=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-mpc=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-isl=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-cloog=/c/mingw491/prerequisites/i686-w64-mingw32-static --enable-cloog-backend=isl --with-pkgversion='i686-posix-dwarf-rev2, Built by MinGW-W64 project' --with-bugurl=http://sourceforge.net/projects/mingw-w64 CFLAGS='-O2 -pipe -I/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/include -I/c/mingw491/prerequisites/i686-zlib-static/include -I/c/mingw491/prerequisites/i686-w64-mingw32-static/include' CXXFLAGS='-O2 -pipe -I/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/include -I/c/mingw491/prerequisites/i686-zlib-static/include -I/c/mingw491/prerequisites/i686-w64-mingw32-static/include' CPPFLAGS= LDFLAGS='-pipe -L/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/lib -L/c/mingw491/prerequisites/i686-zlib-static/lib -L/c/mingw491/prerequisites/i686-w64-mingw32-static/lib -Wl,--large-address-aware']
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 4.9.1 (i686-posix-dwarf-rev2, Built by MinGW-W64 project) ]
+  ignore line: [COMPILER_PATH=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/bin/]
+  ignore line: [LIBRARY_PATH=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTryCompileExec2281564810.exe' '-mtune=generic' '-march=i686']
+  link line: [ C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/collect2.exe -plugin C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/liblto_plugin-0.dll -plugin-opt=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/lto-wrapper.exe -plugin-opt=-fresolution=C:\Users\ark\AppData\Local\Temp\ccRdYYbQ.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-liconv -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt --sysroot=C:/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32 -m i386pe -Bdynamic -o cmTryCompileExec2281564810.exe C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib/crt2.o C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtbegin.o -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1 -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../.. --whole-archive CMakeFiles\cmTryCompileExec2281564810.dir/objects.a --no-whole-archive --out-implib libcmTryCompileExec2281564810.dll.a --major-image-version 0 --minor-image-version 0 -lmingw32 -lgcc -lgcc_eh -lmoldname -lmingwex -lmsvcrt -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -liconv -lmingw32 -lgcc -lgcc_eh -lmoldname -lmingwex -lmsvcrt C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtend.o]
+    arg [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/collect2.exe] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/liblto_plugin-0.dll] ==> ignore
+    arg [-plugin-opt=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/lto-wrapper.exe] ==> ignore
+    arg [-plugin-opt=-fresolution=C:\Users\ark\AppData\Local\Temp\ccRdYYbQ.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmingw32] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_eh] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmoldname] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmingwex] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmsvcrt] ==> ignore
+    arg [-plugin-opt=-pass-through=-lpthread] ==> ignore
+    arg [-plugin-opt=-pass-through=-ladvapi32] ==> ignore
+    arg [-plugin-opt=-pass-through=-lshell32] ==> ignore
+    arg [-plugin-opt=-pass-through=-luser32] ==> ignore
+    arg [-plugin-opt=-pass-through=-lkernel32] ==> ignore
+    arg [-plugin-opt=-pass-through=-liconv] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmingw32] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_eh] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmoldname] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmingwex] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmsvcrt] ==> ignore
+    arg [--sysroot=C:/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32] ==> ignore
+    arg [-m] ==> ignore
+    arg [i386pe] ==> ignore
+    arg [-Bdynamic] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTryCompileExec2281564810.exe] ==> ignore
+    arg [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib/crt2.o] ==> ignore
+    arg [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtbegin.o] ==> ignore
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1]
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc]
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib]
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib]
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib]
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../..] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../..]
+    arg [--whole-archive] ==> ignore
+    arg [CMakeFiles\cmTryCompileExec2281564810.dir/objects.a] ==> ignore
+    arg [--no-whole-archive] ==> ignore
+    arg [--out-implib] ==> ignore
+    arg [libcmTryCompileExec2281564810.dll.a] ==> ignore
+    arg [--major-image-version] ==> ignore
+    arg [0] ==> ignore
+    arg [--minor-image-version] ==> ignore
+    arg [0] ==> ignore
+    arg [-lmingw32] ==> lib [mingw32]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lgcc_eh] ==> lib [gcc_eh]
+    arg [-lmoldname] ==> lib [moldname]
+    arg [-lmingwex] ==> lib [mingwex]
+    arg [-lmsvcrt] ==> lib [msvcrt]
+    arg [-lpthread] ==> lib [pthread]
+    arg [-ladvapi32] ==> lib [advapi32]
+    arg [-lshell32] ==> lib [shell32]
+    arg [-luser32] ==> lib [user32]
+    arg [-lkernel32] ==> lib [kernel32]
+    arg [-liconv] ==> lib [iconv]
+    arg [-lmingw32] ==> lib [mingw32]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lgcc_eh] ==> lib [gcc_eh]
+    arg [-lmoldname] ==> lib [moldname]
+    arg [-lmingwex] ==> lib [mingwex]
+    arg [-lmsvcrt] ==> lib [msvcrt]
+    arg [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtend.o] ==> ignore
+  remove lib [gcc]
+  remove lib [gcc_eh]
+  remove lib [gcc]
+  remove lib [gcc_eh]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/lib/gcc/i686-w64-mingw32/4.9.1]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/lib/gcc]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/i686-w64-mingw32/lib]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/lib]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/i686-w64-mingw32/lib]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../..] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/lib]
+  implicit libs: [mingw32;moldname;mingwex;msvcrt;pthread;advapi32;shell32;user32;kernel32;iconv;mingw32;moldname;mingwex;msvcrt]
+  implicit dirs: [C:/Qt/Qt5.4.1/Tools/mingw491_32/lib/gcc/i686-w64-mingw32/4.9.1;C:/Qt/Qt5.4.1/Tools/mingw491_32/lib/gcc;C:/Qt/Qt5.4.1/Tools/mingw491_32/i686-w64-mingw32/lib;C:/Qt/Qt5.4.1/Tools/mingw491_32/lib]
+  implicit fwks: []
+
+
+Determining if the CXX compiler works passed with the following output:
+Change Dir: C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe" "cmTryCompileExec3817061623/fast"
+C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe -f CMakeFiles\cmTryCompileExec3817061623.dir\build.make CMakeFiles/cmTryCompileExec3817061623.dir/build
+mingw32-make.exe[1]: Entering directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_progress_report C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec3817061623.dir/testCXXCompiler.cxx.obj
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\g++.exe     -o CMakeFiles\cmTryCompileExec3817061623.dir\testCXXCompiler.cxx.obj -c C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec3817061623.exe
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTryCompileExec3817061623.dir\link.txt --verbose=1
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E remove -f CMakeFiles\cmTryCompileExec3817061623.dir/objects.a
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ar.exe cr CMakeFiles\cmTryCompileExec3817061623.dir/objects.a @CMakeFiles\cmTryCompileExec3817061623.dir\objects1.rsp
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\g++.exe      -Wl,--whole-archive CMakeFiles\cmTryCompileExec3817061623.dir/objects.a -Wl,--no-whole-archive  -o cmTryCompileExec3817061623.exe -Wl,--out-implib,libcmTryCompileExec3817061623.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\cmTryCompileExec3817061623.dir\linklibs.rsp
+mingw32-make.exe[1]: Leaving directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe" "cmTryCompileExec241781108/fast"
+C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe -f CMakeFiles\cmTryCompileExec241781108.dir\build.make CMakeFiles/cmTryCompileExec241781108.dir/build
+mingw32-make.exe[1]: Entering directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_progress_report C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec241781108.dir/CMakeCXXCompilerABI.cpp.obj
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\g++.exe     -o CMakeFiles\cmTryCompileExec241781108.dir\CMakeCXXCompilerABI.cpp.obj -c "C:\Program Files (x86)\CMake\share\cmake-3.1\Modules\CMakeCXXCompilerABI.cpp"
+Linking CXX executable cmTryCompileExec241781108.exe
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTryCompileExec241781108.dir\link.txt --verbose=1
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E remove -f CMakeFiles\cmTryCompileExec241781108.dir/objects.a
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ar.exe cr CMakeFiles\cmTryCompileExec241781108.dir/objects.a @CMakeFiles\cmTryCompileExec241781108.dir\objects1.rsp
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\g++.exe     -v -Wl,--whole-archive CMakeFiles\cmTryCompileExec241781108.dir/objects.a -Wl,--no-whole-archive  -o cmTryCompileExec241781108.exe -Wl,--out-implib,libcmTryCompileExec241781108.dll.a -Wl,--major-image-version,0,--minor-image-version,0   
+Using built-in specs.
+COLLECT_GCC=C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\g++.exe
+COLLECT_LTO_WRAPPER=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/lto-wrapper.exe
+Target: i686-w64-mingw32
+Configured with: ../../../src/gcc-4.9.1/configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --target=i686-w64-mingw32 --prefix=/mingw32 --with-sysroot=/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32 --with-gxx-include-dir=/mingw32/i686-w64-mingw32/include/c++ --enable-shared --enable-static --disable-multilib --enable-languages=ada,c,c++,fortran,objc,obj-c++,lto --enable-libstdcxx-time=yes --enable-threads=posix --enable-libgomp --enable-libatomic --enable-lto --enable-graphite --enable-checking=release --enable-fully-dynamic-string --enable-version-specific-runtime-libs --disable-sjlj-exceptions --with-dwarf2 --disable-isl-version-check --disable-cloog-version-check --disable-libstdcxx-pch --disable-libstdcxx-debug --enable-bootstrap --disable-rpath --disable-win32-registry --disable-nls --disable-werror --disable-symvers --with-gnu-as --with-gnu-ld --with-arch=i686 --with-tune=generic --with-libiconv --with-system-zlib --with-gmp=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-mpfr=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-mpc=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-isl=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-cloog=/c/mingw491/prerequisites/i686-w64-mingw32-static --enable-cloog-backend=isl --with-pkgversion='i686-posix-dwarf-rev2, Built by MinGW-W64 project' --with-bugurl=http://sourceforge.net/projects/mingw-w64 CFLAGS='-O2 -pipe -I/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/include -I/c/mingw491/prerequisites/i686-zlib-static/include -I/c/mingw491/prerequisites/i686-w64-mingw32-static/include' CXXFLAGS='-O2 -pipe -I/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/include -I/c/mingw491/prerequisites/i686-zlib-static/include -I/c/mingw491/prerequisites/i686-w64-mingw32-static/include' CPPFLAGS= LDFLAGS='-pipe -L/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/lib -L/c/mingw491/prerequisites/i686-zlib-static/lib -L/c/mingw491/prerequisites/i686-w64-mingw32-static/lib -Wl,--large-address-aware'
+Thread model: posix
+gcc version 4.9.1 (i686-posix-dwarf-rev2, Built by MinGW-W64 project) 
+COMPILER_PATH=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/bin/
+LIBRARY_PATH=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/;C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTryCompileExec241781108.exe' '-shared-libgcc' '-mtune=generic' '-march=i686'
+ C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/collect2.exe -plugin C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/liblto_plugin-0.dll -plugin-opt=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/lto-wrapper.exe -plugin-opt=-fresolution=C:\Users\ark\AppData\Local\Temp\ccilDcLB.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-liconv -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt --sysroot=C:/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32 -m i386pe -Bdynamic -u ___register_frame_info -u ___deregister_frame_info -o cmTryCompileExec241781108.exe C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib/crt2.o C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtbegin.o -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1 -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../.. --whole-archive CMakeFiles\cmTryCompileExec241781108.dir/objects.a --no-whole-archive --out-implib libcmTryCompileExec241781108.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmoldname -lmingwex -lmsvcrt -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -liconv -lmingw32 -lgcc_s -lgcc -lmoldname -lmingwex -lmsvcrt C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtend.o
+mingw32-make.exe[1]: Leaving directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld\.exe|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe" "cmTryCompileExec241781108/fast"]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe -f CMakeFiles\cmTryCompileExec241781108.dir\build.make CMakeFiles/cmTryCompileExec241781108.dir/build]
+  ignore line: [mingw32-make.exe[1]: Entering directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp']
+  ignore line: ["C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_progress_report C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\CMakeFiles 1]
+  ignore line: [Building CXX object CMakeFiles/cmTryCompileExec241781108.dir/CMakeCXXCompilerABI.cpp.obj]
+  ignore line: [C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\g++.exe     -o CMakeFiles\cmTryCompileExec241781108.dir\CMakeCXXCompilerABI.cpp.obj -c "C:\Program Files (x86)\CMake\share\cmake-3.1\Modules\CMakeCXXCompilerABI.cpp"]
+  ignore line: [Linking CXX executable cmTryCompileExec241781108.exe]
+  ignore line: ["C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTryCompileExec241781108.dir\link.txt --verbose=1]
+  ignore line: ["C:\Program Files (x86)\CMake\bin\cmake.exe" -E remove -f CMakeFiles\cmTryCompileExec241781108.dir/objects.a]
+  ignore line: [C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ar.exe cr CMakeFiles\cmTryCompileExec241781108.dir/objects.a @CMakeFiles\cmTryCompileExec241781108.dir\objects1.rsp]
+  ignore line: [C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\g++.exe     -v -Wl,--whole-archive CMakeFiles\cmTryCompileExec241781108.dir/objects.a -Wl,--no-whole-archive  -o cmTryCompileExec241781108.exe -Wl,--out-implib,libcmTryCompileExec241781108.dll.a -Wl,--major-image-version,0,--minor-image-version,0   ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\g++.exe]
+  ignore line: [COLLECT_LTO_WRAPPER=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/lto-wrapper.exe]
+  ignore line: [Target: i686-w64-mingw32]
+  ignore line: [Configured with: ../../../src/gcc-4.9.1/configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --target=i686-w64-mingw32 --prefix=/mingw32 --with-sysroot=/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32 --with-gxx-include-dir=/mingw32/i686-w64-mingw32/include/c++ --enable-shared --enable-static --disable-multilib --enable-languages=ada,c,c++,fortran,objc,obj-c++,lto --enable-libstdcxx-time=yes --enable-threads=posix --enable-libgomp --enable-libatomic --enable-lto --enable-graphite --enable-checking=release --enable-fully-dynamic-string --enable-version-specific-runtime-libs --disable-sjlj-exceptions --with-dwarf2 --disable-isl-version-check --disable-cloog-version-check --disable-libstdcxx-pch --disable-libstdcxx-debug --enable-bootstrap --disable-rpath --disable-win32-registry --disable-nls --disable-werror --disable-symvers --with-gnu-as --with-gnu-ld --with-arch=i686 --with-tune=generic --with-libiconv --with-system-zlib --with-gmp=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-mpfr=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-mpc=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-isl=/c/mingw491/prerequisites/i686-w64-mingw32-static --with-cloog=/c/mingw491/prerequisites/i686-w64-mingw32-static --enable-cloog-backend=isl --with-pkgversion='i686-posix-dwarf-rev2, Built by MinGW-W64 project' --with-bugurl=http://sourceforge.net/projects/mingw-w64 CFLAGS='-O2 -pipe -I/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/include -I/c/mingw491/prerequisites/i686-zlib-static/include -I/c/mingw491/prerequisites/i686-w64-mingw32-static/include' CXXFLAGS='-O2 -pipe -I/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/include -I/c/mingw491/prerequisites/i686-zlib-static/include -I/c/mingw491/prerequisites/i686-w64-mingw32-static/include' CPPFLAGS= LDFLAGS='-pipe -L/c/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32/opt/lib -L/c/mingw491/prerequisites/i686-zlib-static/lib -L/c/mingw491/prerequisites/i686-w64-mingw32-static/lib -Wl,--large-address-aware']
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 4.9.1 (i686-posix-dwarf-rev2, Built by MinGW-W64 project) ]
+  ignore line: [COMPILER_PATH=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/bin/]
+  ignore line: [LIBRARY_PATH=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/]
+  ignore line: [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTryCompileExec241781108.exe' '-shared-libgcc' '-mtune=generic' '-march=i686']
+  link line: [ C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/collect2.exe -plugin C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/liblto_plugin-0.dll -plugin-opt=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/lto-wrapper.exe -plugin-opt=-fresolution=C:\Users\ark\AppData\Local\Temp\ccilDcLB.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-liconv -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt --sysroot=C:/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32 -m i386pe -Bdynamic -u ___register_frame_info -u ___deregister_frame_info -o cmTryCompileExec241781108.exe C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib/crt2.o C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtbegin.o -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1 -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib -LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../.. --whole-archive CMakeFiles\cmTryCompileExec241781108.dir/objects.a --no-whole-archive --out-implib libcmTryCompileExec241781108.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmoldname -lmingwex -lmsvcrt -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -liconv -lmingw32 -lgcc_s -lgcc -lmoldname -lmingwex -lmsvcrt C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtend.o]
+    arg [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/collect2.exe] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/liblto_plugin-0.dll] ==> ignore
+    arg [-plugin-opt=C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../libexec/gcc/i686-w64-mingw32/4.9.1/lto-wrapper.exe] ==> ignore
+    arg [-plugin-opt=-fresolution=C:\Users\ark\AppData\Local\Temp\ccilDcLB.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmingw32] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmoldname] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmingwex] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmsvcrt] ==> ignore
+    arg [-plugin-opt=-pass-through=-lpthread] ==> ignore
+    arg [-plugin-opt=-pass-through=-ladvapi32] ==> ignore
+    arg [-plugin-opt=-pass-through=-lshell32] ==> ignore
+    arg [-plugin-opt=-pass-through=-luser32] ==> ignore
+    arg [-plugin-opt=-pass-through=-lkernel32] ==> ignore
+    arg [-plugin-opt=-pass-through=-liconv] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmingw32] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmoldname] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmingwex] ==> ignore
+    arg [-plugin-opt=-pass-through=-lmsvcrt] ==> ignore
+    arg [--sysroot=C:/mingw491/i686-491-posix-dwarf-rt_v3-rev2/mingw32] ==> ignore
+    arg [-m] ==> ignore
+    arg [i386pe] ==> ignore
+    arg [-Bdynamic] ==> ignore
+    arg [-u] ==> ignore
+    arg [___register_frame_info] ==> ignore
+    arg [-u] ==> ignore
+    arg [___deregister_frame_info] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTryCompileExec241781108.exe] ==> ignore
+    arg [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib/crt2.o] ==> ignore
+    arg [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtbegin.o] ==> ignore
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1]
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc]
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib]
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib]
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib]
+    arg [-LC:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../..] ==> dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../..]
+    arg [--whole-archive] ==> ignore
+    arg [CMakeFiles\cmTryCompileExec241781108.dir/objects.a] ==> ignore
+    arg [--no-whole-archive] ==> ignore
+    arg [--out-implib] ==> ignore
+    arg [libcmTryCompileExec241781108.dll.a] ==> ignore
+    arg [--major-image-version] ==> ignore
+    arg [0] ==> ignore
+    arg [--minor-image-version] ==> ignore
+    arg [0] ==> ignore
+    arg [-lstdc++] ==> lib [stdc++]
+    arg [-lmingw32] ==> lib [mingw32]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lmoldname] ==> lib [moldname]
+    arg [-lmingwex] ==> lib [mingwex]
+    arg [-lmsvcrt] ==> lib [msvcrt]
+    arg [-lpthread] ==> lib [pthread]
+    arg [-ladvapi32] ==> lib [advapi32]
+    arg [-lshell32] ==> lib [shell32]
+    arg [-luser32] ==> lib [user32]
+    arg [-lkernel32] ==> lib [kernel32]
+    arg [-liconv] ==> lib [iconv]
+    arg [-lmingw32] ==> lib [mingw32]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lmoldname] ==> lib [moldname]
+    arg [-lmingwex] ==> lib [mingwex]
+    arg [-lmsvcrt] ==> lib [msvcrt]
+    arg [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/crtend.o] ==> ignore
+  remove lib [gcc_s]
+  remove lib [gcc]
+  remove lib [gcc_s]
+  remove lib [gcc]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/lib/gcc/i686-w64-mingw32/4.9.1]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/lib/gcc]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib/../lib] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/i686-w64-mingw32/lib]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../lib] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/lib]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../../../i686-w64-mingw32/lib] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/i686-w64-mingw32/lib]
+  collapse library dir [C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/../lib/gcc/i686-w64-mingw32/4.9.1/../../..] ==> [C:/Qt/Qt5.4.1/Tools/mingw491_32/lib]
+  implicit libs: [stdc++;mingw32;moldname;mingwex;msvcrt;pthread;advapi32;shell32;user32;kernel32;iconv;mingw32;moldname;mingwex;msvcrt]
+  implicit dirs: [C:/Qt/Qt5.4.1/Tools/mingw491_32/lib/gcc/i686-w64-mingw32/4.9.1;C:/Qt/Qt5.4.1/Tools/mingw491_32/lib/gcc;C:/Qt/Qt5.4.1/Tools/mingw491_32/i686-w64-mingw32/lib;C:/Qt/Qt5.4.1/Tools/mingw491_32/lib]
+  implicit fwks: []
+
+
+Determining if files pthread.h exist passed with the following output:
+Change Dir: C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe" "cmTryCompileExec1580856870/fast"
+C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe -f CMakeFiles\cmTryCompileExec1580856870.dir\build.make CMakeFiles/cmTryCompileExec1580856870.dir/build
+mingw32-make.exe[1]: Entering directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_progress_report C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec1580856870.dir/CheckIncludeFiles.c.obj
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe    -o CMakeFiles\cmTryCompileExec1580856870.dir\CheckIncludeFiles.c.obj   -c C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\CheckIncludeFiles.c
+Linking C executable cmTryCompileExec1580856870.exe
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTryCompileExec1580856870.dir\link.txt --verbose=1
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E remove -f CMakeFiles\cmTryCompileExec1580856870.dir/objects.a
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ar.exe cr CMakeFiles\cmTryCompileExec1580856870.dir/objects.a @CMakeFiles\cmTryCompileExec1580856870.dir\objects1.rsp
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe      -Wl,--whole-archive CMakeFiles\cmTryCompileExec1580856870.dir/objects.a -Wl,--no-whole-archive  -o cmTryCompileExec1580856870.exe -Wl,--out-implib,libcmTryCompileExec1580856870.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\cmTryCompileExec1580856870.dir\linklibs.rsp
+mingw32-make.exe[1]: Leaving directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+
+
+Determining if the pthread_create exist passed with the following output:
+Change Dir: C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe" "cmTryCompileExec3089874323/fast"
+C:/Qt/Qt5.4.1/Tools/mingw491_32/bin/mingw32-make.exe -f CMakeFiles\cmTryCompileExec3089874323.dir\build.make CMakeFiles/cmTryCompileExec3089874323.dir/build
+mingw32-make.exe[1]: Entering directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_progress_report C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3089874323.dir/CheckSymbolExists.c.obj
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe    -o CMakeFiles\cmTryCompileExec3089874323.dir\CheckSymbolExists.c.obj   -c C:\Users\ark\entwicklung\qt\qProtocolAnalyzer\project\libs\build\googletest\CMakeFiles\CMakeTmp\CheckSymbolExists.c
+Linking C executable cmTryCompileExec3089874323.exe
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTryCompileExec3089874323.dir\link.txt --verbose=1
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -E remove -f CMakeFiles\cmTryCompileExec3089874323.dir/objects.a
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ar.exe cr CMakeFiles\cmTryCompileExec3089874323.dir/objects.a @CMakeFiles\cmTryCompileExec3089874323.dir\objects1.rsp
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\gcc.exe      -Wl,--whole-archive CMakeFiles\cmTryCompileExec3089874323.dir/objects.a -Wl,--no-whole-archive  -o cmTryCompileExec3089874323.exe -Wl,--out-implib,libcmTryCompileExec3089874323.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\cmTryCompileExec3089874323.dir\linklibs.rsp
+mingw32-make.exe[1]: Leaving directory 'C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp'
+
+File C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+

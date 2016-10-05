@@ -1,0 +1,2 @@
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ar.exe cq libgmock_main.a  CMakeFiles/gmock_main.dir/__/googletest/src/gtest-all.cc.obj CMakeFiles/gmock_main.dir/src/gmock-all.cc.obj CMakeFiles/gmock_main.dir/src/gmock_main.cc.obj
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ranlib.exe libgmock_main.a

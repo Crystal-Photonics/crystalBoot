@@ -1,0 +1,2 @@
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ar.exe cq libgtest.a  CMakeFiles/gtest.dir/src/gtest-all.cc.obj
+C:\Qt\Qt5.4.1\Tools\mingw491_32\bin\ranlib.exe libgtest.a

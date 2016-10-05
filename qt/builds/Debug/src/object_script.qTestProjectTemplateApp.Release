@@ -1,0 +1,13 @@
+INPUT(
+./release\main.o
+./release\serialworker.o
+./release\mainwindow.o
+./release\rpc_func_qt.o
+./release\rpc_service_qt.o
+./release\RPC_TRANSMISSION_qt2mcu.o
+./release\RPC_TRANSMISSION_parser.o
+./release\channel_codec.o
+./release\crc16.o
+./release\moc_mainwindow.o
+./release\moc_serialworker.o
+);
