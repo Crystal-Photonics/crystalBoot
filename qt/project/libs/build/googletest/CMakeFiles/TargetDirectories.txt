@@ -1,4 +1,0 @@
-C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/googlemock/gtest/CMakeFiles/gtest.dir
-C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/googlemock/CMakeFiles/gmock.dir
-C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/googlemock/gtest/CMakeFiles/gtest_main.dir
-C:/Users/ark/entwicklung/qt/qProtocolAnalyzer/project/libs/build/googletest/googlemock/CMakeFiles/gmock_main.dir
