@@ -10,6 +10,3 @@
 
 	path = mcu/modules/RPC-ChannelCodec
 	url = https://github.com/Crystal-Photonics/RPC-ChannelCodec.git
-[submodule "qt"]
-	path = qt
-	url = https://github.com/pioupus/rpcQtTemplate.git
