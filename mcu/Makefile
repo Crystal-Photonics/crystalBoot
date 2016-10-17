@@ -16,8 +16,8 @@ ifeq ($(MAKECMDGOALS),test)
 endif
 
 ifeq ($(MAKECMDGOALS),clean)
-	RUNTEST=true
-	RUNPROD=false
+	RUNTEST=false
+	RUNPROD=true
 endif
 
 ifeq ($(RUNTEST),true)

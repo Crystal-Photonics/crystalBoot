@@ -9,14 +9,13 @@
 #include"../../../include/rpc_transmission/server/generated_general/RPC_TRANSMISSION_network.h"
 #include "errorlogger/generic_eeprom_errorlogger.h"
 #include "channel_codec/channel_codec.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
+
+
 #include "main.h"
 
 static const uint16_t MAX_LOCKTIME_ms = 10*1000;
 
-SemaphoreHandle_t  rpc_transmission_mutexes[RPC_MUTEX_COUNT];
+uint8_t  rpc_transmission_mutexes[RPC_MUTEX_COUNT];
 
 
 
@@ -25,15 +24,28 @@ SemaphoreHandle_t  rpc_transmission_mutexes[RPC_MUTEX_COUNT];
 /* Initializes all rpc mutexes. */
 void RPC_TRANSMISSION_mutex_init(void){
 	for(int i = 0; i<RPC_MUTEX_COUNT;i++){
-		rpc_transmission_mutexes[i] = xSemaphoreCreateBinary();
+		rpc_transmission_mutexes[i] = 0;
 		RPC_TRANSMISSION_mutex_unlock(i);
 	}
+}
+
+bool xSemaphoreTake(uint8_t *semaphore, int time){
+	*semaphore = 1;
+	(void)time;
+
+	return true;
+}
+
+void xSemaphoreGive(uint8_t *semaphore){
+	*semaphore = 0;
+
+
 }
 
 /* Locks the mutex. If it is already locked it yields until it can lock the mutex. */
 void RPC_TRANSMISSION_mutex_lock(RPC_mutex_id mutex_id){
 	//printf("lock %d\n",mutex_id);
-	if( xSemaphoreTake( rpc_transmission_mutexes[mutex_id], MAX_LOCKTIME_ms ) == pdTRUE ){
+	if( xSemaphoreTake( &rpc_transmission_mutexes[mutex_id], MAX_LOCKTIME_ms ) == true ){
 			//return 1;
 	}else{
 		GEN_ASSERT(0,errlog_E_MUTEX_mutex_could_not_be_locked_within_timeout,"rpc mutex %d, could not be locked within timeout of %d ms\n", mutex_id,MAX_LOCKTIME_ms);
@@ -44,13 +56,13 @@ void RPC_TRANSMISSION_mutex_lock(RPC_mutex_id mutex_id){
 /* Unlocks the mutex. The mutex is locked when the function is called. */
 void RPC_TRANSMISSION_mutex_unlock(RPC_mutex_id mutex_id){
 	//printf("unlock %d\n",mutex_id);
-	xSemaphoreGive( rpc_transmission_mutexes[mutex_id]);
+	xSemaphoreGive( &rpc_transmission_mutexes[mutex_id]);
 }
 
 char RPC_TRANSMISSION_mutex_lock_timeout(RPC_mutex_id mutex_id){
 	const int timeout_ms = 1000;
 	//printf("lock timed %d\n",mutex_id);
-	if( xSemaphoreTake( rpc_transmission_mutexes[mutex_id], timeout_ms / portTICK_RATE_MS ) == pdTRUE ){
+	if( xSemaphoreTake(& rpc_transmission_mutexes[mutex_id], timeout_ms  ) == true ){
 
 			return 1;
 		}else{

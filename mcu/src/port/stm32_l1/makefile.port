@@ -1,0 +1,63 @@
+
+MCU = STM32L151xE
+HSE_VALUE=12000000
+
+# Combine all necessary flags and optional flags
+# Add target processor to flags.
+#
+CPU = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+#CPU = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+#CPU = -mcpu=cortex-m4 -mthumb 
+#CPU = -mcpu=cortex-m4 -mthumb -mfloat-abi=softfp -mfpu=fpv4-sp-d16
+
+
+CMSIS = $(PORT_DIR)/libraries/STM32L1xx_StdPeriph_Lib_V1.3.1/Libraries/CMSIS
+STD_DRIVER = $(PORT_DIR)/libraries/STM32L1xx_StdPeriph_Lib_V1.3.1/Libraries/STM32L1xx_StdPeriph_Driver
+
+
+PORT_SOURCES += $(PORT_DIR)/src/port_flash.c
+PORT_SOURCES += $(PORT_DIR)/src/port_board.c
+PORT_SOURCES += $(PORT_DIR)/src/port_serial.c
+
+PORT_SOURCES += $(STD_DRIVER)/src/misc.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_adc.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_aes.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_aes_util.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_comp.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_crc.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_dac.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_dbgmcu.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_dma.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_exti.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_flash.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_flash_ramfunc.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_fsmc.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_gpio.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_i2c.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_iwdg.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_lcd.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_opamp.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_pwr.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_rcc.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_rtc.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_sdio.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_spi.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_syscfg.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_tim.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_usart.c
+PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_wwdg.c
+
+
+PORT_SOURCES += $(CMSIS)/Device/ST/STM32L1xx/Source/Templates/gcc_ride7/startup_stm32l1xx_md.s
+PORT_SOURCES += $(CMSIS)/Device/ST/STM32L1xx/Source/Templates/system_stm32l1xx.c
+
+PORT_CPPFLAGS += -I$(CMSIS)/Include
+PORT_CPPFLAGS += -I$(CMSIS)/Device/ST/STM32L1xx/Include/
+PORT_CPPFLAGS += -Isrc/port/stm32_l1/libraries/STM32L1xx_StdPeriph_Lib_V1.3.1/Libraries/STM32L1xx_StdPeriph_Driver/inc/
+PORT_CPPFLAGS += -Isrc/port/stm32_l1/include
+
+
+PORT_LDFLAGS += -T$(STD_DRIVER)/../../Project/STM32L1xx_StdPeriph_Templates/TrueSTUDIO/STM32L1XX_XL(STM32L1xxxExx)/STM32L152RE_FLASH.ld
+
+PORT_DEFS = -DUSE_STDPERIPH_DRIVER -DSTM32L1XX_XL
+

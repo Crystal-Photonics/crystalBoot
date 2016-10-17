@@ -45,7 +45,6 @@
 
 
 
-extern SemaphoreHandle_t semaphoreWakeUp;
 
 
 void lowPowerInitPeriodicWakeUp(uint16_t period_s);

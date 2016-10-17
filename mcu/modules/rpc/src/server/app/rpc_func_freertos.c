@@ -16,14 +16,7 @@ uint16_t mcuSetLEDStatus(rpcLEDStatus_t ledStatus){
 
 	static uint16_t returnvalue = 0;
 	returnvalue++;
-	switch (ledStatus){
-	case rpcLEDStatus_off: CLEAR_LED_BLUE();
-		break;
-	case rpcLEDStatus_on: SET_LED_BLUE();
-			break;
-	case rpcLEDStatus_none:
-			break;
-	}
+
 
 	return returnvalue;
 }

@@ -109,3 +109,4 @@ mcu/modules/rpc/src/server/generated_app/
 mcu/modules/rpc/src/client/generated_app/
 mcu/modules/rpc/include/rpc_transmission/server/generated_general/
 mcu/modules/rpc/include/rpc_transmission/client/
+STM32L1xx_StdPeriph_Lib_V1.3.1

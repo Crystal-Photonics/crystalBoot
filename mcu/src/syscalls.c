@@ -1,135 +1,188 @@
-/*
- *    Copyright (C) 2015  Crystal-Photonics GmbH
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+/**
+*****************************************************************************
+**
+**  File        : syscalls.c
+**
+**  Abstract    : Atollic TrueSTUDIO Minimal System calls file
+**
+** 		          For more information about which c-functions
+**                need which of these lowlevel functions
+**                please consult the Newlib libc-manual
+**
+**  Environment : Atollic TrueSTUDIO
+**
+**  Distribution: The file is distributed “as is,” without any warranty
+**                of any kind.
+**
+**  (c)Copyright Atollic AB.
+**  You may use this file as-is or modify it according to the needs of your
+**  project. Distribution of this file (unmodified or modified) is not
+**  permitted. Atollic AB permit registered Atollic TrueSTUDIO(R) users the
+**  rights to distribute the assembled, compiled & linked contents of this
+**  file as part of an application binary file, provided that it is built
+**  using the Atollic TrueSTUDIO(R) Pro toolchain.
+**
+*****************************************************************************
+*/
 
-/*----------------------------------------------------------------------------
- *        Headers
- *----------------------------------------------------------------------------*/
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <sys/types.h>
+/* Includes */
 #include <sys/stat.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <stdio.h>
+#include <signal.h>
+#include <time.h>
+#include <sys/time.h>
+#include <sys/times.h>
 
-#include "board.h"
 
-#include "syscalls.h"
-#include "task.h"
-
-
-#include "serial.h"
-
-/*----------------------------------------------------------------------------
- *        Exported variables
- *----------------------------------------------------------------------------*/
-
+/* Variables */
 #undef errno
-extern int errno ;
-extern int  _end ;
+extern int errno;
+extern int __io_putchar(int ch) __attribute__((weak));
+extern int __io_getchar(void) __attribute__((weak));
 
-/*----------------------------------------------------------------------------
- *        Exported functions
- *----------------------------------------------------------------------------*/
-extern void _exit( int status ) ;
-extern void _kill( int pid, int sig ) ;
-extern int _getpid ( void ) ;
+//register char * stack_ptr asm("sp");
 
-extern caddr_t _sbrk ( int incr )
+char *__env[1] = { 0 };
+char **environ = __env;
+
+
+/* Functions */
+void initialise_monitor_handles()
 {
-	if (incr==0)
-		incr=4;
-	return (caddr_t) pvPortMalloc(incr);
-	/*
-	static unsigned char *heap = NULL ;
-    unsigned char *prev_heap ;
-    if (incr < 0)
-    	return 0;
-    if ( heap == NULL )
-    {
-        heap = (unsigned char *)&_end ;
-    }
-    prev_heap = heap;
-
-    heap += incr ;
-
-    return (caddr_t) prev_heap ;*/
 }
 
-extern int link( char *old, char *new )
+int _getpid(void)
 {
-    return -1 ;
+	return 1;
 }
 
-extern int _close( int file )
+int _kill(int pid, int sig)
 {
-    return -1 ;
+	errno = EINVAL;
+	return -1;
 }
 
-extern int _fstat( int file, struct stat *st )
+void _exit (int status)
 {
-    st->st_mode = S_IFCHR ;
-
-    return 0 ;
+	_kill(status, -1);
+	while (1) {}		/* Make sure we hang here */
 }
 
-extern int _isatty( int file )
+int _read (int file, char *ptr, int len)
 {
-    return 1 ;
+	int DataIdx;
+
+	for (DataIdx = 0; DataIdx < len; DataIdx++)
+	{
+	  *ptr++ = __io_getchar();
+	}
+
+return len;
 }
 
-extern int _lseek( int file, int ptr, int dir )
+int _write(int file, char *ptr, int len)
 {
-    return 0 ;
+	int DataIdx;
+
+	for (DataIdx = 0; DataIdx < len; DataIdx++)
+	{
+	   __io_putchar( *ptr++ );
+	}
+	return len;
 }
 
-extern int _read(int file, char *ptr, int len)
+caddr_t _sbrk(int incr)
 {
-    return 0 ;
+	extern char end asm("end");
+	static char *heap_end;
+	char *prev_heap_end;
+
+	if (heap_end == 0)
+		heap_end = &end;
+
+	prev_heap_end = heap_end;
+#if 0
+	if (heap_end + incr > stack_ptr)
+	{
+//		write(1, "Heap and stack collision\n", 25);
+//		abort();
+		errno = ENOMEM;
+		return (caddr_t) -1;
+	}
+#endif
+
+	heap_end += incr;
+
+	return (caddr_t) prev_heap_end;
 }
 
-extern int _write( int file, char *ptr, int len )
+int _close(int file)
 {
-    int iIndex ;
-    
-
-    for ( iIndex=0 ; iIndex < len ; iIndex++, ptr++ )
-    {
-    	xSerialPutChar(serCOM_DBG,*ptr,0);
-    }
-
-    return iIndex ;
+	return -1;
 }
 
-extern void _exit( int status )
+
+int _fstat(int file, struct stat *st)
 {
-
-	serialSetRTOSRunningFlag(false);
-	printf( "Exiting with status %d.\n", status ) ;
-    taskDISABLE_INTERRUPTS();
-
-    for ( ; ; ) ;
+	st->st_mode = S_IFCHR;
+	return 0;
 }
 
-extern void _kill( int pid, int sig )
+int _isatty(int file)
 {
-    return ; 
+	return 1;
 }
 
-extern int _getpid ( void )
+int _lseek(int file, int ptr, int dir)
 {
-    return -1 ;
+	return 0;
+}
+
+int _open(char *path, int flags, ...)
+{
+	/* Pretend like we always fail */
+	return -1;
+}
+
+int _wait(int *status)
+{
+	errno = ECHILD;
+	return -1;
+}
+
+int _unlink(char *name)
+{
+	errno = ENOENT;
+	return -1;
+}
+
+int _times(struct tms *buf)
+{
+	return -1;
+}
+
+int _stat(char *file, struct stat *st)
+{
+	st->st_mode = S_IFCHR;
+	return 0;
+}
+
+int _link(char *old, char *new)
+{
+	errno = EMLINK;
+	return -1;
+}
+
+int _fork(void)
+{
+	errno = EAGAIN;
+	return -1;
+}
+
+int _execve(char *name, char **argv, char **env)
+{
+	errno = ENOMEM;
+	return -1;
 }

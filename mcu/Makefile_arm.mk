@@ -2,113 +2,39 @@
 #     0 = turn off optimization. s = optimize for size.
 # 
 
-OPT = 0
-
-
-MCU = STM32L151xE
-
-
-HSE_VALUE=12000000
+OPT = s
 
 SILENCE = @
 
 TARGETNAME = rpcFreeRTOSTemplate
 
 SRC = src
-# Libraries
-LIBRARIES = $(SRC)/libraries
-
-CMSIS = $(LIBRARIES)/STM32Cube_FW_L1_V1.5.0/Drivers/CMSIS
-HAL_DRIVER = $(LIBRARIES)/STM32Cube_FW_L1_V1.5.0/Drivers/STM32L1xx_HAL_Driver/
-
-FREERTOSDIR = $(LIBRARIES)/FreeRTOSV8.2.1
 
 
-# Define all C source files (dependencies are generated automatically)
-#
+PORT_DIR = $(SRC)/port/stm32_l1
+
+include $(PORT_DIR)/makefile.port
+
+
 
 SOURCES += $(SRC)/main.c
-
-SOURCES += $(SRC)/board.c
-SOURCES += $(SRC)/task_led.c
-SOURCES += $(SRC)/task_key.c
-SOURCES += $(SRC)/task_adc.c
-SOURCES += $(SRC)/task_rpc_serial_in.c
 SOURCES += $(SRC)/syscalls.c
-SOURCES += $(LIBRARIES)/serial.c
-SOURCES += $(SRC)/chip_init.c
-SOURCES += $(SRC)/stm32l1xx_it.c
-SOURCES += $(SRC)/stm32l1xx_hal_msp.c
-SOURCES += $(SRC)/stm32l1xx_hal_timebase_TIM.c
-#SOURCES += $(SRC)/lowpower.c
-
-
-
-
-SOURCES += $(CMSIS)/Device/ST/STM32L1xx/Source/Templates/gcc/startup_stm32l151xe.s
-SOURCES += $(CMSIS)/Device/ST/STM32L1xx/Source/Templates/system_stm32l1xx.c
-
-
-
 SOURCES += modules/rpc/src/client/generated_app/RPC_TRANSMISSION_mcu2qt.c
 SOURCES += modules/rpc/src/server/generated_app/RPC_TRANSMISSION_parser.c
 SOURCES += modules/rpc/src/server/app/rpc_service_freertos.c
 SOURCES += modules/rpc/src/server/app/rpc_func_freertos.c
-
- 
 SOURCES += modules/RPC-ChannelCodec/src/channel_codec/crc16.c
 SOURCES += modules/RPC-ChannelCodec/src/channel_codec/channel_codec.c
 
-
-
-
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_adc.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_adc_ex.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_cortex.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_dac.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_dac_ex.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_dma.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_flash.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_flash_ex.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_flash_ramfunc.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_gpio.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_i2c.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_pcd.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_pcd_ex.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_pwr.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_pwr_ex.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_rcc.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_rcc_ex.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_rtc.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_rtc_ex.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_spi.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_spi_ex.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_tim.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_tim_ex.c
-SOURCES += $(HAL_DRIVER)/Src/stm32l1xx_hal_uart.c
-
-
-
-ifeq (1,1)
-#free-rtos source code
-SOURCES += $(FREERTOSDIR)/FreeRTOS/Source/tasks.c
-SOURCES += $(FREERTOSDIR)/FreeRTOS/Source/queue.c
-SOURCES += $(FREERTOSDIR)/FreeRTOS/Source/list.c
-SOURCES += $(FREERTOSDIR)/FreeRTOS/Source/croutine.c
-SOURCES += $(FREERTOSDIR)/FreeRTOS/Source/portable/GCC/ARM_CM3/port.c 
-SOURCES += $(FREERTOSDIR)/FreeRTOS/Source/timers.c
-#Memory management
-SOURCES += $(FREERTOSDIR)/FreeRTOS/Source/portable/MemMang/heap_1.c
-endif
-
+SOURCES += $(PORT_SOURCES)
 
 OBJECTS  = $(addprefix $(OBJDIR)/,$(addsuffix .o,$(basename $(SOURCES))))
 
 DEPENDS  = $(addprefix $(OBJDIR)/,$(addsuffix .d,$(basename $(SOURCES))))
 
-DEFS =  -DHSE_VALUE=$(HSE_VALUE) $(USER_DEFS)
+DEFS =  -DHSE_VALUE=$(HSE_VALUE)
 DEFS += -D$(MCU)
+DEFS += $(PORT_DEFS)
 
 # Object files directory
 # Warning: this will be removed by make clean!
@@ -123,14 +49,7 @@ CPPFLAGS += -Iinclude
 CPPFLAGS += -Imodules/rpc/include
 CPPFLAGS += -Imodules/RPC-ChannelCodec/include
 CPPFLAGS += -Imodules/RPC-ChannelCodec/include/errorlogger_dummy
-CPPFLAGS += -I$(HAL_DRIVER)/Inc
-
-CPPFLAGS += -I$(FREERTOSDIR)/FreeRTOS/Source/include
-CPPFLAGS += -I$(CMSIS)/Include
-CPPFLAGS += -I$(CMSIS)/Device/ST/STM32L1xx/Include
-CPPFLAGS += -I$(FREERTOSDIR)/FreeRTOS/Source/portable/GCC/ARM_CM3/
-CPPFLAGS += -I$(CMSIS)/RTOS/Template
-
+CPPFLAGS += $(PORT_CPPFLAGS)
 
 #---------------- Compiler Options C ----------------
 #  -g*:          generate debugging information
@@ -192,7 +111,7 @@ LDFLAGS += -lm
 LDFLAGS += --specs=nano.specs
 LDFLAGS += -Wl,-Map=$(TARGET).map,--cref
 LDFLAGS += -Wl,--gc-sections
-LDFLAGS += -T$(CMSIS)/Device/ST/STM32L1xx/Source/Templates/gcc/linker/$(MCU)_FLASH.ld
+LDFLAGS += $(PORT_LDFLAGS)
 
 #============================================================================
 
@@ -229,13 +148,7 @@ GENDEPFLAGS = -MMD -MP -MF $(OBJDIR)/$(*D)/$(*F).d
 
 
 
-# Combine all necessary flags and optional flags
-# Add target processor to flags.
-#
-CPU = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-#CPU = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-#CPU = -mcpu=cortex-m4 -mthumb 
-#CPU = -mcpu=cortex-m4 -mthumb -mfloat-abi=softfp -mfpu=fpv4-sp-d16
+
 
 CFLAGS   += $(CPU)
 CXXFLAGS += $(CPU)
@@ -278,8 +191,8 @@ program: all
 # Target: clean project
 clean:
 	@echo Cleaning project:
-	rm -rf $(OBJDIR)
-	rm -rf docs/html
+	rm  -rf $(OBJDIR)
+	
 
 
 # Create extended listing file from ELF output file
