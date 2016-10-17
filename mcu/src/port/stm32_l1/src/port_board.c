@@ -21,152 +21,76 @@
 
 
 
-const pinGPIO_t gpioPins[] = { PIN_LED_RED,PIN_KEY_1};
+const pinGPIO_t gpioPins[] = { PIN_LED_RED,PIN_KEY_1,PIN_DBG_TX_PIO};
 
-const pinGPIO_t afPins[] = {PIN_DBG_RX,PIN_DBG_TX};
 
-const uint32_t COM_TX_PORT_CLK[2] = {EVAL_COM1_TX_GPIO_CLK, EVAL_COM2_TX_GPIO_CLK};
+const pinGPIO_t afPins[] = {PIN_DBG_RX		,PIN_DBG_TX
+};
 
-const uint32_t COM_RX_PORT_CLK[2] = {EVAL_COM1_RX_GPIO_CLK, EVAL_COM2_RX_GPIO_CLK};
 
-const uint32_t COM_USART_CLK[2] = {EVAL_COM1_CLK, EVAL_COM2_CLK};
-
-const uint16_t COM_TX_PIN[2] = {EVAL_COM1_TX_PIN, EVAL_COM2_TX_PIN};
-
-const uint16_t COM_RX_PIN[2] = {EVAL_COM1_RX_PIN, EVAL_COM2_RX_PIN};
-
-GPIO_TypeDef* COM_TX_PORT[2] = {EVAL_COM1_TX_GPIO_PORT, EVAL_COM2_TX_GPIO_PORT};
-
-GPIO_TypeDef* COM_RX_PORT[2] = {EVAL_COM1_RX_GPIO_PORT, EVAL_COM2_RX_GPIO_PORT};
-
-USART_TypeDef* COM_USART[2] = {EVAL_COM1, EVAL_COM2};
+/**
+  * @brief  Configure a SysTick Base time to 10 ms.
+  * @param  None
+  * @retval None
+  */
+static void SysTickConfig(void)
+{
+	/* Setup SysTick Timer for 1ms interrupts  */
+	if (SysTick_Config(SystemCoreClock / 1000))
+	{
+		/* Capture error */
+		while (1);
+	}
+	/* Configure the SysTick handler priority */
+	NVIC_SetPriority(SysTick_IRQn, 0x0);
+}
 
 void boardPowerOn(void){
 
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
+
+	//__HAL_RCC_COMP_CLK_ENABLE();
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 #if 0
-	__GPIOA_CLK_ENABLE();
-	__GPIOB_CLK_ENABLE();
-	__GPIOC_CLK_ENABLE();
+	  /* MemoryManagement_IRQn interrupt configuration */
+	  HAL_NVIC_SetPriority(MemoryManagement_IRQn, 0, 0);
+	  /* BusFault_IRQn interrupt configuration */
+	  HAL_NVIC_SetPriority(BusFault_IRQn, 0, 0);
+	  /* UsageFault_IRQn interrupt configuration */
+	  HAL_NVIC_SetPriority(UsageFault_IRQn, 0, 0);
+	  /* DebugMonitor_IRQn interrupt configuration */
+	  HAL_NVIC_SetPriority(DebugMonitor_IRQn, 0, 0);
 #endif
-
-
 }
 
-/**
-  * @brief  Configures COM port.
-  * @param  COM: Specifies the COM port to be configured.
-  *   This parameter can be one of following parameters:
-  *     @arg COM1
-  *     @arg COM2
-  * @param  USART_InitStruct: pointer to a USART_InitTypeDef structure that
-  *   contains the configuration information for the specified USART peripheral.
-  * @retval None
-  */
-void STM_EVAL_COMInit(COM_TypeDef COM, USART_InitTypeDef* USART_InitStruct)
-{
-  GPIO_InitTypeDef GPIO_InitStructure;
 
-  /* Enable GPIO clock */
-  RCC_APB2PeriphClockCmd(COM_TX_PORT_CLK[COM] | COM_RX_PORT_CLK[COM], ENABLE);
-
-
-  /* Enable UART clock */
-  if (COM == COM1)
-  {
-    RCC_APB2PeriphClockCmd(COM_USART_CLK[COM], ENABLE);
-  }
-  else
-  {
-    /* Enable the USART2 Pins Software Remapping */
-    //GPIO_PinRemapConfig(GPIO_Remap_USART2, ENABLE);
-    RCC_APB1PeriphClockCmd(COM_USART_CLK[COM], ENABLE);
-  }
-
-  /* Configure USART Tx as alternate function push-pull */
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_Pin = COM_TX_PIN[COM];
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
-  GPIO_Init(COM_TX_PORT[COM], &GPIO_InitStructure);
-
-  /* Configure USART Rx as input floating */
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-  GPIO_InitStructure.GPIO_Pin = COM_RX_PIN[COM];
-  GPIO_Init(COM_RX_PORT[COM], &GPIO_InitStructure);
-
-  /* USART configuration */
-  USART_Init(COM_USART[COM], USART_InitStruct);
-
-  /* Enable USART */
-  USART_Cmd(COM_USART[COM], ENABLE);
-}
-
-void boardInitPin(const pinGPIO_t *pin){
-	GPIO_Init(pin->port, (GPIO_InitTypeDef*) &pin->pinDef);
-}
-
-void boardInitAFPin(const pinGPIO_t *pinAF){
-	//HAL_GPIO_Init(pinAF->port,  (GPIO_InitTypeDef*) &pinAF->pinDef);
-}
 
 
 void boardConfigurePIO(void){
 	size_t i;
 
-#if 0
-	//void STM_EVAL_PBInit(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode)
-	{
-	  GPIO_InitTypeDef GPIO_InitStructure;
-	  EXTI_InitTypeDef EXTI_InitStructure;
-	  NVIC_InitTypeDef NVIC_InitStructure;
+	SystemCoreClockUpdate();
 
-	  /* Enable the BUTTON Clock */
-	  RCC_APB2PeriphClockCmd(BUTTON_CLK[Button] | RCC_APB2Periph_AFIO, ENABLE);
+	SysTickConfig();
 
-	  /* Configure Button pin as input floating */
-	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	  GPIO_InitStructure.GPIO_Pin = BUTTON_PIN[Button];
-	  GPIO_Init(BUTTON_PORT[Button], &GPIO_InitStructure);
-#endif
 	boardPowerOn();
 
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
 
 	for (i=0;i<sizeof(gpioPins)/sizeof(pinGPIO_t);i++){
-		boardInitPin(&gpioPins[i]);
-
+		GPIO_Init(gpioPins[i].port, (GPIO_InitTypeDef*) &gpioPins[i].pinDef);
 	}
 
 	for (i=0;i<sizeof(afPins)/sizeof(pinGPIO_t);i++){
-		boardInitAFPin(&afPins[i]);
+		GPIO_Init(afPins[i].port, (GPIO_InitTypeDef*) &afPins[i].pinDef);
+	}
+
+	for (i=0;i<sizeof(afPins)/sizeof(pinGPIO_t);i++){
+		GPIO_PinAFConfig(afPins[i].port, afPins[i].pinSource, afPins[i].af);
 	}
 }
 
-#if 0
-void boardSetPinsToIntput(void){
-	//for shutting off vcc power rail it might be necessary to shut down some gpios.
-	//especially when these IOs are connected indirectly via protection diodes or Pull ups to VCC.
-	//If these Pins are input pins, they cant supply vcc with these indirect connections
-
-	const pinGPIO_t gpio_pins_toinput[]={PIN_PIO_DBG_TX};
-
-	for (size_t i=0;i<sizeof(gpio_pins_toinput)/sizeof(pinGPIO_t);i++){
-		boardInitPin(&gpio_pins_toinput[i]);
-		HAL_GPIO_WritePin(gpio_pins_toinput[i].port, gpio_pins_toinput[i].pinDef.Pin,RESET);
-	}
-
-}
-
-void boardReinitPins(void){
-	const pinGPIO_t gpio_pins_tonormal[]={PIN_DBG_TX,PIN_SDA,PIN_SCL};
-
-	for (size_t i=0;i<sizeof(gpio_pins_tonormal)/sizeof(pinGPIO_t);i++){
-		boardInitAFPin(&gpio_pins_tonormal[i]);
-	}
-
-}
-#endif
 
 
 

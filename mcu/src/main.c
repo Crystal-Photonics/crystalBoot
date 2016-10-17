@@ -16,24 +16,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <stdio.h>
-#include <inttypes.h>
+//#include <stdio.h>
 #include <assert.h>
+#include "vc.h"
 #include "board.h"
 #include "main.h"
 #include "port_flash.h"
 #include "port_serial.h"
-
-//#include "serial.h"
-
-
-
+#include "stm32l1xx_it.h"
 #include "rpc_transmission/server/generated_general/RPC_TRANSMISSION_network.h"
 #include "rpc_transmission/client/generated_app/RPC_TRANSMISSION_mcu2qt.h"
 
-
-#include "lowpower.h"
-#include "vc.h"
+uint32_t sysTick_ms;
 
 channel_codec_instance_t cc_instances[channel_codec_comport_COUNT];
 
@@ -43,8 +37,7 @@ extern uint32_t JumpAddress;
 resetReason_t mainResetReason;
 uint32_t FlashDestination;
 
-/* Private function prototypes -----------------------------------------------*/
-static void IAP_Init(void);
+
 
 /**
  * @brief  Convert an Integer to a string
@@ -107,6 +100,9 @@ static void printResetReason_t(resetReason_t reason){
 
 	}
 }
+
+
+
 
 
 static resetReason_t mainTestResetSource(void){
@@ -202,19 +198,23 @@ int main(void)
 
 	bool hardreset=true;
 	 /* Flash unlock */
-	FLASH_Unlock();
+	//FLASH_Unlock();
 
 	/* Initialize Key Button mounted on STM3210X-EVAL board */
-	boardConfigurePIO();
-	//(BUTTON_KEY, BUTTON_MODE_GPIO);
 
-	RPC_TRANSMISSION_mutex_init();
+	boardConfigurePIO();
+	portSerialInit(115200);
+
+
+	//RPC_TRANSMISSION_mutex_init();
 
 	mainResetReason = mainTestResetSource();
 	printResetReason_t(mainResetReason);
 	printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR,hardreset);
 	printf("githash = %X\n", GITHASH);
 	printf("gitdate = %s %u\n", GITDATE, GITUNIX);
+
+	SET_LED_RED();
 	if(mainResetReason == rer_rtc){
 
 
@@ -229,15 +229,15 @@ int main(void)
 	{
 		/* If Key is pressed */
 		/* Execute the IAP driver in order to re-program the Flash */
-		IAP_Init();
-		SerialPutString("\r\n======================================================================");
-		SerialPutString("\r\n=              (C) COPYRIGHT 2010 STMicroelectronics                 =");
-		SerialPutString("\r\n=                                                                    =");
-		SerialPutString("\r\n=     In-Application Programming Application  (Version 3.3.0)        =");
-		SerialPutString("\r\n=                                                                    =");
-		SerialPutString("\r\n=                                   By MCD Application Team          =");
-		SerialPutString("\r\n======================================================================");
-		SerialPutString("\r\n\r\n");
+
+		portSerialPutString("\r\n======================================================================");
+		portSerialPutString("\r\n=              (C) COPYRIGHT 2010 STMicroelectronics                 =");
+		portSerialPutString("\r\n=                                                                    =");
+		portSerialPutString("\r\n=     In-Application Programming Application  (Version 3.3.0)        =");
+		portSerialPutString("\r\n=                                                                    =");
+		portSerialPutString("\r\n=                                   By MCD Application Team          =");
+		portSerialPutString("\r\n======================================================================");
+		portSerialPutString("\r\n\r\n");
 		//Main_Menu ();
 	}
 	/* Keep the user application running */
@@ -256,37 +256,22 @@ int main(void)
 	}
 
 	while (1)
-	{}
+	{
+		static uint32_t oldTick;
+		uint32_t tick = sysTick_ms/100;
+		if (oldTick != tick){
+			if (tick & 1){
+				SET_LED_RED();
+				SET_DBG_TX_PIO();
+			}else{
+				CLEAR_LED_RED();
+				USART_SendData(COM_USART_BASE,'A');
+				CLEAR_DBG_TX_PIO();
+			}
+		}
+		oldTick = tick;
+	}
 
-}
-
-
-/**
-  * @brief  Initialize the IAP: Configure RCC, USART and GPIOs.
-  * @param  None
-  * @retval None
-  */
-void IAP_Init(void)
-{
- USART_InitTypeDef USART_InitStructure;
-
-  /* USART resources configuration (Clock, GPIO pins and USART registers) ----*/
-  /* USART configured as follow:
-        - BaudRate = 115200 baud
-        - Word Length = 8 Bits
-        - One Stop Bit
-        - No parity
-        - Hardware flow control disabled (RTS and CTS signals)
-        - Receive and transmit enabled
-  */
-  USART_InitStructure.USART_BaudRate = 115200;
-  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-  USART_InitStructure.USART_StopBits = USART_StopBits_1;
-  USART_InitStructure.USART_Parity = USART_Parity_No;
-  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-
-  STM_EVAL_COMInit(COM1, &USART_InitStructure);
 }
 
 #ifdef USE_FULL_ASSERT

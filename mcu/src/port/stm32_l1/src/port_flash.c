@@ -11,7 +11,12 @@ pFunction Jump_To_Application;
 uint32_t JumpAddress;
 uint32_t BlockNbr = 0, UserMemoryMask = 0;
 __IO uint32_t FlashProtection = 0;
-extern uint32_t FlashDestination;
+
+
+#define ApplicationAddress    0x8003000
+
+
+uint32_t FlashDestination = ApplicationAddress;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -248,6 +253,27 @@ void GetInputString (uint8_t * buffP)
 	buffP[bytes_read] = '\0';
 }
 #endif
+
+void portFlashWrite(uint8_t *buffer, size_t size){
+	(void)buffer;
+	(void)size;
+
+}
+
+void portFlashRead(uint8_t *buffer, size_t size){
+#if 0
+	Address = FLASH_START_ADDR;
+	/* Check the written data */
+	while(Address < FLASH_END_ADDR)
+	{
+		buffer++* = *(__IO uint32_t*)Address
+
+		Address = Address + 4;
+	}
+#endif
+}
+
+
 /**
  * @brief  Calculate the number of pages
  * @param  Size: The image size
@@ -269,6 +295,8 @@ uint32_t FLASH_PagesMask(__IO uint32_t Size)
 	return pagenumber;
 
 }
+
+
 
 /**
  * @brief  Disable the write protection of desired pages
