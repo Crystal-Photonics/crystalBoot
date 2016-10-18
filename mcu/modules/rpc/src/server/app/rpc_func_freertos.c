@@ -11,16 +11,20 @@
 #include "programmer.h"
 
 
+uint8_t mcuEraseFlash(){
+	return programmerErase();
+}
+
 void mcuResetReadWritePointer(void){
 	programmerReset();
 }
 
-void mcuWriteFirmwareBlock(uint8_t data_in[32]){
-	programmerWriteBlock(data_in,32);
+void mcuWriteFirmwareBlock(uint8_t data_in[128]){
+	programmerWriteBlock(data_in,128);
 }
 
-void mcuReadFirmwareBlock(uint8_t data_out[32]){
-	programmerReadBlock(data_out,32);
+void mcuReadFirmwareBlock(uint8_t data_out[128]){
+	programmerReadBlock(data_out,128);
 }
 
 firmwareVerifyResult_t mcuVerifyFirmware(){
@@ -30,17 +34,27 @@ firmwareVerifyResult_t mcuVerifyFirmware(){
 
 firmware_descriptor_t mcuGetFirmwareDescriptor( ){
 	firmware_descriptor_t result;
-	memset(&result,sizeof(result),0);
+	memset(&result,0,sizeof(result));
 	return result;
 }
 
 mcu_descriptor_t mcuGetMCUDescriptor( ){
 	mcu_descriptor_t result;
-	memset(&result,sizeof(result),0);
+	memset(&result,0,sizeof(result));
 	return result;
 }
 
 void mcuReboot(void){
 
 }
+
+void mcuEnterProgrammerMode(void){
+
+}
+
+void mcuRunApplication(void){
+
+}
+
+
 

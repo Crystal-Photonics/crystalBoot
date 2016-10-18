@@ -106,7 +106,7 @@ RPC_SIZE_RESULT RPC_CHANNEL_CODEC_get_request_size(channel_codec_instance_t *ins
 		RPC_SIZE_RESULT result;
 		result.size = 0;
 		result.result = RPC_FAILURE;
-		assert(0);
+		//assert(0);
 		return result;
 	}
 }
@@ -118,7 +118,7 @@ RPC_SIZE_RESULT RPC_CHANNEL_CODEC_get_answer_length(channel_codec_instance_t *in
 		RPC_SIZE_RESULT result;
 		result.size = 0;
 		result.result = RPC_FAILURE;
-		assert(0);
+		//assert(0);
 		return result;
 	}
 }
@@ -127,7 +127,7 @@ void RPC_CHANNEL_CODEC_parse_request(channel_codec_instance_t *instance, const v
 	if (instance->aux.port == channel_codec_comport_transmission){
 		RPC_TRANSMISSION_parse_request(buffer, size_bytes);
 	}else{
-		assert(0);
+		//assert(0);
 	}
 }
 
@@ -135,7 +135,7 @@ void RPC_CHANNEL_CODEC_parse_answer(channel_codec_instance_t *instance, const vo
 	if (instance->aux.port == channel_codec_comport_transmission){
 		RPC_TRANSMISSION_parse_answer(buffer, size_bytes);
 	}else{
-		assert(0);
+		//assert(0);
 	}
 }
 
@@ -143,7 +143,7 @@ void RPC_CHANNEL_CODEC_parser_init(channel_codec_instance_t *instance){
 	if (instance->aux.port == channel_codec_comport_transmission){
 		RPC_TRANSMISSION_Parser_init();
 	}else{
-		assert(0);
+		//assert(0);
 	}
 }
 
