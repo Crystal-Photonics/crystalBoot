@@ -243,17 +243,14 @@ int main(void)
 		while (1)
 		{
 			static uint32_t oldTick;
-			uint32_t tick = sysTick_ms/10;
+			uint32_t tick = sysTick_ms/100;
 			rpc_receive();
 			if (oldTick != tick){
 				if (tick & 1){
 					SET_LED_RED();
-					//SET_DBG_TX_PIO();
 				}else{
 					CLEAR_LED_RED();
-					//USART_SendData(COM_USART_BASE,'A');
-					//CLEAR_DBG_TX_PIO();
-					portSerialPutString("Hallo\n");
+					//portSerialPutString("Hallo\n");
 				}
 			}
 			oldTick = tick;
