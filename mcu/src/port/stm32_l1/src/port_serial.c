@@ -11,8 +11,8 @@
 #include "board.h"
 #include "main.h"
 
-#define BUFFER_LENGTH_RX 128
-#define BUFFER_LENGTH_TX 128
+#define BUFFER_LENGTH_RX 256
+#define BUFFER_LENGTH_TX 256
 
 static fifo_t fifo_tx;
 static fifo_t fifo_rx;

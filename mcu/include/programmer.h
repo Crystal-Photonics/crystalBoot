@@ -9,7 +9,9 @@
 #define MCU_INCLUDE_PROGRAMMER_H_
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
+bool programmerErase(void);
 void programmerReset(void);
 void programmerWriteBlock(uint8_t *data, size_t size);
 void programmerReadBlock(uint8_t *data, size_t size);

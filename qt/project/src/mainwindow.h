@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSettings>
+#include <QCloseEvent>
 #include "serialworker.h"
 #include "channel_codec/channel_codec_types.h"
 
@@ -20,10 +22,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
-public slots:
-    void updateADC(float adcValue);
-    void updateKeyState(rpcKeyStatus_t keyState);
+    void closeEvent(QCloseEvent *event);
 
 private slots:
     void on_btnRefresh_clicked();
@@ -36,6 +35,7 @@ private:
     Ui::MainWindow *ui;
 
     SerialThread* serialThread;
+    QSettings settings;
 
 
 };

@@ -12,8 +12,8 @@
 SerialWorker *serialWorkerForRPCFunc = NULL;
 
 
-#define CHANNEL_CODEC_TX_BUFFER_SIZE 64
-#define CHANNEL_CODEC_RX_BUFFER_SIZE 64
+#define CHANNEL_CODEC_TX_BUFFER_SIZE 256
+#define CHANNEL_CODEC_RX_BUFFER_SIZE 256
 
 
 char channel_codec_rxbuffer[channel_codec_comport_COUNT][CHANNEL_CODEC_RX_BUFFER_SIZE];
@@ -55,8 +55,7 @@ SerialThread::SerialThread(QObject *parent) :
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
 
-    connect(serialWorker,SIGNAL(updateADC(float)),this,SIGNAL(updateADC(float)));
-    connect(serialWorker,SIGNAL(updateKeyState(rpcKeyStatus_t)),this,SIGNAL(updateKeyState(rpcKeyStatus_t)));
+
 
     connect(this, SIGNAL(openPort(QString, int)), serialWorker, SLOT(openPort(QString, int)), Qt::BlockingQueuedConnection);
     connect(this, SIGNAL(closePort()), serialWorker, SLOT(closePort()), Qt::BlockingQueuedConnection);
@@ -90,18 +89,13 @@ bool SerialThread::isOpen()
     return result;
 }
 
-void SerialThread::rpcSetTemperature(float temperature)
-{
-    uint16_t temp_returnvalue = -1;
-    RPC_RESULT result;
-    rpcLEDStatus_t ledStatus = rpcLEDStatus_none;
-    if (temperature > 10){
-        ledStatus = rpcLEDStatus_on;
-    }else{
-        ledStatus = rpcLEDStatus_off;
-    }
 
-    result = mcuSetLEDStatus(&temp_returnvalue, ledStatus);
+RPC_RESULT SerialThread::rpcWriteFirmwareBlock(uint8_t *data, size_t size){
+
+    RPC_RESULT result;
+    assert(size == 128);
+
+    result = mcuWriteFirmwareBlock(data);
     QString resultstr;
     switch(result){
     case RPC_SUCCESS:
@@ -118,8 +112,67 @@ void SerialThread::rpcSetTemperature(float temperature)
         break;
     }
 
-    qDebug() << "sending data return: " << temp_returnvalue << " with : "<< resultstr;
-    //qDebug()<<" rpcSetTemperature threadid "<<QThread::currentThreadId();
+  //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
+RPC_RESULT SerialThread::rpcReadFirmwareBlock(uint8_t *data, size_t size){
+    RPC_RESULT result;
+    assert(size == 128);
+
+    result = mcuReadFirmwareBlock(data);
+    QString resultstr;
+    switch(result){
+    case RPC_SUCCESS:
+        resultstr = "RPC_SUCCESS";
+        break;
+    case RPC_FAILURE:
+        resultstr = "RPC_FAILURE";
+        break;
+    case RPC_COMMAND_UNKNOWN:
+        resultstr = "RPC_COMMAND_UNKNOWN";
+        break;
+    case RPC_COMMAND_INCOMPLETE:
+        resultstr = "RPC_COMMAND_INCOMPLETE";
+        break;
+    }
+
+  //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
+RPC_RESULT SerialThread::rpcEraseFlash()
+{
+    RPC_RESULT result;
+
+    uint8_t return_value;
+
+    result = mcuEraseFlash(&return_value);
+    if(return_value==0){
+        result = RPC_FAILURE;
+    }
+    QString resultstr;
+    switch(result){
+    case RPC_SUCCESS:
+        resultstr = "RPC_SUCCESS";
+        break;
+    case RPC_FAILURE:
+        resultstr = "RPC_FAILURE";
+        break;
+    case RPC_COMMAND_UNKNOWN:
+        resultstr = "RPC_COMMAND_UNKNOWN";
+        break;
+    case RPC_COMMAND_INCOMPLETE:
+        resultstr = "RPC_COMMAND_INCOMPLETE";
+        break;
+    }
+
+  //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
+void SerialThread::rpcResetFirmwarePointer(){
+    mcuResetReadWritePointer();
 }
 
 void SerialThread::sendByteData(QByteArray data)
@@ -138,8 +191,10 @@ bool SerialThread::rpcIsCorrectHash(void)
 	if (result != RPC_SUCCESS){
 		return false;
 	}
-	return memcmp(hash, RPC_TRANSMISSION_HASH, RPC_TRANSMISSION_HASH_SIZE) == 0;
+    return memcmp(hash, RPC_TRANSMISSION_HASH, RPC_TRANSMISSION_HASH_SIZE) == 0;
 }
+
+
 
 SerialWorker::SerialWorker(SerialThread *serialThread, QObject *parent):
     QObject(parent)
@@ -156,15 +211,9 @@ SerialWorker::SerialWorker(SerialThread *serialThread, QObject *parent):
 
 }
 
-void SerialWorker::wrapUpdateADC(float adc1)
-{
-    emit updateADC(adc1);
-}
 
-void SerialWorker::wrapUpdateKeyState(rpcKeyStatus_t keyState)
-{
-    emit updateKeyState(keyState);
-}
+
+
 
 void SerialWorker::openPort(QString name, int baudrate)
 {
@@ -187,7 +236,7 @@ bool SerialWorker::isPortOpened()
 void SerialWorker::sendData(QByteArray data)
 {
     serialport->write(data);
-	qDebug() << ">>>" << data;
+    //qDebug() << ">>>" << data;
 }
 
 
@@ -204,7 +253,7 @@ void SerialWorker::on_readyRead()
     QByteArray inbuffer = serialport->readAll();
 
 	if (!inbuffer.isEmpty()){
-		qDebug() << "<<<" << inbuffer;
+        //qDebug() << "<<<" << inbuffer;
 	}
     if (inbuffer.count() == 512){
         qDebug() << "Rechner langsam";

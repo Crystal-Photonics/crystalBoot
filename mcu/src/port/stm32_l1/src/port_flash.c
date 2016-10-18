@@ -13,10 +13,10 @@ uint32_t BlockNbr = 0, UserMemoryMask = 0;
 __IO uint32_t FlashProtection = 0;
 
 
-#define ApplicationAddress    0x8003000
+#define APPLICATION_ADDRESS  0x8003000
 
 
-uint32_t FlashDestination = ApplicationAddress;
+uint32_t FlashDestination = APPLICATION_ADDRESS;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -260,6 +260,41 @@ void portFlashWrite(uint8_t *buffer, size_t size){
 
 }
 
+//typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
+
+bool portFlashEraseApplication(){
+	uint32_t NbrOfPage = 0;
+	uint32_t Address = 0;
+	 FLASH_Status FLASHStatus = FLASH_COMPLETE;
+	 bool MemoryProgramOK = true;
+
+	FLASH_Unlock();
+	FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR
+			| FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
+
+	Address = APPLICATION_ADDRESS;
+	NbrOfPage = ((FLASH_END_ADDR - Address) + 1 ) / FLASH_PAGE_SIZE ;
+
+	/* Erase the FLASH Program memory pages */
+	for(uint32_t j = 0; j < NbrOfPage-10; j++)
+	{
+		FLASHStatus = FLASH_ErasePage(Address + (FLASH_PAGE_SIZE * j));
+
+		if (FLASHStatus != FLASH_COMPLETE)
+		{
+			MemoryProgramOK = false;
+			break;
+		}
+		else
+		{
+			FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR
+					| FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
+		}
+	}
+	FLASH_Lock();
+	return MemoryProgramOK;
+}
+
 void portFlashRead(uint8_t *buffer, size_t size){
 #if 0
 	Address = FLASH_START_ADDR;
@@ -274,6 +309,7 @@ void portFlashRead(uint8_t *buffer, size_t size){
 }
 
 
+
 /**
  * @brief  Calculate the number of pages
  * @param  Size: The image size
@@ -284,13 +320,13 @@ uint32_t FLASH_PagesMask(__IO uint32_t Size)
 	uint32_t pagenumber = 0x0;
 	uint32_t size = Size;
 
-	if ((size % PAGE_SIZE) != 0)
+	if ((size % FLASH_PAGE_SIZE) != 0)
 	{
-		pagenumber = (size / PAGE_SIZE) + 1;
+		pagenumber = (size / FLASH_PAGE_SIZE) + 1;
 	}
 	else
 	{
-		pagenumber = size / PAGE_SIZE;
+		pagenumber = size / FLASH_PAGE_SIZE;
 	}
 	return pagenumber;
 

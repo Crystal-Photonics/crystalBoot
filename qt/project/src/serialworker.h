@@ -15,8 +15,7 @@ class SerialWorker : public QObject
     Q_OBJECT
 public:
     explicit SerialWorker(SerialThread* serialThread, QObject *parent = 0);
-    void wrapUpdateADC(float adc1);
-    void wrapUpdateKeyState(rpcKeyStatus_t keyState);
+
 
 public slots:
 
@@ -31,8 +30,7 @@ public slots:
 signals:
     void finished();
 
-    void updateADC(float adc1);
-    void updateKeyState(rpcKeyStatus_t keyState);
+
 
 private slots:
     void on_readyRead();
@@ -54,9 +52,14 @@ public:
     void close();
     bool isOpen();
 
-    void rpcSetTemperature(float temperature);
+
     void sendByteData(QByteArray data);
     bool rpcIsCorrectHash(void);
+
+    RPC_RESULT rpcEraseFlash();
+    RPC_RESULT rpcWriteFirmwareBlock(uint8_t *data, size_t size);
+    RPC_RESULT rpcReadFirmwareBlock(uint8_t *data, size_t size);
+    void rpcResetFirmwarePointer();
 signals:
 
     void openPort(QString name, int baudrate);
@@ -64,8 +67,7 @@ signals:
     bool isPortOpened();
     void sendData(QByteArray data);
 
-    void updateADC(float adc1);
-    void updateKeyState(rpcKeyStatus_t keyState);
+
 
 
 public slots:

@@ -27,8 +27,10 @@ typedef  void (*pFunction)(void);
 
 #if 1
 #if defined (STM32L1XX_XL)
- #define PAGE_SIZE                         (256)    /* 1 Kbyte */
- //#define FLASH_SIZE                        (512*1024)  /* 128 KBytes */
+	#define FLASH_PAGE_SIZE             (256)
+	 //#define FLASH_SIZE
+	#define FLASH_SIZE                	0x80000
+	#define FLASH_END_ADDR				0x08000000+FLASH_SIZE
 
 #else
  #error "Please select first the STM32 device to be used (in stm32f10x.h)"
@@ -67,7 +69,7 @@ uint32_t FLASH_PagesMask(__IO uint32_t Size);
 void FLASH_DisableWriteProtectionPages(void);
 
 
-void portFlashEraseAllApplication();
+bool portFlashEraseApplication();
 void portFlashWrite(uint8_t *buffer, size_t size);
 void portFlashRead(uint8_t *buffer, size_t size);
 

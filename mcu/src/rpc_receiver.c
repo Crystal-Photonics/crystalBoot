@@ -28,8 +28,8 @@
 #include "port_serial.h"
 
 
-#define CHANNEL_CODEC_TX_BUFFER_SIZE 64
-#define CHANNEL_CODEC_RX_BUFFER_SIZE 64
+#define CHANNEL_CODEC_TX_BUFFER_SIZE 256
+#define CHANNEL_CODEC_RX_BUFFER_SIZE 256
 
 channel_codec_instance_t cc_instances[channel_codec_comport_COUNT];
 

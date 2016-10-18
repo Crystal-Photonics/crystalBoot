@@ -6,19 +6,26 @@
  */
 #include <string.h>
 #include "programmer.h"
+#include "port_flash.h"
 
-#define AES_BLOCK_LENGTH 32
+#define BLOCK_LENGTH 128
 
-static uint8_t progBuffer[AES_BLOCK_LENGTH];
+static uint8_t progBuffer[BLOCK_LENGTH];
+
+bool programmerErase(){
+	return portFlashEraseApplication();
+}
 
 void programmerReset(void){
-	memset(progBuffer,AES_BLOCK_LENGTH,0);
+	memset(progBuffer,BLOCK_LENGTH,0);
 }
 
 void programmerWriteBlock(uint8_t *data, size_t size){
-	memcpy(progBuffer,data,AES_BLOCK_LENGTH);
+	portFlashWrite(data,  size);
+	//memcpy(progBuffer,data,BLOCK_LENGTH);
+	//progBuffer[0]+=1;
 }
 
 void programmerReadBlock(uint8_t *data, size_t size){
-	memcpy(data,progBuffer,AES_BLOCK_LENGTH);
+	memcpy(data,progBuffer,BLOCK_LENGTH);
 }
