@@ -12,13 +12,13 @@ SRC = src
 
 
 PORT_DIR = $(SRC)/port/stm32_l1
-
 include $(PORT_DIR)/makefile.port
 
 
 
 SOURCES += $(SRC)/main.c
 SOURCES += $(SRC)/syscalls.c
+SOURCES += $(SRC)/rpc_receiver.c
 SOURCES += modules/rpc/src/client/generated_app/RPC_TRANSMISSION_mcu2qt.c
 SOURCES += modules/rpc/src/server/generated_app/RPC_TRANSMISSION_parser.c
 SOURCES += modules/rpc/src/server/app/rpc_service_freertos.c

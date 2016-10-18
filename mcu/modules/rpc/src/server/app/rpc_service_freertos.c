@@ -11,7 +11,7 @@
 #include "channel_codec/channel_codec.h"
 
 
-#include "main.h"
+#include "rpc_receiver.h"
 
 static const uint16_t MAX_LOCKTIME_ms = 10*1000;
 

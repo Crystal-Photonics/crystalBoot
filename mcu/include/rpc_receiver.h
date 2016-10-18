@@ -16,9 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef MCU_INCLUDE_TASK_RPC_SERIAL_IN_H_
-#define MCU_INCLUDE_TASK_RPC_SERIAL_IN_H_
+#ifndef MCU_INCLUDE_RPC_RECEIVER_H_
+#define MCU_INCLUDE_RPC_RECEIVER_H_
 
-void taskRPCSerialIn(void *pvParameters);
+#include "channel_codec/channel_codec_types.h"
 
-#endif /* MCU_INCLUDE_TASK_RPC_SERIAL_IN_H_ */
+extern channel_codec_instance_t cc_instances[channel_codec_comport_COUNT];
+
+void rpc_receiver_init(void);
+
+void rpc_receive(void);
+
+#endif /* MCU_INCLUDE_RPC_RECEIVER_H_ */

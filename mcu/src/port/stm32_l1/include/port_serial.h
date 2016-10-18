@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+
 void portSerialInit(int baud);
 
 void portSerialPutChar(uint8_t c);

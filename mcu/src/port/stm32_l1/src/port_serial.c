@@ -106,7 +106,7 @@ void portSerialPutChar(uint8_t c)
 	vPortEnterCritical();
 	fifo_result_t result = fifo_push(&fifo_tx,c);
 	vPortExitCritical();
-	assert(result == FIFO_SUCCESS);
+	//assert(result == FIFO_SUCCESS);
 	if (wasEmpty){
 		USART_ITConfig(COM_USART_BASE, USART_IT_TXE, ENABLE);
 	}

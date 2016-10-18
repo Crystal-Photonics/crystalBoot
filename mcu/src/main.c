@@ -23,13 +23,18 @@
 #include "main.h"
 #include "port_flash.h"
 #include "port_serial.h"
-#include "stm32l1xx_it.h"
+//#include "stm32l1xx_it.h"
+#include "rpc_receiver.h"
 #include "rpc_transmission/server/generated_general/RPC_TRANSMISSION_network.h"
 #include "rpc_transmission/client/generated_app/RPC_TRANSMISSION_mcu2qt.h"
 
-uint32_t sysTick_ms;
 
-channel_codec_instance_t cc_instances[channel_codec_comport_COUNT];
+#include "channel_codec/channel_codec.h"
+
+#include "channel_codec/phylayer.h"
+#include "errorlogger/generic_eeprom_errorlogger.h"
+
+uint32_t sysTick_ms;
 
 extern pFunction Jump_To_Application;
 extern uint32_t JumpAddress;
@@ -39,13 +44,15 @@ uint32_t FlashDestination;
 
 
 
+
+#if 0
 /**
  * @brief  Convert an Integer to a string
  * @param  str: The string
  * @param  intnum: The intger to be converted
  * @retval None
  */
-void Int2Str(uint8_t* str, int32_t intnum)
+static void Int2Str(uint8_t* str, int32_t intnum)
 {
 	uint32_t i, Div = 1000000000, j = 0, Status = 0;
 
@@ -65,7 +72,7 @@ void Int2Str(uint8_t* str, int32_t intnum)
 		}
 	}
 }
-
+#endif
 
 
 static void printResetReason_t(resetReason_t reason){
@@ -193,6 +200,7 @@ bool testIfStartIntoProgrammingMode(){
 	return true;
 }
 
+
 int main(void)
 {
 
@@ -206,7 +214,7 @@ int main(void)
 	portSerialInit(115200);
 
 
-	//RPC_TRANSMISSION_mutex_init();
+
 
 	mainResetReason = mainTestResetSource();
 	printResetReason_t(mainResetReason);
@@ -224,11 +232,33 @@ int main(void)
 	}
 
 
+
+	rpc_receiver_init();
+
 	/* Test if Key push-button on STM3210X-EVAL Board is pressed */
 	if (testIfStartIntoProgrammingMode())
 	{
 
-		portSerialPutString("Hallo\n");
+
+		while (1)
+		{
+			static uint32_t oldTick;
+			uint32_t tick = sysTick_ms/10;
+			rpc_receive();
+			if (oldTick != tick){
+				if (tick & 1){
+					SET_LED_RED();
+					//SET_DBG_TX_PIO();
+				}else{
+					CLEAR_LED_RED();
+					//USART_SendData(COM_USART_BASE,'A');
+					//CLEAR_DBG_TX_PIO();
+					portSerialPutString("Hallo\n");
+				}
+			}
+			oldTick = tick;
+		}
+
 	}
 	/* Keep the user application running */
 	else
@@ -245,23 +275,12 @@ int main(void)
 		}
 	}
 
-	while (1)
-	{
-		static uint32_t oldTick;
-		uint32_t tick = sysTick_ms/10;
-		if (oldTick != tick){
-			if (tick & 1){
-				SET_LED_RED();
-				//SET_DBG_TX_PIO();
-			}else{
-				CLEAR_LED_RED();
-				//USART_SendData(COM_USART_BASE,'A');
-				//CLEAR_DBG_TX_PIO();
-				portSerialPutString("Hallo\n");
-			}
-		}
-		oldTick = tick;
+	while(1){
+
 	}
+
+
+
 
 }
 

@@ -66,7 +66,7 @@ typedef enum{rer_none,
 	} resetReason_t;
 
 extern resetReason_t mainResetReason;
-extern channel_codec_instance_t cc_instances[channel_codec_comport_COUNT];
+
 extern uint32_t sysTick_ms;
 
 #endif /* MAIN_H_ */
