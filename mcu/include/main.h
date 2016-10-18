@@ -26,6 +26,7 @@
 
 
 
+
 #define mainLED_TASK_STACK				( ( unsigned short ) 550 )
 #define mainKEY_TASK_STACK				( ( unsigned short ) 300 )
 #define mainRPC_SERIAL_TASK_STACK		( ( unsigned short ) 300 )
@@ -36,20 +37,13 @@
 #define mainKEY_TASK_PRIORITY			tskIDLE_PRIORITY + 3
 #define mainADC_TASK_PRIORITY			tskIDLE_PRIORITY + 3
 
-#if 0
 #define ISR_PRIORITY_SERIAL_DBG				configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+2
 #define ISR_PRIORITY_PIO					configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+0
 #define ISR_PRIORITY_COUNTER				configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+0
 #define ISR_PRIORITY_ADC					configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+0
 #define ISR_PRIORITY_PIO_ADC				configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY-1
 
-#else
-#define ISR_PRIORITY_SERIAL_DBG				2
-#define ISR_PRIORITY_PIO					0
-#define ISR_PRIORITY_COUNTER				0
-#define ISR_PRIORITY_ADC					0
-#define ISR_PRIORITY_PIO_ADC				1
-#endif
+
 void sleepAboutMS(int ms);
 
 

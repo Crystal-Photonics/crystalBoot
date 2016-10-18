@@ -27,6 +27,62 @@ const pinGPIO_t gpioPins[] = { PIN_LED_RED,PIN_KEY_1,PIN_DBG_TX_PIO};
 const pinGPIO_t afPins[] = {PIN_DBG_RX		,PIN_DBG_TX
 };
 
+#if 0
+#define portDISABLE_INTERRUPTS()				ulPortSetInterruptMask()
+#define portENABLE_INTERRUPTS()					vPortClearInterruptMask(0)
+
+
+__attribute__(( naked )) uint32_t ulPortSetInterruptMask( void )
+{
+	__asm volatile														\
+	(																	\
+		"	mrs r0, basepri											\n" \
+		"	mov r1, %0												\n"	\
+		"	msr basepri, r1											\n" \
+		"	bx lr													\n" \
+		:: "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "r0", "r1"	\
+	);
+
+	/* This return will not be reached but is necessary to prevent compiler
+	warnings. */
+	return 0;
+}
+/*-----------------------------------------------------------*/
+
+__attribute__(( naked )) void vPortClearInterruptMask( uint32_t ulNewMaskValue )
+{
+	__asm volatile													\
+	(																\
+		"	msr basepri, r0										\n"	\
+		"	bx lr												\n" \
+		:::"r0"														\
+	);
+
+	/* Just to avoid compiler warnings. */
+	( void ) ulNewMaskValue;
+}
+#endif
+
+void vPortEnterCritical( void )
+{
+#if 0
+	portDISABLE_INTERRUPTS();
+
+	__asm volatile( "dsb" );
+	__asm volatile( "isb" );
+#else
+	  __disable_irq();
+#endif
+}
+
+void vPortExitCritical( void )
+{
+	#if 0
+	portENABLE_INTERRUPTS();
+#else
+	__enable_irq();
+#endif
+}
 
 /**
   * @brief  Configure a SysTick Base time to 10 ms.
@@ -46,21 +102,8 @@ static void SysTickConfig(void)
 }
 
 void boardPowerOn(void){
-
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
-
-	//__HAL_RCC_COMP_CLK_ENABLE();
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-#if 0
-	  /* MemoryManagement_IRQn interrupt configuration */
-	  HAL_NVIC_SetPriority(MemoryManagement_IRQn, 0, 0);
-	  /* BusFault_IRQn interrupt configuration */
-	  HAL_NVIC_SetPriority(BusFault_IRQn, 0, 0);
-	  /* UsageFault_IRQn interrupt configuration */
-	  HAL_NVIC_SetPriority(UsageFault_IRQn, 0, 0);
-	  /* DebugMonitor_IRQn interrupt configuration */
-	  HAL_NVIC_SetPriority(DebugMonitor_IRQn, 0, 0);
-#endif
 }
 
 

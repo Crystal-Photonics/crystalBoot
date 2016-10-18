@@ -227,18 +227,8 @@ int main(void)
 	/* Test if Key push-button on STM3210X-EVAL Board is pressed */
 	if (testIfStartIntoProgrammingMode())
 	{
-		/* If Key is pressed */
-		/* Execute the IAP driver in order to re-program the Flash */
 
-		portSerialPutString("\r\n======================================================================");
-		portSerialPutString("\r\n=              (C) COPYRIGHT 2010 STMicroelectronics                 =");
-		portSerialPutString("\r\n=                                                                    =");
-		portSerialPutString("\r\n=     In-Application Programming Application  (Version 3.3.0)        =");
-		portSerialPutString("\r\n=                                                                    =");
-		portSerialPutString("\r\n=                                   By MCD Application Team          =");
-		portSerialPutString("\r\n======================================================================");
-		portSerialPutString("\r\n\r\n");
-		//Main_Menu ();
+		portSerialPutString("Hallo\n");
 	}
 	/* Keep the user application running */
 	else
@@ -258,15 +248,16 @@ int main(void)
 	while (1)
 	{
 		static uint32_t oldTick;
-		uint32_t tick = sysTick_ms/100;
+		uint32_t tick = sysTick_ms/10;
 		if (oldTick != tick){
 			if (tick & 1){
 				SET_LED_RED();
-				SET_DBG_TX_PIO();
+				//SET_DBG_TX_PIO();
 			}else{
 				CLEAR_LED_RED();
-				USART_SendData(COM_USART_BASE,'A');
-				CLEAR_DBG_TX_PIO();
+				//USART_SendData(COM_USART_BASE,'A');
+				//CLEAR_DBG_TX_PIO();
+				portSerialPutString("Hallo\n");
 			}
 		}
 		oldTick = tick;
