@@ -2,7 +2,7 @@
 #     0 = turn off optimization. s = optimize for size.
 # 
 
-OPT = s
+OPT = 0
 
 SILENCE = @
 
@@ -86,7 +86,8 @@ CFLAGS += -Wa,-adhlns=$(OBJDIR)/$(*D)/$(*F).lst
 #CFLAGS += -fsingle-precision-constant
 
 # use USE_FULL_ASSERT
-CFLAGS += -DUSE_FULL_ASSERT
+#CFLAGS += -DUSE_FULL_ASSERT
+
 # This will not work without recompiling App/STM32F4-Discovery/Libraries
 #
 # CFLAGS += -fshort-double

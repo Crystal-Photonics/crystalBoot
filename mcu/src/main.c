@@ -23,12 +23,12 @@
 #include "main.h"
 #include "port_flash.h"
 #include "port_serial.h"
-//#include "stm32l1xx_it.h"
+
 #include "rpc_receiver.h"
 #include "rpc_transmission/server/generated_general/RPC_TRANSMISSION_network.h"
 #include "rpc_transmission/client/generated_app/RPC_TRANSMISSION_mcu2qt.h"
 
-
+#include "programmer.h"
 #include "channel_codec/channel_codec.h"
 
 #include "channel_codec/phylayer.h"
@@ -245,21 +245,26 @@ int main(void)
 			static uint32_t oldTick;
 			uint32_t tick = sysTick_ms/100;
 			rpc_receive();
+			//printf("Halloasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd\n");
 			if (oldTick != tick){
 				if (tick & 1){
 					SET_LED_RED();
+					//programmerErase();
 				}else{
 					CLEAR_LED_RED();
+					//printf("hallo\n");
 					//portSerialPutString("Hallo\n");
 				}
 			}
 			oldTick = tick;
+			//sysTick_ms++;
 		}
 
 	}
 	/* Keep the user application running */
 	else
 	{
+#if 0
 		/* Test if user code is programmed starting from address "ApplicationAddress" */
 		if (((*(__IO uint32_t*)ApplicationAddress) & 0x2FFE0000 ) == 0x20000000)
 		{
@@ -270,6 +275,7 @@ int main(void)
 			__set_MSP(*(__IO uint32_t*) ApplicationAddress);
 			Jump_To_Application();
 		}
+#endif
 	}
 
 	while(1){

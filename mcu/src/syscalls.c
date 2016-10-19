@@ -28,21 +28,98 @@
 /* Includes */
 #include <sys/stat.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <signal.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/times.h>
-
+#include "port_serial.h"
+#include "board.h"
 
 /* Variables */
 #undef errno
 extern int errno;
-extern int __io_putchar(int ch) __attribute__((weak));
-extern int __io_getchar(void) __attribute__((weak));
+//extern int __io_putchar(int ch) __attribute__((weak));
+//extern int __io_getchar(void) __attribute__((weak));
 
-//register char * stack_ptr asm("sp");
+
+#if portBYTE_ALIGNMENT == 8
+	#define portBYTE_ALIGNMENT_MASK ( 0x0007 )
+#endif
+
+#if portBYTE_ALIGNMENT == 4
+	#define portBYTE_ALIGNMENT_MASK	( 0x0003 )
+#endif
+
+#if portBYTE_ALIGNMENT == 2
+	#define portBYTE_ALIGNMENT_MASK	( 0x0001 )
+#endif
+
+#if portBYTE_ALIGNMENT == 1
+	#define portBYTE_ALIGNMENT_MASK	( 0x0000 )
+#endif
+
+/* A few bytes might be lost to byte aligning the heap start address. */
+#define configADJUSTED_HEAP_SIZE	( portTOTAL_HEAP_SIZE - portBYTE_ALIGNMENT )
+
+
+
+/* Allocate the memory for the heap. */
+static uint8_t ucHeap[ portTOTAL_HEAP_SIZE ];
+static size_t xNextFreeByte = ( size_t ) 0;
+
+/*-----------------------------------------------------------*/
+
+static void *sys_malloc( size_t xWantedSize )
+{
+void *pvReturn = NULL;
+static uint8_t *pucAlignedHeap = NULL;
+
+	/* Ensure that blocks are always aligned to the required number of bytes. */
+	#if portBYTE_ALIGNMENT != 1
+		if( xWantedSize & portBYTE_ALIGNMENT_MASK )
+		{
+			/* Byte alignment required. */
+			xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+		}
+	#endif
+
+	{
+		if( pucAlignedHeap == NULL )
+		{
+			/* Ensure the heap starts on a correctly aligned boundary. */
+			pucAlignedHeap = ( uint8_t * ) ( ( ( portPOINTER_SIZE_TYPE ) &ucHeap[ portBYTE_ALIGNMENT ] ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );
+		}
+
+		/* Check there is enough room left for the allocation. */
+		if( ( ( xNextFreeByte + xWantedSize ) < configADJUSTED_HEAP_SIZE ) &&
+			( ( xNextFreeByte + xWantedSize ) > xNextFreeByte )	)/* Check for overflow. */
+		{
+			/* Return the next free byte then increment the index past this
+			block. */
+			pvReturn = pucAlignedHeap + xNextFreeByte;
+			xNextFreeByte += xWantedSize;
+		}
+
+
+	}
+
+	assert(pvReturn);
+
+	#if( configUSE_MALLOC_FAILED_HOOK == 1 )
+	{
+		if( pvReturn == NULL )
+		{
+			extern void vApplicationMallocFailedHook( void );
+			vApplicationMallocFailedHook();
+		}
+	}
+	#endif
+
+	return pvReturn;
+}
 
 char *__env[1] = { 0 };
 char **environ = __env;
@@ -74,12 +151,7 @@ int _read (int file, char *ptr, int len)
 {
 	int DataIdx;
 
-	for (DataIdx = 0; DataIdx < len; DataIdx++)
-	{
-	  //*ptr++ = __io_getchar();
-	}
-
-return len;
+	return 0 ;
 }
 
 int _write(int file, char *ptr, int len)
@@ -89,33 +161,16 @@ int _write(int file, char *ptr, int len)
 	for (DataIdx = 0; DataIdx < len; DataIdx++)
 	{
 	   //__io_putchar( *ptr++ );
+		portSerialPutChar(ptr[DataIdx]);
 	}
 	return len;
 }
 
 caddr_t _sbrk(int incr)
 {
-	extern char end asm("end");
-	static char *heap_end;
-	char *prev_heap_end;
-
-	if (heap_end == 0)
-		heap_end = &end;
-
-	prev_heap_end = heap_end;
-#if 0
-	if (heap_end + incr > stack_ptr)
-	{
-//		write(1, "Heap and stack collision\n", 25);
-//		abort();
-		errno = ENOMEM;
-		return (caddr_t) -1;
-	}
-#endif
-
-	heap_end += incr;
-
-	return (caddr_t) prev_heap_end;
+	if (incr==0)
+		incr=4;
+	return (caddr_t) sys_malloc(incr);
 }
 
 int _close(int file)

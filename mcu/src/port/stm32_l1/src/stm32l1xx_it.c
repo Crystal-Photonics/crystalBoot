@@ -54,6 +54,69 @@
 /*            Cortex-M3 Processor Exceptions Handlers                         */
 /******************************************************************************/
 
+
+
+/* The prototype shows it is a naked function - in effect this is just an
+assembly function. */
+void HardFault_Handler( void ) __attribute__( ( naked ) );
+
+/* The fault handler implementation calls a function called
+prvGetRegistersFromStack(). */
+ void HardFault_Handler(void)
+{
+    __asm volatile
+    (
+        " tst lr, #4                                                \n"
+        " ite eq                                                    \n"
+        " mrseq r0, msp                                             \n"
+        " mrsne r0, psp                                             \n"
+        " ldr r1, [r0, #24]                                         \n"
+        " ldr r2, handler2_address_const                            \n"
+        " bx r2                                                     \n"
+        " handler2_address_const: .word prvGetRegistersFromStack    \n"
+    );
+}
+
+
+
+void prvGetRegistersFromStack( uint32_t *pulFaultStackAddress )
+{
+/* These are volatile to try and prevent the compiler/linker optimising them
+away as the variables never actually get used.  If the debugger won't show the
+values of the variables, make them global my moving their declaration outside
+of this function. */
+volatile uint32_t r0;
+volatile uint32_t r1;
+volatile uint32_t r2;
+volatile uint32_t r3;
+volatile uint32_t r12;
+volatile uint32_t lr; /* Link register. */
+volatile uint32_t pc; /* Program counter. */
+volatile uint32_t psr;/* Program status register. */
+
+    r0 = pulFaultStackAddress[ 0 ];
+    r1 = pulFaultStackAddress[ 1 ];
+    r2 = pulFaultStackAddress[ 2 ];
+    r3 = pulFaultStackAddress[ 3 ];
+
+    r12 = pulFaultStackAddress[ 4 ];
+    lr = pulFaultStackAddress[ 5 ];
+    pc = pulFaultStackAddress[ 6 ];
+    psr = pulFaultStackAddress[ 7 ];
+
+    /* When the following line is hit, the variables contain the register values. */
+    for( ;; );
+    (void)r0;
+    (void)r1;
+    (void)r2;
+    (void)r3;
+    (void)r12;
+    (void)lr;
+    (void)pc;
+    (void)psr;
+
+}
+
 /**
 * @brief  This function handles NMI exception.
 * @param  None
@@ -62,17 +125,7 @@
 void NMI_Handler(void)
 {}
 
-/**
-* @brief  This function handles Hard Fault exception.
-* @param  None
-* @retval None
-*/
-void HardFault_Handler(void)
-{
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {}
-}
+
 
 /**
 * @brief  This function handles Memory Manage exception.
@@ -144,6 +197,67 @@ void SysTick_Handler(void)
 	sysTick_ms++;
 }
 
+
+void WWDG_IRQHandler  (){ }
+void PVD_IRQHandler  (){ }
+void TAMPER_STAMP_IRQHandler  (){ }
+void RTC_WKUP_IRQHandler  (){ }
+void FLASH_IRQHandler  (){ }
+void RCC_IRQHandler  (){ }
+void EXTI0_IRQHandler  (){ }
+void EXTI1_IRQHandler  (){ }
+void EXTI2_IRQHandler  (){ }
+void EXTI3_IRQHandler  (){ }
+void EXTI4_IRQHandler  (){ }
+void DMA1_Channel1_IRQHandler  (){ }
+void DMA1_Channel2_IRQHandler  (){ }
+void DMA1_Channel3_IRQHandler  (){ }
+void DMA1_Channel4_IRQHandler  (){ }
+void DMA1_Channel5_IRQHandler  (){ }
+void DMA1_Channel6_IRQHandler  (){ }
+void DMA1_Channel7_IRQHandler  (){ }
+void ADC1_IRQHandler  (){ }
+void USB_HP_IRQHandler  (){ }
+void USB_LP_IRQHandler  (){ }
+void DAC_IRQHandler  (){ }
+void COMP_IRQHandler  (){ }
+void EXTI9_5_IRQHandler  (){ }
+void LCD_IRQHandler  (){ }
+void TIM9_IRQHandler  (){ }
+void TIM10_IRQHandler  (){ }
+void TIM11_IRQHandler  (){ }
+void TIM2_IRQHandler  (){ }
+void TIM3_IRQHandler  (){ }
+void TIM4_IRQHandler  (){ }
+void I2C1_EV_IRQHandler  (){ }
+  void I2C1_ER_IRQHandler  (){ }
+  void I2C2_EV_IRQHandler  (){ }
+  void I2C2_ER_IRQHandler  (){ }
+  void SPI1_IRQHandler  (){ }
+  void SPI2_IRQHandler  (){ }
+
+  void USART2_IRQHandler  (){ }
+  void USART3_IRQHandler  (){ }
+  void EXTI15_10_IRQHandler  (){ }
+  void RTC_Alarm_IRQHandler  (){ }
+  void USB_FS_WKUP_IRQHandler  (){ }
+  void TIM6_IRQHandler  (){ }
+  void TIM7_IRQHandler  (){ }
+
+  void TIM5_IRQHandler  (){ }
+  void SPI3_IRQHandler  (){ }
+  void UART4_IRQHandler  (){ }
+  void UART5_IRQHandler  (){ }
+  void DMA2_Channel1_IRQHandler  (){ }
+  void DMA2_Channel2_IRQHandler  (){ }
+  void DMA2_Channel3_IRQHandler  (){ }
+  void DMA2_Channel4_IRQHandler  (){ }
+  void DMA2_Channel5_IRQHandler  (){ }
+  void AES_IRQHandler  (){ }
+  void COMP_ACQ_IRQHandler  (){ }
+  void BootRAM(){
+
+  }
 /******************************************************************************/
 /*                 STM32L1xx Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */

@@ -133,10 +133,16 @@ void MainWindow::on_btnSend_clicked()
         QTime runtime;
         bool fail = false;
         runtime.start();
+        qDebug() << "erasing..";
         result = serialThread->rpcEraseFlash();
         if (result != RPC_SUCCESS){
             fail = true;
+            qDebug() << "erasing fail";
+        }else{
+            qDebug() << "erasing ok";
         }
+
+#if 0
         while (!firmwareFile.atEnd() && fail == false){
 
             char blockData[BLOCKLENGTH];
@@ -174,6 +180,7 @@ void MainWindow::on_btnSend_clicked()
             progress_old = progress;
 
         }
+        #else
         if ((result != RPC_SUCCESS) || fail){
             QString resultstr;
             switch(result){
@@ -194,6 +201,10 @@ void MainWindow::on_btnSend_clicked()
         }else{
             qDebug() << "tranfered ok. " << runtime.elapsed()/1000.0<< "seconds needed";
         }
+
+        (void)fileSize;
+        (void)byteCounter;
+#endif
     }else{
         qDebug() << "cant open file" << ui->edtFileName->text();
     }

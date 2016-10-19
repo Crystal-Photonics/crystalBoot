@@ -7,13 +7,15 @@
 
 #include "port_flash.h"
 
-pFunction Jump_To_Application;
-uint32_t JumpAddress;
-uint32_t BlockNbr = 0, UserMemoryMask = 0;
-__IO uint32_t FlashProtection = 0;
+#include <inttypes.h>
 
+//pFunction Jump_To_Application;
+//uint32_t JumpAddress;
+//uint32_t BlockNbr = 0, UserMemoryMask = 0;
+//__IO uint32_t FlashProtection = 0;
+uint32_t pageAddress;
 
-#define APPLICATION_ADDRESS  0x8003000
+#define APPLICATION_ADDRESS  0x8004000
 
 
 uint32_t FlashDestination = APPLICATION_ADDRESS;
@@ -264,25 +266,47 @@ void portFlashWrite(uint8_t *buffer, size_t size){
 
 bool portFlashEraseApplication(){
 	uint32_t NbrOfPage = 0;
-	uint32_t Address = 0;
-	 FLASH_Status FLASHStatus = FLASH_COMPLETE;
-	 bool MemoryProgramOK = true;
-
+	const uint32_t Address = APPLICATION_ADDRESS;
+	FLASH_Status FLASHStatus = FLASH_COMPLETE;
+	bool MemoryProgramOK = true;
+	CLEAR_LED_BLUE();
 	FLASH_Unlock();
 	FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR
 			| FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
 
-	Address = APPLICATION_ADDRESS;
+	//Address = 0x08040000;
 	NbrOfPage = ((FLASH_END_ADDR - Address) + 1 ) / FLASH_PAGE_SIZE ;
 
 	/* Erase the FLASH Program memory pages */
-	for(uint32_t j = 0; j < NbrOfPage-10; j++)
+	for(uint32_t pageIndex = 0; pageIndex < NbrOfPage; pageIndex++)
 	{
-		FLASHStatus = FLASH_ErasePage(Address + (FLASH_PAGE_SIZE * j));
+
+		pageAddress = Address + (FLASH_PAGE_SIZE * pageIndex);
+		FLASHStatus = FLASH_ErasePage(pageAddress);
 
 		if (FLASHStatus != FLASH_COMPLETE)
 		{
+			printf("err %d at %"PRIu32"\n",FLASHStatus,pageIndex);
+			if (FLASHStatus == FLASH_BUSY){
+				MemoryProgramOK = false;
+
+			}
+			if (FLASHStatus == FLASH_ERROR_WRP){
+				MemoryProgramOK = false;
+
+			}
+			if (FLASHStatus == FLASH_ERROR_PROGRAM){
+				MemoryProgramOK = false;
+
+			}
+			if (FLASHStatus == FLASH_TIMEOUT){
+				MemoryProgramOK = false;
+
+			}
+
+
 			MemoryProgramOK = false;
+
 			break;
 		}
 		else
@@ -291,7 +315,14 @@ bool portFlashEraseApplication(){
 					| FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
 		}
 	}
+	(void)NbrOfPage;
 	FLASH_Lock();
+	if(MemoryProgramOK){
+		SET_LED_BLUE();
+		printf("erase ok\n");
+	}else{
+		CLEAR_LED_BLUE();
+	}
 	return MemoryProgramOK;
 }
 
@@ -346,6 +377,7 @@ void FLASH_DisableWriteProtectionPages(void)
 	(void)var1;
 	(void)var2;
 	(void)var3;
+#if 0
 	FLASH_Status status = FLASH_BUSY;
 
 	// WRPR = FLASH_GetWriteProtectionOptionByte();
@@ -408,6 +440,7 @@ void FLASH_DisableWriteProtectionPages(void)
 	{
 		//SerialPutString("Flash memory not write protected\r\n");
 	}
+#endif
 }
 
 #if 0

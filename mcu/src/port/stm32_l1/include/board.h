@@ -34,7 +34,7 @@
 #include "stm32l1xx_conf.h"
 #include "stm32l1xx.h"
 
-#define printf(...) (void)0
+//#define printf(...) (void)0
 
 /** Name of the board */
 #define BOARD_NAME "rpcFREERTOS_TEMPLATE"
@@ -42,6 +42,10 @@
 /**
   * @brief General Purpose IO
   */
+
+#define portTOTAL_HEAP_SIZE 1024*16
+#define portBYTE_ALIGNMENT 1
+#define portPOINTER_SIZE_TYPE uint32_t
 
 typedef struct {
 	GPIO_InitTypeDef pinDef;
@@ -61,6 +65,10 @@ typedef enum{les_none, les_on, les_off}led_state_t;
 #define PIN_LED_RED   			{.pinDef = {.GPIO_Pin = GPIO_Pin_7, .GPIO_Mode=GPIO_Mode_OUT, .GPIO_Speed = GPIO_Speed_2MHz, .GPIO_OType=GPIO_OType_PP, .GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOC}
 #define SET_LED_RED()			GPIO_SetBits(GPIOC, GPIO_Pin_7)
 #define CLEAR_LED_RED()			GPIO_ResetBits(GPIOC, GPIO_Pin_7)
+
+#define PIN_LED_BLUE   			{.pinDef = {.GPIO_Pin = GPIO_Pin_6, .GPIO_Mode=GPIO_Mode_OUT, .GPIO_Speed = GPIO_Speed_2MHz, .GPIO_OType=GPIO_OType_PP, .GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOC}
+#define SET_LED_BLUE()			GPIO_SetBits(GPIOC, GPIO_Pin_6)
+#define CLEAR_LED_BLUE()			GPIO_ResetBits(GPIOC, GPIO_Pin_6)
 
 #define PIN_DBG_TX_PIO 			{.pinDef = {.GPIO_Pin = GPIO_Pin_9, .GPIO_Mode=GPIO_Mode_OUT, .GPIO_Speed = GPIO_Speed_40MHz, .GPIO_OType=GPIO_OType_PP,  .GPIO_PuPd=GPIO_PuPd_NOPULL }, .port = GPIOA}
 #define SET_DBG_TX_PIO()			GPIO_SetBits(GPIOA, GPIO_Pin_9)

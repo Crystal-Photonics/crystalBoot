@@ -253,7 +253,7 @@ void SerialWorker::on_readyRead()
     QByteArray inbuffer = serialport->readAll();
 
 	if (!inbuffer.isEmpty()){
-        //qDebug() << "<<<" << inbuffer;
+        qDebug() << "<<<" << inbuffer;
 	}
     if (inbuffer.count() == 512){
         qDebug() << "Rechner langsam";

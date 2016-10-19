@@ -21,7 +21,7 @@
 
 
 
-const pinGPIO_t gpioPins[] = { PIN_LED_RED,PIN_KEY_1,PIN_DBG_TX_PIO};
+const pinGPIO_t gpioPins[] = { PIN_LED_RED,PIN_LED_BLUE,PIN_KEY_1,PIN_DBG_TX_PIO};
 
 
 const pinGPIO_t afPins[] = {PIN_DBG_RX		,PIN_DBG_TX
@@ -89,7 +89,7 @@ void vPortExitCritical( void )
   * @param  None
   * @retval None
   */
-static void SysTickConfig(void)
+ static void SysTickConfig(void)
 {
 	/* Setup SysTick Timer for 1ms interrupts  */
 	if (SysTick_Config(SystemCoreClock / 1000))
