@@ -18,7 +18,7 @@ CPU = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
 #CPU = -mcpu=cortex-m4 -mthumb 
 #CPU = -mcpu=cortex-m4 -mthumb -mfloat-abi=softfp -mfpu=fpv4-sp-d16
 
-PORT_LDFLAGS += -T$(STD_DRIVER)/../../Project/STM32L1xx_StdPeriph_Templates/TrueSTUDIO/STM32L1XX_XL(STM32L1xxxExx)/STM32L152RE_FLASH.ld
+PORT_LDFLAGS += -T$(PORT_DIR)/STM32L152RE_FLASH.ld
 
 
 

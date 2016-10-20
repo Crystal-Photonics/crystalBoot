@@ -218,10 +218,11 @@ int main(void)
 
 	mainResetReason = mainTestResetSource();
 	printResetReason_t(mainResetReason);
+#if 1
 	printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR,hardreset);
 	printf("githash = %X\n", GITHASH);
 	printf("gitdate = %s %u\n", GITDATE, GITUNIX);
-
+#endif
 	SET_LED_RED();
 	if(mainResetReason == rer_rtc){
 

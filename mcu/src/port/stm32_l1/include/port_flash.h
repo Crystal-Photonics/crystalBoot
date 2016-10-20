@@ -21,8 +21,7 @@ typedef  void (*pFunction)(void);
 /* Constants used by Serial Command Line Mode */
 #define CMD_STRING_SIZE       128
 
-#define ApplicationAddress    0x8003000
-
+#define MINIMAL_APPLICATION_ADDRESS  0x8006000
 
 
 #if 1
@@ -65,13 +64,14 @@ uint8_t GetKey(void);
 #endif
 
 void GetInputString(uint8_t * buffP);
-uint32_t FLASH_PagesMask(__IO uint32_t Size);
+//uint32_t FLASH_PagesMask(__IO uint32_t Size);
 void FLASH_DisableWriteProtectionPages(void);
 
 
 bool portFlashEraseApplication();
-void portFlashWrite(uint8_t *buffer, size_t size);
-void portFlashRead(uint8_t *buffer, size_t size);
+bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const size_t size);
+bool portFlashVerifyAgainstBuffer(const uint32_t startAddress, uint8_t *buffer, const size_t size);
+bool portFlashRead(const uint32_t startAddress, uint8_t *buffer, const size_t size);
 
 void portFlashVerify();
 

@@ -14,7 +14,11 @@
 #include <QMutex>
 #include <assert.h>
 
-const int TIMEOUT_ms = 1000;
+uint32_t TIMEOUT_ms = 1000;
+
+void RPC_SET_timeout(uint32_t timeout_ms){
+    TIMEOUT_ms = timeout_ms;
+}
 
 QMutex mutexes[RPC_number_of_mutexes];
 

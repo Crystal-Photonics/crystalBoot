@@ -8,6 +8,7 @@
 #include "port_flash.h"
 
 #include <inttypes.h>
+#include <string.h>
 
 //pFunction Jump_To_Application;
 //uint32_t JumpAddress;
@@ -15,10 +16,10 @@
 //__IO uint32_t FlashProtection = 0;
 uint32_t pageAddress;
 
-#define APPLICATION_ADDRESS  0x8004000
+#define MINIMAL_APPLICATION_ADDRESS  0x8006000
 
 
-uint32_t FlashDestination = APPLICATION_ADDRESS;
+uint32_t FlashDestination = MINIMAL_APPLICATION_ADDRESS;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -256,91 +257,7 @@ void GetInputString (uint8_t * buffP)
 }
 #endif
 
-void portFlashWrite(uint8_t *buffer, size_t size){
-	(void)buffer;
-	(void)size;
-
-}
-
-//typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
-
-bool portFlashEraseApplication(){
-	uint32_t NbrOfPage = 0;
-	const uint32_t Address = APPLICATION_ADDRESS;
-	FLASH_Status FLASHStatus = FLASH_COMPLETE;
-	bool MemoryProgramOK = true;
-	CLEAR_LED_BLUE();
-	FLASH_Unlock();
-	FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR
-			| FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
-
-	//Address = 0x08040000;
-	NbrOfPage = ((FLASH_END_ADDR - Address) + 1 ) / FLASH_PAGE_SIZE ;
-
-	/* Erase the FLASH Program memory pages */
-	for(uint32_t pageIndex = 0; pageIndex < NbrOfPage; pageIndex++)
-	{
-
-		pageAddress = Address + (FLASH_PAGE_SIZE * pageIndex);
-		FLASHStatus = FLASH_ErasePage(pageAddress);
-
-		if (FLASHStatus != FLASH_COMPLETE)
-		{
-			printf("err %d at %"PRIu32"\n",FLASHStatus,pageIndex);
-			if (FLASHStatus == FLASH_BUSY){
-				MemoryProgramOK = false;
-
-			}
-			if (FLASHStatus == FLASH_ERROR_WRP){
-				MemoryProgramOK = false;
-
-			}
-			if (FLASHStatus == FLASH_ERROR_PROGRAM){
-				MemoryProgramOK = false;
-
-			}
-			if (FLASHStatus == FLASH_TIMEOUT){
-				MemoryProgramOK = false;
-
-			}
-
-
-			MemoryProgramOK = false;
-
-			break;
-		}
-		else
-		{
-			FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR
-					| FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
-		}
-	}
-	(void)NbrOfPage;
-	FLASH_Lock();
-	if(MemoryProgramOK){
-		SET_LED_BLUE();
-		printf("erase ok\n");
-	}else{
-		CLEAR_LED_BLUE();
-	}
-	return MemoryProgramOK;
-}
-
-void portFlashRead(uint8_t *buffer, size_t size){
 #if 0
-	Address = FLASH_START_ADDR;
-	/* Check the written data */
-	while(Address < FLASH_END_ADDR)
-	{
-		buffer++* = *(__IO uint32_t*)Address
-
-		Address = Address + 4;
-	}
-#endif
-}
-
-
-
 /**
  * @brief  Calculate the number of pages
  * @param  Size: The image size
@@ -360,8 +277,191 @@ uint32_t FLASH_PagesMask(__IO uint32_t Size)
 		pagenumber = size / FLASH_PAGE_SIZE;
 	}
 	return pagenumber;
+}
+#endif
+
+bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const size_t size){
+
+	FLASH_Status FLASHStatus = FLASH_COMPLETE;
+	bool MemoryProgramOK = true;
+	const uint32_t HALF_PAGE_SIZE = FLASH_PAGE_SIZE/2;
+
+	CLEAR_LED_BLUE();
+
+	if (size % HALF_PAGE_SIZE){	//size is not multiple of pagesize/2
+		return false;
+	}
+	if (startAddress % HALF_PAGE_SIZE){	//address is not multiple of pagesize/2
+		return false;
+	}
+	if (startAddress + size > FLASH_END_ADDR){//buffer exceeds flashsize
+		return false;
+	}
+
+	FLASH_Unlock();
+
+	FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR
+			| FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
+
+	const uint32_t numOfHalfPages = size / HALF_PAGE_SIZE;
+
+	for(uint32_t pageOffset = 0; pageOffset < numOfHalfPages; pageOffset++)
+	{
+		const uint32_t HALF_PAGE_WORD_COUNT = HALF_PAGE_SIZE/4;
+
+		uint32_t halfPageBuffer[HALF_PAGE_WORD_COUNT];
+
+		for(uint32_t i=0;i<HALF_PAGE_WORD_COUNT;i++){
+			halfPageBuffer[i] = (buffer[i*4+3]) << 24 | (buffer[i*4+2] << 16) | (buffer[i*4+1] << 8) | (buffer[i*4+0]);
+		}
+
+		const uint32_t flashAddress = startAddress+FLASH_PAGE_SIZE*pageOffset;
+
+
+		__disable_irq(); 	// FLASH_ProgramHalfPage is a ramfunction and must not be disturbed by interrupts
+							// since the vector table is not initialized in ram?
+		FLASHStatus = FLASH_ProgramHalfPage(flashAddress, halfPageBuffer);
+		__enable_irq();
+
+		if(FLASHStatus != FLASH_COMPLETE)
+		{
+			//printf("err write %d at %"PRIu32"\n",FLASHStatus,Address);
+			if (FLASHStatus == FLASH_BUSY){
+				MemoryProgramOK = false;
+			}
+			if (FLASHStatus == FLASH_ERROR_WRP){
+				MemoryProgramOK = false;
+			}
+			if (FLASHStatus == FLASH_ERROR_PROGRAM){
+				MemoryProgramOK = false;
+			}
+			if (FLASHStatus == FLASH_TIMEOUT){
+				MemoryProgramOK = false;
+			}
+			MemoryProgramOK = false;
+			FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR
+					| FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
+			break;
+		}
+	}
+	FLASH_Lock();
+	if(MemoryProgramOK){
+		SET_LED_BLUE();
+		//printf("write ok\n");
+	}else{
+		CLEAR_LED_BLUE();
+	}
+	return MemoryProgramOK;
 
 }
+
+static void uint32_tToBuffer(uint8_t *out_buffer, const uint32_t in){
+	out_buffer[0] = (in) & 0xFF;
+	out_buffer[1] = (in >> 8) & 0xFF;
+	out_buffer[2] = (in >> 16) & 0xFF;
+	out_buffer[3] = (in >> 24) & 0xFF;
+}
+
+bool portFlashVerifyAgainstBuffer(const uint32_t startAddress, uint8_t *buffer, const size_t size){
+	uint32_t flashAddress = startAddress;
+	CLEAR_LED_BLUE();
+	/* Check the written data */
+	for(uint32_t i = 0; i<size/4; i++){
+		uint8_t inBuf[4];
+		uint32_t inWord = *(__IO uint32_t*)flashAddress;
+
+		uint32_tToBuffer(inBuf,inWord);
+
+		if (memcmp(&buffer[i*4],inBuf,4)){
+			return false;
+		}
+		flashAddress += 4;
+	}
+	SET_LED_BLUE();
+	return true;
+}
+
+bool portFlashRead(const uint32_t startAddress, uint8_t *buffer, const size_t size){
+
+	uint32_t flashAddress = startAddress;
+	CLEAR_LED_BLUE();
+	if (size % 4){	//size is well aligned for uint32_t?
+		return false;
+	}
+	if (startAddress % 4){	//address is well aligned for uint32_t?
+		return false;
+	}
+	if (startAddress + size > FLASH_END_ADDR){//buffer exceeds flashsize
+		return false;
+	}
+
+	/* Check the written data */
+	for(uint32_t i = 0; i<size/4; i++){
+
+		uint32_t inWord = *(__IO uint32_t*)flashAddress;
+
+		uint32_tToBuffer(&buffer[i*4],inWord);
+
+		flashAddress += 4;
+	}
+	SET_LED_BLUE();
+	return true;
+}
+
+
+
+bool portFlashEraseApplication(){
+	uint32_t NbrOfPage = 0;
+	const uint32_t Address = MINIMAL_APPLICATION_ADDRESS;
+	FLASH_Status FLASHStatus = FLASH_COMPLETE;
+	bool MemoryProgramOK = true;
+	CLEAR_LED_BLUE();
+	FLASH_Unlock();
+	FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR
+			| FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
+
+	NbrOfPage = ((FLASH_END_ADDR - Address) + 1 ) / FLASH_PAGE_SIZE ;
+
+	/* Erase the FLASH Program memory pages */
+	for(uint32_t pageIndex = 0; pageIndex < NbrOfPage; pageIndex++)
+	{
+		pageAddress = Address + (FLASH_PAGE_SIZE * pageIndex);
+		FLASHStatus = FLASH_ErasePage(pageAddress);
+		if (FLASHStatus != FLASH_COMPLETE)
+		{
+			//printf("err %d at %"PRIu32"\n",FLASHStatus,pageIndex);
+			if (FLASHStatus == FLASH_BUSY){
+				MemoryProgramOK = false;
+			}
+			if (FLASHStatus == FLASH_ERROR_WRP){
+				MemoryProgramOK = false;
+			}
+			if (FLASHStatus == FLASH_ERROR_PROGRAM){
+				MemoryProgramOK = false;
+			}
+			if (FLASHStatus == FLASH_TIMEOUT){
+				MemoryProgramOK = false;
+			}
+			MemoryProgramOK = false;
+			break;
+		}
+		else
+		{
+			FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR
+					| FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
+		}
+	}
+	FLASH_Lock();
+	if(MemoryProgramOK){
+		SET_LED_BLUE();
+		//printf("erase ok\n");
+	}else{
+		CLEAR_LED_BLUE();
+	}
+	return MemoryProgramOK;
+}
+
+
 
 
 

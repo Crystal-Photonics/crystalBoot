@@ -59,7 +59,7 @@ public:
     RPC_RESULT rpcEraseFlash();
     RPC_RESULT rpcWriteFirmwareBlock(uint8_t *data, size_t size);
     RPC_RESULT rpcReadFirmwareBlock(uint8_t *data, size_t size);
-    void rpcResetFirmwarePointer();
+    RPC_RESULT rpcResetFirmwarePointer();
 signals:
 
     void openPort(QString name, int baudrate);

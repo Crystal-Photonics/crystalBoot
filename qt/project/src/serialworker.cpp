@@ -95,7 +95,12 @@ RPC_RESULT SerialThread::rpcWriteFirmwareBlock(uint8_t *data, size_t size){
     RPC_RESULT result;
     assert(size == 128);
 
-    result = mcuWriteFirmwareBlock(data);
+    crystalBoolResult_t return_value = crystalBool_OK;
+
+    result = mcuWriteFirmwareBlock(&return_value,data);
+    if (return_value == crystalBool_Fail){
+        result = RPC_FAILURE;
+    }
     QString resultstr;
     switch(result){
     case RPC_SUCCESS:
@@ -120,7 +125,12 @@ RPC_RESULT SerialThread::rpcReadFirmwareBlock(uint8_t *data, size_t size){
     RPC_RESULT result;
     assert(size == 128);
 
-    result = mcuReadFirmwareBlock(data);
+    crystalBoolResult_t return_value = crystalBool_OK;
+
+    result = mcuReadFirmwareBlock(&return_value,data);
+    if (return_value == crystalBool_Fail){
+        result = RPC_FAILURE;
+    }
     QString resultstr;
     switch(result){
     case RPC_SUCCESS:
@@ -145,12 +155,13 @@ RPC_RESULT SerialThread::rpcEraseFlash()
 {
     RPC_RESULT result;
 
-    uint8_t return_value;
+    crystalBoolResult_t return_value = crystalBool_OK;
 
     result = mcuEraseFlash(&return_value);
-    if(return_value==0){
+    if (return_value == crystalBool_Fail){
         result = RPC_FAILURE;
     }
+
     QString resultstr;
     switch(result){
     case RPC_SUCCESS:
@@ -171,8 +182,26 @@ RPC_RESULT SerialThread::rpcEraseFlash()
     return result;
 }
 
-void SerialThread::rpcResetFirmwarePointer(){
-    mcuResetReadWritePointer();
+RPC_RESULT SerialThread::rpcResetFirmwarePointer(){
+    QString resultstr;
+    RPC_RESULT result = mcuResetReadWritePointerToApplicationAddress();
+    switch(result){
+    case RPC_SUCCESS:
+        resultstr = "RPC_SUCCESS";
+        break;
+    case RPC_FAILURE:
+        resultstr = "RPC_FAILURE";
+        break;
+    case RPC_COMMAND_UNKNOWN:
+        resultstr = "RPC_COMMAND_UNKNOWN";
+        break;
+    case RPC_COMMAND_INCOMPLETE:
+        resultstr = "RPC_COMMAND_INCOMPLETE";
+        break;
+    }
+
+  //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
 }
 
 void SerialThread::sendByteData(QByteArray data)
@@ -252,8 +281,8 @@ void SerialWorker::on_readyRead()
     //qDebug() << "on read:" << QThread::currentThreadId();
     QByteArray inbuffer = serialport->readAll();
 
-	if (!inbuffer.isEmpty()){
-        qDebug() << "<<<" << inbuffer;
+    if (!inbuffer.isEmpty()){
+      //  qDebug() << "<<<" << inbuffer;
 	}
     if (inbuffer.count() == 512){
         qDebug() << "Rechner langsam";

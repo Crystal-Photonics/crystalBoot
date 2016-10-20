@@ -131,18 +131,34 @@ void MainWindow::on_btnSend_clicked()
         qint64 fileSize =  firmwareFile.size();
         qint64 byteCounter = 0;
         QTime runtime;
+        QTime totalRuntime;
         bool fail = false;
         runtime.start();
+        totalRuntime.start();
         qDebug() << "erasing..";
+        RPC_SET_timeout(20*1000);
         result = serialThread->rpcEraseFlash();
         if (result != RPC_SUCCESS){
             fail = true;
             qDebug() << "erasing fail";
         }else{
-            qDebug() << "erasing ok";
+            qDebug() << "erase ok. " << runtime.elapsed()/1000.0<< "seconds needed";
         }
 
-#if 0
+        qDebug() << "resetting write/read pointer..";
+
+        result = serialThread->rpcResetFirmwarePointer();
+        if (result != RPC_SUCCESS){
+            fail = true;
+            qDebug() << "pointer reset fail.";
+        }else{
+            qDebug() << "pointer reset ok. ";
+        }
+
+        runtime.start();
+        RPC_SET_timeout(1*1000);
+
+#if 1
         while (!firmwareFile.atEnd() && fail == false){
 
             char blockData[BLOCKLENGTH];
@@ -153,8 +169,9 @@ void MainWindow::on_btnSend_clicked()
             if (result != RPC_SUCCESS){
                 break;
             }
+
             memset(blockDataTest,0, BLOCKLENGTH);
-#if 0
+            #if 0
             result = serialThread->rpcReadFirmwareBlock((uint8_t*)blockDataTest,BLOCKLENGTH);
             if (result != RPC_SUCCESS){
                 break;
@@ -180,7 +197,7 @@ void MainWindow::on_btnSend_clicked()
             progress_old = progress;
 
         }
-        #else
+#endif
         if ((result != RPC_SUCCESS) || fail){
             QString resultstr;
             switch(result){
@@ -199,12 +216,12 @@ void MainWindow::on_btnSend_clicked()
             }
             qDebug() << resultstr;
         }else{
-            qDebug() << "tranfered ok. " << runtime.elapsed()/1000.0<< "seconds needed";
+            qDebug() << "tranfer ok. " << runtime.elapsed()/1000.0<< "seconds needed. In Total: "<< totalRuntime.elapsed()/1000.0 << "seconds needed.";
         }
 
         (void)fileSize;
         (void)byteCounter;
-#endif
+
     }else{
         qDebug() << "cant open file" << ui->edtFileName->text();
     }

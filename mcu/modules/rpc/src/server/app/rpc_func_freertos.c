@@ -15,20 +15,29 @@ uint8_t mcuEraseFlash(){
 	return programmerErase();
 }
 
-void mcuResetReadWritePointer(void){
-	programmerReset();
+crystalBoolResult_t mcuSetApplicationAddress(uint32_t applicationAddress){
+	(void)applicationAddress;
+	return crystalBool_OK;
 }
 
-void mcuWriteFirmwareBlock(uint8_t data_in[128]){
-	programmerWriteBlock(data_in,128);
+uint32_t mcuGetApplicationAddress(void){
+	return 0;
 }
 
-void mcuReadFirmwareBlock(uint8_t data_out[128]){
-	programmerReadBlock(data_out,128);
+void mcuResetReadWritePointerToApplicationAddress(void){
+	programmerResetReadWritePointerToApplicationAddress();
+}
+
+crystalBoolResult_t mcuWriteFirmwareBlock(uint8_t data_in[128]){
+	return programmerWriteBlock(data_in,128);
+}
+
+crystalBoolResult_t mcuReadFirmwareBlock(uint8_t data_out[128]){
+	return programmerReadBlock(data_out,128);
 }
 
 firmwareVerifyResult_t mcuVerifyFirmware(){
-	firmwareVerifyResult_t result = fvr_ERROR;
+	firmwareVerifyResult_t result = crystalBool_VerifyError;
 	return result;
 }
 
@@ -40,6 +49,12 @@ firmware_descriptor_t mcuGetFirmwareDescriptor( ){
 
 mcu_descriptor_t mcuGetMCUDescriptor( ){
 	mcu_descriptor_t result;
+	memset(&result,0,sizeof(result));
+	return result;
+}
+
+device_descriptor_t mcuGetDeviceDescriptor(void){
+	device_descriptor_t result;
 	memset(&result,0,sizeof(result));
 	return result;
 }

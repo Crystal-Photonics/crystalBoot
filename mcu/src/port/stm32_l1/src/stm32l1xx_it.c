@@ -53,6 +53,8 @@
 /******************************************************************************/
 /*            Cortex-M3 Processor Exceptions Handlers                         */
 /******************************************************************************/
+void **HARDFAULT_PSP;
+//static register void *stack_pointer asm("sp");
 
 
 
@@ -64,6 +66,7 @@ void HardFault_Handler( void ) __attribute__( ( naked ) );
 prvGetRegistersFromStack(). */
  void HardFault_Handler(void)
 {
+#if 	 1
     __asm volatile
     (
         " tst lr, #4                                                \n"
@@ -75,7 +78,18 @@ prvGetRegistersFromStack(). */
         " bx r2                                                     \n"
         " handler2_address_const: .word prvGetRegistersFromStack    \n"
     );
+#else
+    // Hijack the process stack pointer to make backtrace work
+    register void *stack_pointer asm("sp");
+
+    asm("mrs %0, psp" : "=r"(HARDFAULT_PSP) : :);
+    stack_pointer = HARDFAULT_PSP;
+    (void)stack_pointer;
+    while(1);
+#endif
+
 }
+
 
 
 

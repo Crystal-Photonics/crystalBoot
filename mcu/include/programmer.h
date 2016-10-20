@@ -10,11 +10,12 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "rpc_transmission/server/app/qt2mcu.h"
 
-bool programmerErase(void);
-void programmerReset(void);
-void programmerWriteBlock(uint8_t *data, size_t size);
-void programmerReadBlock(uint8_t *data, size_t size);
+crystalBoolResult_t programmerErase(void);
+void programmerResetReadWritePointerToApplicationAddress(void);
+crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size);
+crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size);
 
 
 
