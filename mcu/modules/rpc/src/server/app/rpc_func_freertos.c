@@ -68,7 +68,7 @@ void mcuEnterProgrammerMode(void){
 }
 
 void mcuRunApplication(void){
-
+	programmerRunApplication();
 }
 
 

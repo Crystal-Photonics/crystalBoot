@@ -17,6 +17,6 @@ void programmerResetReadWritePointerToApplicationAddress(void);
 crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size);
 crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size);
 
-
+void programmerRunApplication(void);
 
 #endif /* MCU_INCLUDE_PROGRAMMER_H_ */

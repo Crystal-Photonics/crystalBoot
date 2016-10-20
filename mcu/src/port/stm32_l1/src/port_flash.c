@@ -10,16 +10,21 @@
 #include <inttypes.h>
 #include <string.h>
 
-//pFunction Jump_To_Application;
-//uint32_t JumpAddress;
+
+typedef  void (*pFunction)(void);
+
+static pFunction Jump_To_Application;
+static uint32_t stackAddressOfApplication;
+static uint32_t JumpAddress;
+
 //uint32_t BlockNbr = 0, UserMemoryMask = 0;
 //__IO uint32_t FlashProtection = 0;
-uint32_t pageAddress;
+//
 
 #define MINIMAL_APPLICATION_ADDRESS  0x8006000
 
 
-uint32_t FlashDestination = MINIMAL_APPLICATION_ADDRESS;
+//uint32_t FlashDestination = MINIMAL_APPLICATION_ADDRESS;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -425,6 +430,7 @@ bool portFlashEraseApplication(){
 	/* Erase the FLASH Program memory pages */
 	for(uint32_t pageIndex = 0; pageIndex < NbrOfPage; pageIndex++)
 	{
+		static uint32_t pageAddress;
 		pageAddress = Address + (FLASH_PAGE_SIZE * pageIndex);
 		FLASHStatus = FLASH_ErasePage(pageAddress);
 		if (FLASHStatus != FLASH_COMPLETE)
@@ -462,7 +468,39 @@ bool portFlashEraseApplication(){
 }
 
 
+void portFlashRunApplication(){
+//#define ApplicationAddress    0x8003000
+	//MINIMAL_APPLICATION_ADDRESS
+	/* Image:
+	 * 4 bytes:	pointer to stack location. In our case something like  0x20 01 3F FF
+	 * 4 bytes:	reset vector
+	 *
+	 *
+	 * Test if user code is programmed starting from address "ApplicationAddress"
+	 * magic number 0x2FFE0000 results from ram size aka stack pointer				*/
+	stackAddressOfApplication = *(__IO uint32_t*)MINIMAL_APPLICATION_ADDRESS;
+	if ((stackAddressOfApplication & 0x2FFE0000 ) == 0x20000000)
+	{
+		static const uint32_t applicationResetVector = MINIMAL_APPLICATION_ADDRESS + 4;
+		JumpAddress = *(__IO uint32_t*) (applicationResetVector);
 
+		__disable_irq();
+		Jump_To_Application = (pFunction) JumpAddress;
+		/* Initialize user application's Stack Pointer */
+		NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x6000);
+/*
+
+	    __set_PRIMASK(1);
+	    RCC_DeInit();
+	    SysTick->CTRL = 0;
+	    SysTick->LOAD = 0;
+	    SysTick->VAL = 0;
+	    RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
+*/
+		__set_MSP(stackAddressOfApplication);
+		Jump_To_Application();
+	}
+}
 
 
 /**

@@ -226,3 +226,13 @@ void MainWindow::on_btnSend_clicked()
         qDebug() << "cant open file" << ui->edtFileName->text();
     }
 }
+
+void MainWindow::on_btnRunApplication_clicked()
+{
+    RPC_RESULT result = serialThread->rpcRunApplication();
+    if (result == RPC_SUCCESS){
+        qDebug() << "application startet";
+    }else{
+        qDebug() << "application start failed"<<result;
+    }
+}

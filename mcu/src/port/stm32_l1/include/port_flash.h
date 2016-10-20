@@ -15,7 +15,7 @@
 #include "board.h"
 
 /* Exported types ------------------------------------------------------------*/
-typedef  void (*pFunction)(void);
+
 
 /* Exported constants --------------------------------------------------------*/
 /* Constants used by Serial Command Line Mode */
@@ -72,6 +72,8 @@ bool portFlashEraseApplication();
 bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const size_t size);
 bool portFlashVerifyAgainstBuffer(const uint32_t startAddress, uint8_t *buffer, const size_t size);
 bool portFlashRead(const uint32_t startAddress, uint8_t *buffer, const size_t size);
+
+void portFlashRunApplication();
 
 void portFlashVerify();
 

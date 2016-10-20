@@ -36,8 +36,7 @@
 
 uint32_t sysTick_ms;
 
-extern pFunction Jump_To_Application;
-extern uint32_t JumpAddress;
+
 
 resetReason_t mainResetReason;
 uint32_t FlashDestination;
@@ -209,6 +208,8 @@ int main(void)
 	//FLASH_Unlock();
 
 	/* Initialize Key Button mounted on STM3210X-EVAL board */
+
+	portFlashRunApplication();
 
 	boardConfigurePIO();
 	portSerialInit(115200);

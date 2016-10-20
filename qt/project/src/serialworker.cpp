@@ -204,6 +204,29 @@ RPC_RESULT SerialThread::rpcResetFirmwarePointer(){
     return result;
 }
 
+RPC_RESULT SerialThread::rpcRunApplication()
+{
+    QString resultstr;
+    RPC_RESULT result = mcuRunApplication();
+    switch(result){
+    case RPC_SUCCESS:
+        resultstr = "RPC_SUCCESS";
+        break;
+    case RPC_FAILURE:
+        resultstr = "RPC_FAILURE";
+        break;
+    case RPC_COMMAND_UNKNOWN:
+        resultstr = "RPC_COMMAND_UNKNOWN";
+        break;
+    case RPC_COMMAND_INCOMPLETE:
+        resultstr = "RPC_COMMAND_INCOMPLETE";
+        break;
+    }
+
+  //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
 void SerialThread::sendByteData(QByteArray data)
 {
     emit sendData(data);
@@ -282,7 +305,7 @@ void SerialWorker::on_readyRead()
     QByteArray inbuffer = serialport->readAll();
 
     if (!inbuffer.isEmpty()){
-      //  qDebug() << "<<<" << inbuffer;
+        qDebug() << "<<<" << inbuffer;
 	}
     if (inbuffer.count() == 512){
         qDebug() << "Rechner langsam";

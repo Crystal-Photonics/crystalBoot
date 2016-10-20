@@ -18,6 +18,9 @@
     <item row="0" column="2">
      <widget class="QComboBox" name="cmbPort"/>
     </item>
+    <item row="3" column="2" colspan="2">
+     <widget class="QLineEdit" name="edtFileName"/>
+    </item>
     <item row="0" column="4">
      <spacer name="horizontalSpacer">
       <property name="orientation">
@@ -45,13 +48,10 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="2">
-     <widget class="QComboBox" name="cmbBaud"/>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLabel" name="label_3">
+    <item row="4" column="4">
+     <widget class="QLabel" name="lblKey">
       <property name="text">
-       <string>Baud</string>
+       <string>key:</string>
       </property>
      </widget>
     </item>
@@ -62,8 +62,15 @@
       </property>
      </widget>
     </item>
-    <item row="5" column="1" colspan="4">
-     <widget class="QPlainTextEdit" name="plainTextEdit"/>
+    <item row="1" column="1">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Baud</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QComboBox" name="cmbBaud"/>
     </item>
     <item row="0" column="3">
      <widget class="QPushButton" name="btnRefresh">
@@ -72,15 +79,15 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="4">
-     <widget class="QLabel" name="lblKey">
+    <item row="5" column="1" colspan="4">
+     <widget class="QPlainTextEdit" name="plainTextEdit"/>
+    </item>
+    <item row="3" column="5">
+     <widget class="QPushButton" name="btnRunApplication">
       <property name="text">
-       <string>key:</string>
+       <string>run application</string>
       </property>
      </widget>
-    </item>
-    <item row="3" column="2" colspan="2">
-     <widget class="QLineEdit" name="edtFileName"/>
     </item>
    </layout>
   </widget>

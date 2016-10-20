@@ -31,6 +31,8 @@ private slots:
 
     void on_btnSend_clicked();
 
+    void on_btnRunApplication_clicked();
+
 private:
     Ui::MainWindow *ui;
 

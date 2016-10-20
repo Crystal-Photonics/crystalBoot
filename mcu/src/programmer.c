@@ -12,7 +12,7 @@
 static uint32_t programmWritePointerAddress = MINIMAL_APPLICATION_ADDRESS;
 static uint32_t programmReadPointerAddress = MINIMAL_APPLICATION_ADDRESS;
 
-static uint8_t progBuffer[BLOCK_LENGTH];
+//static uint8_t progBuffer[BLOCK_LENGTH];
 
 crystalBoolResult_t programmerErase(){
 	if (portFlashEraseApplication()){
@@ -23,7 +23,7 @@ crystalBoolResult_t programmerErase(){
 }
 
 void programmerResetReadWritePointerToApplicationAddress(void){
-	memset(progBuffer,BLOCK_LENGTH,0);
+	//memset(progBuffer,BLOCK_LENGTH,0);
 	programmWritePointerAddress = MINIMAL_APPLICATION_ADDRESS;
 	programmReadPointerAddress  = MINIMAL_APPLICATION_ADDRESS;
 }
@@ -48,4 +48,8 @@ crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size){
 	}else{
 		return crystalBool_Fail;
 	}
+}
+
+void programmerRunApplication(void){
+	portFlashRunApplication();
 }
