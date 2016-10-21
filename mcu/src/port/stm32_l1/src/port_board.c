@@ -107,29 +107,42 @@ void boardPowerOn(void){
 }
 
 
-
+void boardDeInitChip(void){
+	for (size_t i=0;i<sizeof(gpioPins)/sizeof(pinGPIO_t);i++){
+		GPIO_DeInit(gpioPins[i].port);
+	}
+	for (size_t i=0;i<sizeof(afPins)/sizeof(pinGPIO_t);i++){
+		GPIO_DeInit(afPins[i].port);
+	}
+    USART_DeInit(COM_USART_BASE);
+	RCC_DeInit();
+#if 1
+	    SysTick->CTRL = 0;
+	    SysTick->LOAD = 0;
+	    SysTick->VAL = 0;
+#endif
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,DISABLE);
+	RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
+}
 
 void boardConfigurePIO(void){
-	size_t i;
-
 	SystemCoreClockUpdate();
 
-	SysTickConfig();
-
 	boardPowerOn();
+	SysTickConfig();
 
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
 
-	for (i=0;i<sizeof(gpioPins)/sizeof(pinGPIO_t);i++){
+	for (size_t i=0;i<sizeof(gpioPins)/sizeof(pinGPIO_t);i++){
 		GPIO_Init(gpioPins[i].port, (GPIO_InitTypeDef*) &gpioPins[i].pinDef);
 	}
 
-	for (i=0;i<sizeof(afPins)/sizeof(pinGPIO_t);i++){
+	for (size_t i=0;i<sizeof(afPins)/sizeof(pinGPIO_t);i++){
 		GPIO_Init(afPins[i].port, (GPIO_InitTypeDef*) &afPins[i].pinDef);
 	}
 
-	for (i=0;i<sizeof(afPins)/sizeof(pinGPIO_t);i++){
+	for (size_t i=0;i<sizeof(afPins)/sizeof(pinGPIO_t);i++){
 		GPIO_PinAFConfig(afPins[i].port, afPins[i].pinSource, afPins[i].af);
 	}
 }

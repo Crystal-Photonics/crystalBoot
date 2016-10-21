@@ -17,17 +17,9 @@ static pFunction Jump_To_Application;
 static uint32_t stackAddressOfApplication;
 static uint32_t JumpAddress;
 
-//uint32_t BlockNbr = 0, UserMemoryMask = 0;
-//__IO uint32_t FlashProtection = 0;
-//
 
 #define MINIMAL_APPLICATION_ADDRESS  0x8006000
 
-
-//uint32_t FlashDestination = MINIMAL_APPLICATION_ADDRESS;
-
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
 
 #if 0
 /**
@@ -488,17 +480,20 @@ void portFlashRunApplication(){
 		Jump_To_Application = (pFunction) JumpAddress;
 		/* Initialize user application's Stack Pointer */
 		NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x6000);
-/*
 
-	    __set_PRIMASK(1);
-	    RCC_DeInit();
-	    SysTick->CTRL = 0;
-	    SysTick->LOAD = 0;
-	    SysTick->VAL = 0;
-	    RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
-*/
-		__set_MSP(stackAddressOfApplication);
+	    //for this application it works. but it might be better to do an reset and start the application directly after this
+		//before initializing any peripheral
+
+		boardDeInitChip();
+
+	    __set_MSP(stackAddressOfApplication);
 		Jump_To_Application();
+
+		//should not reach this
+		while(1){
+
+		}
+
 	}
 }
 
@@ -580,100 +575,3 @@ void FLASH_DisableWriteProtectionPages(void)
 	}
 #endif
 }
-
-#if 0
-/**
- * @brief  Display the Main Menu on to HyperTerminal
- * @param  None
- * @retval None
- */
-void Main_Menu(void)
-{
-	uint8_t key = 0;
-
-	/* Get the number of block (4 or 2 pages) from where the user program will be loaded */
-	BlockNbr = (FlashDestination - 0x08000000) >> 12;
-
-	/* Compute the mask to test if the Flash memory, where the user program will be
-     loaded, is write protected */
-#if defined (STM32F10X_MD) || defined (STM32F10X_MD_VL)
-	UserMemoryMask = ((uint32_t)~((1 << BlockNbr) - 1));
-#else /* USE_STM3210E_EVAL */
-	if (BlockNbr < 62)
-	{
-		UserMemoryMask = ((uint32_t)~((1 << BlockNbr) - 1));
-	}
-	else
-	{
-		UserMemoryMask = ((uint32_t)0x80000000);
-	}
-#endif /* (STM32F10X_MD) || (STM32F10X_MD_VL) */
-
-
-	/* Test if any page of Flash memory where program user will be loaded is write protected */
-	//if ((FLASH_GetWriteProtectionOptionByte() & UserMemoryMask) != UserMemoryMask)
-	//TODO find replacement
-	if(1)
-	{
-		FlashProtection = 1;
-	}
-	else
-	{
-		FlashProtection = 0;
-	}
-
-	while (1)
-	{
-		SerialPutString("\r\n================== Main Menu ============================\r\n\n");
-		SerialPutString("  Download Image To the STM32F10x Internal Flash ------- 1\r\n\n");
-		SerialPutString("  Upload Image From the STM32F10x Internal Flash ------- 2\r\n\n");
-		SerialPutString("  Execute The New Program ------------------------------ 3\r\n\n");
-
-		if(FlashProtection != 0)
-		{
-			SerialPutString("  Disable the write protection ------------------------- 4\r\n\n");
-		}
-
-		SerialPutString("==========================================================\r\n\n");
-
-		key = 0;
-
-		if (key == 0x31)
-		{
-			/* Download user application in the Flash */
-			//SerialDownload();
-		}
-		else if (key == 0x32)
-		{
-			/* Upload user application from the Flash */
-			//SerialUpload();
-		}
-		else if (key == 0x33)
-		{
-			JumpAddress = *(__IO uint32_t*) (ApplicationAddress + 4);
-
-			/* Jump to user application */
-			Jump_To_Application = (pFunction) JumpAddress;
-			/* Initialize user application's Stack Pointer */
-			__set_MSP(*(__IO uint32_t*) ApplicationAddress);
-			Jump_To_Application();
-		}
-		else if ((key == 0x34) && (FlashProtection == 1))
-		{
-			/* Disable the write protection of desired pages */
-			FLASH_DisableWriteProtectionPages();
-		}
-		else
-		{
-			if (FlashProtection == 0)
-			{
-				SerialPutString("Invalid Number ! ==> The number should be either 1, 2 or 3\r");
-			}
-			else
-			{
-				SerialPutString("Invalid Number ! ==> The number should be either 1, 2, 3 or 4\r");
-			}
-		}
-	}
-}
-#endif

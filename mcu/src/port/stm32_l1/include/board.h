@@ -89,6 +89,7 @@ typedef enum{les_none, les_on, les_off}led_state_t;
 
 
 void boardConfigurePIO(void);
+void boardDeInitChip(void);
 
 #define configPRIO_BITS       		4        /* 15 priority levels */
 

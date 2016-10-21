@@ -209,7 +209,7 @@ int main(void)
 
 	/* Initialize Key Button mounted on STM3210X-EVAL board */
 
-	portFlashRunApplication();
+//	portFlashRunApplication();
 
 	boardConfigurePIO();
 	portSerialInit(115200);
