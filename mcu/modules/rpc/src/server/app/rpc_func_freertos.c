@@ -42,15 +42,11 @@ firmwareVerifyResult_t mcuVerifyFirmware(){
 }
 
 firmware_descriptor_t mcuGetFirmwareDescriptor( ){
-	firmware_descriptor_t result;
-	memset(&result,0,sizeof(result));
-	return result;
+	return programmerGetFirmwareDescriptor();
 }
 
 mcu_descriptor_t mcuGetMCUDescriptor( ){
-	mcu_descriptor_t result;
-	memset(&result,0,sizeof(result));
-	return result;
+	return programmerGetMCUDescriptor();
 }
 
 device_descriptor_t mcuGetDeviceDescriptor(void){

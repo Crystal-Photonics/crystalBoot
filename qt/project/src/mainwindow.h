@@ -33,6 +33,8 @@ private slots:
 
     void on_btnRunApplication_clicked();
 
+    void on_btnChipInfo_clicked();
+
 private:
     Ui::MainWindow *ui;
 

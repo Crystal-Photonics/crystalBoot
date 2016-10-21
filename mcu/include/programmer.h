@@ -19,4 +19,8 @@ crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size);
 
 void programmerRunApplication(void);
 
+
+firmware_descriptor_t programmerGetFirmwareDescriptor( );
+mcu_descriptor_t programmerGetMCUDescriptor( );
+
 #endif /* MCU_INCLUDE_PROGRAMMER_H_ */

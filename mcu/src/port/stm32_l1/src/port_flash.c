@@ -20,7 +20,7 @@ static uint32_t stackAddressOfApplication;
 static uint32_t JumpAddress;
 
 
-#define MINIMAL_APPLICATION_ADDRESS  0x8006000
+
 
 
 #if 0
@@ -480,7 +480,34 @@ void portFlashRunApplication(){
 
 		__disable_irq();
 		Jump_To_Application = (pFunction) JumpAddress;
-		/* Initialize user application's Stack Pointer */
+		/* Initialize user application's Stack Pointer
+		 *
+		 * !!!!Often the application initializes the isr Vector table in startup code to wrong address.
+		 * check system_stm32l1xx.c for this.
+		 *
+		 * can be fixed with
+		 *	  extern uint32_t _start_isr_vector;
+		 *
+		 *    volatile uint32_t ISR_VECTOR_TABLE_OFFSET = (uint32_t)&_start_isr_vector;
+		 *
+  	  	 * 	  ISR_VECTOR_TABLE_OFFSET = ISR_VECTOR_TABLE_OFFSET - FLASH_BASE;
+		 *
+  	  	 * 	  SCB->VTOR = FLASH_BASE | ISR_VECTOR_TABLE_OFFSET;
+  	  	 *
+  	  	 *
+  	  	 * 	  and:
+  	  	 *
+  	  	 * 	    .isr_vector :
+		 *		  {
+		 *			. = ALIGN(4);
+		 *			PROVIDE(_start_isr_vector = .);
+		 *			KEEP(*(.isr_vector))
+		 *			. = ALIGN(4);
+		 *		  } >FLASH
+		 *
+		 * in linker script
+		 *
+		 * */
 		NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x6000);
 
 	    //for this application it works. but it might be better to do an reset and start the application directly after this
@@ -499,6 +526,39 @@ void portFlashRunApplication(){
 	}
 }
 
+void portFlashGetGUID(uint8_t guid[12]){
+	uint32_t *uid1 = (uint32_t *) UID1;
+	uint32_t *uid2 = (uint32_t *) UID2;
+	uint32_t *uid3 = (uint32_t *) UID3;
+
+	uint32_tToBuffer(&guid[0],*uid1);
+	uint32_tToBuffer(&guid[4],*uid2);
+	uint32_tToBuffer(&guid[8],*uid3);
+}
+
+uint16_t portFlashGetDeviceID(){
+	return DBGMCU_GetDEVID();
+}
+
+uint16_t portFlashGetRevisionID(){
+	return DBGMCU_GetREVID();
+}
+
+uint32_t portFlashGetFlashSize(){
+	uint16_t *fsize = (uint16_t *) F_SIZE_ADDRESS;
+	uint16_t devID = portFlashGetDeviceID();
+	uint32_t result = *fsize & 0xFFFF;
+
+	if (devID == 0x436){
+		if(result & 0xFF){
+			result = 384;
+		}else{
+			result = 256;
+		}
+	}
+	result *= 1024;
+	return result;
+}
 
 /**
  * @brief  Disable the write protection of desired pages

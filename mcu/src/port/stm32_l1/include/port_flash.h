@@ -13,17 +13,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h> //for size_t
+#include "stm32l1xx_conf.h"
+#include "stm32l1xx.h"
 
 
-/* Exported types ------------------------------------------------------------*/
-
-
-/* Exported constants --------------------------------------------------------*/
-/* Constants used by Serial Command Line Mode */
-#define CMD_STRING_SIZE       128
-
-#define MINIMAL_APPLICATION_ADDRESS  0x8006000
-
+#define MINIMAL_APPLICATION_ADDRESS 	0x8006000
+#define APPLICATION_ADDRESS  			0x8006000
+#define FLASH_ADDRESS                	FLASH_BASE
 
 #if 1
 #if defined (STM32L1XX_XL)
@@ -31,15 +27,13 @@
 	 //#define FLASH_SIZE
 	#define FLASH_SIZE                	0x80000
 	#define FLASH_END_ADDR				0x08000000+FLASH_SIZE
-
+	#define F_SIZE_ADDRESS				((uint32_t)0x1FF800CC)  /* on 0x427 Medium+ and 0x436 HD devices */
 #else
- #error "Please select first the STM32 device to be used (in stm32f10x.h)"
+ #error "Please select first the STM32 device to be used"
 #endif
 #endif
 #if 0
 
-/* Compute the FLASH upload image size */
-#define FLASH_IMAGE_SIZE                   (uint32_t) (FLASH_SIZE - (ApplicationAddress - 0x08000000))
 
 /* Exported macro ------------------------------------------------------------*/
 /* Common routines */
@@ -84,10 +78,10 @@ void portFlashGetProtection();
 
 void portFlashJumpToApplication();
 
-void portFlashGetGUID();
-void portFlashGetFlashSize();//F_SIZE
-void portFlashGetDeviceID(); //DBGMCU_IDCODE
-void portFlashGetRevisionID(); //DBGMCU_IDCODE
+void portFlashGetGUID(uint8_t guid[12]);
+uint32_t portFlashGetFlashSize();//F_SIZE
+uint16_t portFlashGetDeviceID(); //DBGMCU_IDCODE
+uint16_t portFlashGetRevisionID(); //DBGMCU_IDCODE
 
 #if 0
 void Main_Menu(void);

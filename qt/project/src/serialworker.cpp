@@ -227,6 +227,32 @@ RPC_RESULT SerialThread::rpcRunApplication()
     return result;
 }
 
+RPC_RESULT SerialThread::rpcGetMCUDescriptor(mcu_descriptor_t *descriptor)
+{
+
+    QString resultstr;
+    RPC_RESULT result = mcuGetMCUDescriptor(descriptor);
+    switch(result){
+    case RPC_SUCCESS:
+        resultstr = "RPC_SUCCESS";
+        break;
+    case RPC_FAILURE:
+        resultstr = "RPC_FAILURE";
+        break;
+    case RPC_COMMAND_UNKNOWN:
+        resultstr = "RPC_COMMAND_UNKNOWN";
+        break;
+    case RPC_COMMAND_INCOMPLETE:
+        resultstr = "RPC_COMMAND_INCOMPLETE";
+        break;
+    }
+
+//  qDebug() << "sending data return: "  << " with : "<< resultstr;
+return result;
+}
+
+
+
 void SerialThread::sendByteData(QByteArray data)
 {
     emit sendData(data);

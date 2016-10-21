@@ -23,11 +23,13 @@ typedef struct{
 } firmware_descriptor_t;
 
 typedef struct{
-	uint32_t guid;
+	uint8_t guid[12];
 	uint32_t flashsize;
 	uint32_t availFlashSize;
 	uint16_t devID;
 	uint16_t revision;
+	uint32_t firmwareEntryPoint;
+	uint32_t minimalFirmwareEntryPoint;
 } mcu_descriptor_t;
 
 typedef struct{

@@ -5,7 +5,8 @@
 #include <QThread>
 #include <QtSerialPort/QSerialPort>
 #include <QDebug>
-#include "rpc_transmission/server/app/mcu2qt.h"
+//#include "rpc_transmission/server/app/mcu2qt.h"
+#include "rpc_transmission/client/generated_app/RPC_TRANSMISSION_qt2mcu.h"
 #include "rpc_transmission/server/generated_general/RPC_types.h"
 
 struct SerialThread;
@@ -61,6 +62,8 @@ public:
     RPC_RESULT rpcReadFirmwareBlock(uint8_t *data, size_t size);
     RPC_RESULT rpcResetFirmwarePointer();
     RPC_RESULT rpcRunApplication(void);
+    RPC_RESULT rpcGetMCUDescriptor(mcu_descriptor_t *descriptor);
+
 signals:
 
     void openPort(QString name, int baudrate);

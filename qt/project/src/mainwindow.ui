@@ -79,15 +79,22 @@
       </property>
      </widget>
     </item>
-    <item row="5" column="1" colspan="4">
-     <widget class="QPlainTextEdit" name="plainTextEdit"/>
-    </item>
     <item row="3" column="5">
      <widget class="QPushButton" name="btnRunApplication">
       <property name="text">
        <string>run application</string>
       </property>
      </widget>
+    </item>
+    <item row="4" column="5">
+     <widget class="QPushButton" name="btnChipInfo">
+      <property name="text">
+       <string>get ChipInfo</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1" colspan="5">
+     <widget class="QPlainTextEdit" name="plainTextEdit"/>
     </item>
    </layout>
   </widget>

@@ -236,3 +236,47 @@ void MainWindow::on_btnRunApplication_clicked()
         qDebug() << "application start failed"<<result;
     }
 }
+
+void MainWindow::on_btnChipInfo_clicked()
+{
+    mcu_descriptor_t descriptor;
+
+    RPC_RESULT result = serialThread->rpcGetMCUDescriptor(&descriptor);
+    if (result == RPC_SUCCESS){
+        qDebug() << "mcu info requested";
+
+        QString uid;
+        for (int i=0;i<12;i++){
+            uid += "0x"+QString::number(descriptor.guid[i],16).toUpper();
+            if (i<11){
+                uid += ", ";
+            }
+        }
+
+        QString cat;
+        if (descriptor.devID == 0x416){
+           cat = "Cat.1 device";
+        }else if(descriptor.devID == 0x429){
+            cat = "Cat.2 device";
+        }else if(descriptor.devID == 0x427){
+            cat = "Cat.3 device";
+        }else if(descriptor.devID == 0x436){
+            cat = "Cat.4 device or Cat.3 device";
+        }else if(descriptor.devID == 0x437){
+            cat = "Cat.5 device or Cat.6 device";
+        }
+        ui->plainTextEdit->clear();
+        ui->plainTextEdit->appendPlainText(QString("MCU devID: ")+"0x"+QString::number(descriptor.devID,16).toUpper()+" "+cat);
+        ui->plainTextEdit->appendPlainText(QString("MCU revID: ")+"0x"+QString::number(descriptor.revision,16).toUpper());
+        ui->plainTextEdit->appendPlainText(QString("Flashsize: ")+"0x"+QString::number(descriptor.flashsize,16).toUpper());
+        ui->plainTextEdit->appendPlainText(QString("Unique ID: ")+uid);
+        ui->plainTextEdit->appendPlainText(QString(""));
+        ui->plainTextEdit->appendPlainText(QString("Available flashsize: ")+"0x"+QString::number(descriptor.availFlashSize,16).toUpper());
+        ui->plainTextEdit->appendPlainText(QString("Entrypoint: ")+"0x"+QString::number(descriptor.firmwareEntryPoint,16).toUpper());
+        ui->plainTextEdit->appendPlainText(QString("minimal entrypoint: ")+"0x"+QString::number(descriptor.minimalFirmwareEntryPoint,16).toUpper());
+
+    }else{
+        qDebug() << "mcu info request"<<result;
+    }
+
+}

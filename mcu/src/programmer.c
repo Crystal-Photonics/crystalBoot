@@ -9,8 +9,8 @@
 #include "port_flash.h"
 
 #define BLOCK_LENGTH 128
-static uint32_t programmWritePointerAddress = MINIMAL_APPLICATION_ADDRESS;
-static uint32_t programmReadPointerAddress = MINIMAL_APPLICATION_ADDRESS;
+static uint32_t programmWritePointerAddress = APPLICATION_ADDRESS;
+static uint32_t programmReadPointerAddress = APPLICATION_ADDRESS;
 
 //static uint8_t progBuffer[BLOCK_LENGTH];
 
@@ -24,8 +24,8 @@ crystalBoolResult_t programmerErase(){
 
 void programmerResetReadWritePointerToApplicationAddress(void){
 	//memset(progBuffer,BLOCK_LENGTH,0);
-	programmWritePointerAddress = MINIMAL_APPLICATION_ADDRESS;
-	programmReadPointerAddress  = MINIMAL_APPLICATION_ADDRESS;
+	programmWritePointerAddress = APPLICATION_ADDRESS;
+	programmReadPointerAddress  = APPLICATION_ADDRESS;
 }
 
 crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size){
@@ -52,4 +52,25 @@ crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size){
 
 void programmerRunApplication(void){
 	portFlashRunApplication();
+}
+
+firmware_descriptor_t programmerGetFirmwareDescriptor( ){
+	firmware_descriptor_t result;
+	memset(&result,0,sizeof(result));
+	return result;
+}
+
+mcu_descriptor_t programmerGetMCUDescriptor( ){
+	mcu_descriptor_t result;
+	memset(&result,0,sizeof(result));
+
+	portFlashGetGUID(result.guid);
+	result.devID = 						portFlashGetDeviceID();
+	result.revision = 					portFlashGetRevisionID();
+	result.flashsize = 					portFlashGetFlashSize();
+	result.firmwareEntryPoint = 		APPLICATION_ADDRESS;
+	result.minimalFirmwareEntryPoint = 	MINIMAL_APPLICATION_ADDRESS;
+	result.availFlashSize = 			FLASH_ADDRESS+result.flashsize - APPLICATION_ADDRESS;
+
+	return result;
 }
