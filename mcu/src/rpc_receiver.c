@@ -18,7 +18,7 @@
 
 #include "rpc_receiver.h"
 
-#include "board.h"
+//#include "board.h"
 #include "channel_codec/channel_codec.h"
 
 #include "channel_codec/phylayer.h"

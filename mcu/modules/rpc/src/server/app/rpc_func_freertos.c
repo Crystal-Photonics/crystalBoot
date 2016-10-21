@@ -7,7 +7,7 @@
 
 #include <string.h>
 #include "../../../include/rpc_transmission/server/app/qt2mcu.h"
-#include "board.h"
+//#include "board.h"
 #include "programmer.h"
 
 

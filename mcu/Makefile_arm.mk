@@ -14,7 +14,13 @@ SRC = src
 PORT_DIR = $(SRC)/port/stm32_l1
 include $(PORT_DIR)/makefile.port
 
+BOOTLOADER_CONFIG_DIR = bootloaderconfig
 
+PORT_SOURCES += $(BOOTLOADER_CONFIG_DIR)/board/port_board.c
+PORT_SOURCES += $(BOOTLOADER_CONFIG_DIR)/key/aes_256_key.c
+
+PORT_CPPFLAGS += -I$(BOOTLOADER_CONFIG_DIR)/board
+PORT_CPPFLAGS += -I$(BOOTLOADER_CONFIG_DIR)/key
 
 SOURCES += $(SRC)/main.c
 SOURCES += $(SRC)/syscalls.c

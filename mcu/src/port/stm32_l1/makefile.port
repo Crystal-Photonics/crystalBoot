@@ -24,7 +24,7 @@ PORT_LDFLAGS += -T$(PORT_DIR)/STM32L152RE_FLASH.ld
 
 
 PORT_SOURCES += $(PORT_DIR)/src/port_flash.c
-PORT_SOURCES += $(PORT_DIR)/src/port_board.c
+PORT_SOURCES += $(PORT_DIR)/src/port_chip.c
 PORT_SOURCES += $(PORT_DIR)/src/port_serial.c
 
 PORT_SOURCES += $(PORT_DIR)/src/stm32l1xx_it.c

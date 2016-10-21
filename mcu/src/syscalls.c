@@ -36,7 +36,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include "port_serial.h"
-#include "board.h"
+#include "port_chip.h"
 
 /* Variables */
 #undef errno

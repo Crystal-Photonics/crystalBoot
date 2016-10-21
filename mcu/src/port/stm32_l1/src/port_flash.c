@@ -5,10 +5,12 @@
  *      Author: ak
  */
 
-#include "port_flash.h"
-
 #include <inttypes.h>
 #include <string.h>
+#include "port_flash.h"
+#include "port_board.h"
+#include "port_chip.h"
+
 
 
 typedef  void (*pFunction)(void);
@@ -283,7 +285,7 @@ bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const size_t s
 	bool MemoryProgramOK = true;
 	const uint32_t HALF_PAGE_SIZE = FLASH_PAGE_SIZE/2;
 
-	CLEAR_LED_BLUE();
+	CLEAR_LED_OK();
 
 	if (size % HALF_PAGE_SIZE){	//size is not multiple of pagesize/2
 		return false;
@@ -343,7 +345,7 @@ bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const size_t s
 	}
 	FLASH_Lock();
 	if(MemoryProgramOK){
-		SET_LED_BLUE();
+		SET_LED_OK();
 		//printf("write ok\n");
 	}else{
 		CLEAR_LED_BLUE();
@@ -484,7 +486,7 @@ void portFlashRunApplication(){
 	    //for this application it works. but it might be better to do an reset and start the application directly after this
 		//before initializing any peripheral
 
-		boardDeInitChip();
+		port_chipDeinit();
 
 	    __set_MSP(stackAddressOfApplication);
 		Jump_To_Application();

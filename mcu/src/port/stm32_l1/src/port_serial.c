@@ -8,8 +8,9 @@
 #include <assert.h>
 #include "port_serial.h"
 #include "fifo/fifo.h"
-#include "board.h"
-#include "main.h"
+#include "port_chip.h"
+#include "port_board.h"
+//#include "main.h"
 
 #define BUFFER_LENGTH_RX 256
 #define BUFFER_LENGTH_TX 256
@@ -103,9 +104,9 @@ void portSerialPutChar(uint8_t c)
 
 	bool wasEmpty = fifo_is_empty(&fifo_tx);
 
-	vPortEnterCritical();
+	port_EnterCritical();
 	fifo_result_t result = fifo_push(&fifo_tx,c);
-	vPortExitCritical();
+	port_ExitCritical();
 	//assert(result == FIFO_SUCCESS);
 	if (wasEmpty){
 		USART_ITConfig(COM_USART_BASE, USART_IT_TXE, ENABLE);
@@ -132,9 +133,9 @@ bool portSerialGetChar(uint8_t *c){
 	if (fifo_is_empty(&fifo_rx)){
 		return false;
 	}else{
-		vPortEnterCritical();
+		port_EnterCritical();
 		fifo_pop(&fifo_rx,c);
-		vPortExitCritical();
+		port_ExitCritical();
 		return true;
 	}
 }

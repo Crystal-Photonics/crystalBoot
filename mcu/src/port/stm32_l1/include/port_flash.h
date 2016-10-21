@@ -10,9 +10,10 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "stdio.h"
-#include "string.h"
-#include "board.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h> //for size_t
+
 
 /* Exported types ------------------------------------------------------------*/
 

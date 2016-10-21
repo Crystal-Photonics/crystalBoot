@@ -19,7 +19,8 @@
 //#include <stdio.h>
 #include <assert.h>
 #include "vc.h"
-#include "board.h"
+#include "port_chip.h"
+#include "port_board.h"
 #include "main.h"
 #include "port_flash.h"
 #include "port_serial.h"
@@ -211,7 +212,7 @@ int main(void)
 
 //	portFlashRunApplication();
 
-	boardConfigurePIO();
+	port_chipInit();
 	portSerialInit(115200);
 
 
@@ -224,7 +225,7 @@ int main(void)
 	printf("githash = %X\n", GITHASH);
 	printf("gitdate = %s %u\n", GITDATE, GITUNIX);
 #endif
-	SET_LED_RED();
+	SET_LED_BUSY();
 	if(mainResetReason == rer_rtc){
 
 
@@ -250,10 +251,10 @@ int main(void)
 			//printf("Halloasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd\n");
 			if (oldTick != tick){
 				if (tick & 1){
-					SET_LED_RED();
+					SET_LED_BUSY();
 					//programmerErase();
 				}else{
-					CLEAR_LED_RED();
+					CLEAR_LED_BUSY();
 					//printf("hallo\n");
 					//portSerialPutString("Hallo\n");
 				}
