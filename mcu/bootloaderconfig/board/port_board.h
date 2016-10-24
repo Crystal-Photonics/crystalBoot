@@ -93,7 +93,7 @@ typedef enum{les_none, les_on, les_off}led_state_t;
 
 void boardInit(void);
 void boardDeinit(void);
-
+bool getEnterBootloaderKeyState(void);
 
 
 

@@ -31,8 +31,7 @@ typedef enum{rer_none,
 	rer_windowWatchdog,
 	rer_softwareReset,
 	rer_rtc,
-	rer_wupin1_USB,
-	rer_wupin2_ONOFFKEY,
+	rer_wupin
 	} resetReason_t;
 
 extern resetReason_t mainResetReason;

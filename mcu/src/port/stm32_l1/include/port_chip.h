@@ -14,13 +14,15 @@
 
 #include "stm32l1xx_conf.h"
 #include "stm32l1xx.h"
+#include <stdbool.h>
 
 void port_EnterCritical( void );
 void port_ExitCritical( void );
 
 void port_chipInit();
 void port_chipDeinit();
-
+bool port_isDirectApplicationLaunchProgrammed(void);
+void port_programDirectApplicationLaunch(void);
 
 #define configPRIO_BITS       		4        /* 15 priority levels */
 

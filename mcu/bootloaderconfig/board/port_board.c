@@ -59,6 +59,8 @@ void boardInit(void){
 	}
 }
 
-
+bool getEnterBootloaderKeyState(){
+	return true;
+}
 
 

@@ -35,6 +35,7 @@
 #include "channel_codec/phylayer.h"
 #include "errorlogger/generic_eeprom_errorlogger.h"
 
+
 uint32_t sysTick_ms;
 
 
@@ -95,10 +96,8 @@ static void printResetReason_t(resetReason_t reason){
 	case rer_rtc:
 		printf("Reset reason: rtc wakeup reset\n");
 		break;
-	case rer_wupin1_USB:
-		printf("Reset reason: rer_wupin1_USB reset\n");
-		break;
-	case rer_wupin2_ONOFFKEY:
+
+	case rer_wupin:
 		printf("Reset reason: rer_wupin2_ONOFFKEY reset\n");
 		break;
 	case rer_none:
@@ -116,10 +115,10 @@ static resetReason_t mainTestResetSource(void){
 	// test the reset flags in order because the pin reset is always set.
 	//http://www.micromouseonline.com/2012/03/29/stm32-reset-source/
 	resetReason_t result = rer_none;
-#if 0
+#if 1
 	uint32_t rcc_csr = RCC->CSR;
 	uint32_t pwr_csr = PWR->CSR;
-	printf("reset reason PWR_CSR 0x%08"PRIX32 " RCC_CSR 0x%08"PRIX32 " RTC_ISR 0x%08"PRIX32"\n",rcc_csr,pwr_csr,RTC->ISR);
+	//printf("reset reason PWR_CSR 0x%08"PRIX32 " RCC_CSR 0x%08"PRIX32 " RTC_ISR 0x%08"PRIX32"\n",rcc_csr,pwr_csr,RTC->ISR);
 
 	if ((pwr_csr & PWR_CSR_WUF) && (pwr_csr & PWR_CSR_SBF)){
 		//PWR_CSR_WUF: Wakeup flag
@@ -135,17 +134,9 @@ static resetReason_t mainTestResetSource(void){
 		//	0: Device has not been in Standby mode
 		//	1: Device has been in Standby mode
 
-		//probe was in standbymode
-		  if (GET_KEYONOFF()){
-			  result = rer_wupin2_ONOFFKEY; //works
-
-			  while(GET_KEYONOFF()){ //lets wait until key released
-
-			  }
-
-		  }else if(RTC->ISR & RTC_ISR_WUTF){
+		  result = rer_wupin;
+		  if(RTC->ISR & RTC_ISR_WUTF){
 			  result = rer_rtc; 			//works
-			  HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
 		  }else{
 
 			  result = rer_none;
@@ -185,26 +176,25 @@ static resetReason_t mainTestResetSource(void){
 		result = rer_none;
 		assert(0);
 	}
-
-	RCC->CSR |= RCC_CSR_RMVF; 				//Remove reset flag
-	PWR->CR |= PWR_CR_CSBF | PWR_CR_CWUF;  	// Clear Wakeup Flag  Clear Standby Flag
-	HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);	//System reset, as well as low-power modes (Sleep, Stop and Standby) have no influence on the wakeup timer.
-
-
 #endif
 	return result;
 }
+
+
+
 
 
 bool testIfStartIntoProgrammingMode(){
 	return true;
 }
 
+typedef enum{blm_direct_into_bootloader_mode,blm_direct_to_application, blm_timeout_waiting_till_communication} bootloaderJumpMode_t;
 
 int main(void)
 {
 
 	bool hardreset=true;
+	bootloaderJumpMode_t blJumpMode = blm_timeout_waiting_till_communication;
 	 /* Flash unlock */
 	//FLASH_Unlock();
 
@@ -212,6 +202,39 @@ int main(void)
 
 //	portFlashRunApplication();
 
+	boardInit();
+	if (getEnterBootloaderKeyState()){
+		blJumpMode = blm_direct_into_bootloader_mode;
+	}
+
+	resetReason_t resetReason = mainTestResetSource();
+
+	switch (resetReason){
+		case rer_resetPin:
+		case rer_powerOnReset:
+			break;
+		case rer_softwareReset:
+			if (port_isDirectApplicationLaunchProgrammed()){
+				blJumpMode = blm_direct_to_application;
+			}
+			break;
+
+
+		case rer_none:
+		case rer_independendWatchdog:
+		case rer_windowWatchdog:
+		case rer_rtc:
+		case rer_wupin:
+			blJumpMode = blm_direct_to_application;
+			break;
+
+	}
+	if(blJumpMode == blm_direct_to_application){
+		portFlashRunApplication();
+		while(1){
+
+		}
+	}
 	port_chipInit();
 	portSerialInit(115200);
 

@@ -2,6 +2,10 @@
 #include "port_chip.h"
 #include "port_board.h"
 
+
+const uint32_t MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_APPMODE = 0x5868FE4A;
+const uint32_t BACKUPADDRESS_OF_DIRECTLY_START_IN_APPMODE_VALUE = RTC_BKP_DR31;
+
 #if 0
 #define portDISABLE_INTERRUPTS()				ulPortSetInterruptMask()
 #define portENABLE_INTERRUPTS()					vPortClearInterruptMask(0)
@@ -98,4 +102,38 @@ void port_chipDeinit(){
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,DISABLE);
 	RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
 
+}
+
+static uint32_t mainBKUPGetSetting(const uint32_t bkp_register, const uint32_t mask, const uint8_t pos){
+
+	uint32_t result = RTC_ReadBackupRegister(bkp_register);
+	result &= mask;
+	result >>= pos;
+	//printf("read backup reg: %"PRIu32", mask: 0x%"PRIX32", pos: %d, result value: %"PRIu32"\n",bkp_register, mask, pos, result);
+	return result;
+}
+
+static void mainBKUPSetSetting(uint32_t value, const uint32_t bkp_register, const uint32_t mask, const uint8_t pos){
+	uint32_t tmp = RTC_ReadBackupRegister(bkp_register);
+	value <<= pos;
+	if (value & ~mask){
+	//	GEN_ASSERT(0,errLog_E_main_backupregister_attempted_write_of_an_illegal_value,"backupregister attempted write of an illegal value\n");
+	}
+	tmp &= ~mask;
+	tmp |= value;
+//	printf("write backup reg: %"PRIu32", mask: 0x%"PRIX32", pos: %d, origvalue: %"PRIu32", value written: %"PRIu32"\n",bkp_register, mask, pos, value, tmp);
+	RTC_WriteBackupRegister(bkp_register, tmp);
+}
+
+bool port_isDirectApplicationLaunchProgrammed(){
+	uint32_t val = mainBKUPGetSetting(BACKUPADDRESS_OF_DIRECTLY_START_IN_APPMODE_VALUE,0xFFFFFFFF,0);
+	mainBKUPSetSetting(0,BACKUPADDRESS_OF_DIRECTLY_START_IN_APPMODE_VALUE,0xFFFFFFFF,0);
+	return val == MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_APPMODE;
+}
+
+void port_programDirectApplicationLaunch(void){
+	mainBKUPSetSetting(MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_APPMODE,
+			BACKUPADDRESS_OF_DIRECTLY_START_IN_APPMODE_VALUE,
+			0xFFFFFFFF,
+			0);
 }

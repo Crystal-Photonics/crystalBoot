@@ -461,6 +461,10 @@ bool portFlashEraseApplication(){
 	return MemoryProgramOK;
 }
 
+void portFlashRunApplicationAfterReset(){
+	port_programDirectApplicationLaunch();
+	NVIC_SystemReset();
+}
 
 void portFlashRunApplication(){
 //#define ApplicationAddress    0x8003000
