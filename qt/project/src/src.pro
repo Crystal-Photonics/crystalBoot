@@ -13,7 +13,8 @@ TEMPLATE = lib
 
 DEFINES += EXPORT_LIBRARY
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    infodialog.cpp
 SOURCES += serialworker.cpp
 SOURCES += mainwindow.cpp
 
@@ -22,6 +23,7 @@ SOURCES += ../libs/rpc/src/server/app/rpc_func_qt.cpp
 SOURCES += ../libs/rpc/src/server/app/rpc_service_qt.cpp
 
 HEADERS += mainwindow.h
+HEADERS += infodialog.h
 HEADERS += serialworker.h
 
 SOURCES += ../libs/rpc/src/client/generated_app/RPC_TRANSMISSION_qt2mcu.c
@@ -51,23 +53,25 @@ INCLUDEPATH += ../libs/rpc/include/rpc_transmission/client/generated_app
 
 
 FORMS    += mainwindow.ui
+FORMS    += infodialog.ui
+
+SH = "C:\Program Files (x86)\Git\usr\bin\sh.exe"
+
+#DEFINES += GIT_CURRENT_SHA1="\\\"$(SH) git.sh\\\""
+
+GIT_CMD = "$$(UNIXTOOLS)sh git.sh"
 
 
 
-#INCLUDEPATH += $$(PYTHON_PATH)/include
+versionTarget.target = vc.h
+versionTarget.depends = FORCE
 
-#exists( $$(PYTHON_PATH)/include/python.h ) {
-#    #message(found python windows)
-#    INCLUDEPATH += $$(PYTHON_PATH)/include
-#    PYTHON_FOUND = 1
-#}
+win32: versionTarget.commands = $$SH $$PWD/git.sh
+#else:  versionTarget.commands = cd $$PWD; python ./version_getter.py -p $$TARGET
 
-#exists( $$(PYTHON_PATH)/Python.h ) {
-    #message(found python linux)crystalTestFrameworkApp
-#    INCLUDEPATH += $$(PYTHON_PATH)
-#    PYTHON_FOUND = 1
-#}
+PRE_TARGETDEPS += vc.h
+QMAKE_EXTRA_TARGETS += versionTarget
 
-#!equals( PYTHON_FOUND , 1){
-#    error (Python directory needs to be configured in environment variable PYTHON_PATH. eg. C:/Python27 )
-#}
+#DEPENDPATH += ../
+#INCLUDEPATH += ../
+HEADERS += vc.h

@@ -43,7 +43,15 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 
 #define ISR_PRIORITY_SERIAL_DBG				configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+2
 
+typedef enum{rer_none,
+	rer_resetPin,
+	rer_powerOnReset,
+	rer_independendWatchdog,
+	rer_windowWatchdog,
+	rer_softwareReset,
+	rer_rtc,
+	rer_wupin
+	} resetReason_t;
 
-
-
+	resetReason_t portTestResetSource(void);
 #endif /* MCU_SRC_PORT_STM32_L1_INCLUDE_PORT_CHIP_H_ */

@@ -5,6 +5,7 @@
  *      Author: ak
  */
 #include <string.h>
+#include "bootloader_config.h"
 #include "programmer.h"
 #include "port_flash.h"
 
@@ -12,7 +13,9 @@
 static uint32_t programmWritePointerAddress = APPLICATION_ADDRESS;
 static uint32_t programmReadPointerAddress = APPLICATION_ADDRESS;
 
-//static uint8_t progBuffer[BLOCK_LENGTH];
+#ifndef  BOOTLOADER_BOOT_APP_USING_RESET
+#error "please define BOOTLOADER_BOOT_APP_USING_RESET"
+#endif
 
 crystalBoolResult_t programmerErase(){
 	if (portFlashEraseApplication()){
@@ -51,7 +54,12 @@ crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size){
 }
 
 void programmerRunApplication(void){
+#if BOOTLOADER_BOOT_APP_USING_RESET
+	portFlashRunApplicationAfterReset();
+#else
 	portFlashRunApplication();
+#endif
+
 }
 
 firmware_descriptor_t programmerGetFirmwareDescriptor( ){

@@ -62,6 +62,7 @@ public:
     RPC_RESULT rpcReadFirmwareBlock(uint8_t *data, size_t size);
     RPC_RESULT rpcResetFirmwarePointer();
     RPC_RESULT rpcRunApplication(void);
+    RPC_RESULT rpcEnterProgrammingMode(void);
     RPC_RESULT rpcGetMCUDescriptor(mcu_descriptor_t *descriptor);
 
 signals:

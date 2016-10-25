@@ -6,6 +6,8 @@
 const uint32_t MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_APPMODE = 0x5868FE4A;
 const uint32_t BACKUPADDRESS_OF_DIRECTLY_START_IN_APPMODE_VALUE = RTC_BKP_DR31;
 
+uint32_t magic_key_which_survives_soft_reset_and_mustn_be_inited __attribute__((section (".un_init")));
+
 #if 0
 #define portDISABLE_INTERRUPTS()				ulPortSetInterruptMask()
 #define portENABLE_INTERRUPTS()					vPortClearInterruptMask(0)
@@ -103,7 +105,7 @@ void port_chipDeinit(){
 	RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
 
 }
-
+#if 0
 static uint32_t mainBKUPGetSetting(const uint32_t bkp_register, const uint32_t mask, const uint8_t pos){
 
 	uint32_t result = RTC_ReadBackupRegister(bkp_register);
@@ -124,16 +126,94 @@ static void mainBKUPSetSetting(uint32_t value, const uint32_t bkp_register, cons
 //	printf("write backup reg: %"PRIu32", mask: 0x%"PRIX32", pos: %d, origvalue: %"PRIu32", value written: %"PRIu32"\n",bkp_register, mask, pos, value, tmp);
 	RTC_WriteBackupRegister(bkp_register, tmp);
 }
+#endif
 
 bool port_isDirectApplicationLaunchProgrammed(){
+#if 0
 	uint32_t val = mainBKUPGetSetting(BACKUPADDRESS_OF_DIRECTLY_START_IN_APPMODE_VALUE,0xFFFFFFFF,0);
 	mainBKUPSetSetting(0,BACKUPADDRESS_OF_DIRECTLY_START_IN_APPMODE_VALUE,0xFFFFFFFF,0);
 	return val == MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_APPMODE;
+#else
+	uint32_t val = magic_key_which_survives_soft_reset_and_mustn_be_inited;
+	magic_key_which_survives_soft_reset_and_mustn_be_inited = 0;
+	return val == MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_APPMODE;
+#endif
+
 }
 
 void port_programDirectApplicationLaunch(void){
+	magic_key_which_survives_soft_reset_and_mustn_be_inited = MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_APPMODE;
+	/*
 	mainBKUPSetSetting(MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_APPMODE,
 			BACKUPADDRESS_OF_DIRECTLY_START_IN_APPMODE_VALUE,
 			0xFFFFFFFF,
-			0);
+			0);*/
+}
+
+
+
+resetReason_t portTestResetSource(void){
+	// test the reset flags in order because the pin reset is always set.
+	//http://www.micromouseonline.com/2012/03/29/stm32-reset-source/
+	resetReason_t result = rer_none;
+#if 1
+	uint32_t rcc_csr = RCC->CSR;
+	uint32_t pwr_csr = PWR->CSR;
+	//printf("reset reason PWR_CSR 0x%08"PRIX32 " RCC_CSR 0x%08"PRIX32 " RTC_ISR 0x%08"PRIX32"\n",rcc_csr,pwr_csr,RTC->ISR);
+
+	if ((pwr_csr & PWR_CSR_WUF) && (pwr_csr & PWR_CSR_SBF)){
+		//PWR_CSR_WUF: Wakeup flag
+		//	This bit is set by hardware and cleared by a system reset or by setting the CWUF bit in the
+		//	PWR power control register (PWR_CR)
+		//	0: No wakeup event occurred
+		//	1: A wakeup event was received from the WKUP pin or from the RTC alarm (Alarm A or
+		//	Alarm B), RTC Tamper event, RTC TimeStamp event or RTC Wakeup).
+
+		//PWR_CSR_SBF: Standby flag
+		//	This bit is set by hardware and cleared only by a POR/PDR (power on reset/power down reset)
+		//	or by setting the CSBF bit in the PWR power control register (PWR_CR)
+		//	0: Device has not been in Standby mode
+		//	1: Device has been in Standby mode
+
+
+		  if(RTC->ISR & RTC_ISR_WUTF){
+			  result = rer_rtc; 			//works
+		  }else{
+			  result = rer_wupin;
+		  }
+
+	}else if  ( rcc_csr & RCC_CSR_LPWRRSTF){
+
+		//Low-power management reset
+		//	There are two ways to generate a low-power management reset:
+		//
+		//	1.Reset generated when entering Standby mode:
+		//		This type of reset is enabled by resetting nRST_STDBY bit in user option bytes. In this
+		//		case, whenever a Standby mode entry sequence is successfully executed, the device
+		//		is reset instead of entering Standby mode.
+		//
+		//	2. Reset when entering Stop mode:
+		//		This type of reset is enabled by resetting nRST_STOP bit in user option bytes. In this
+		//		case, whenever a Stop mode entry sequence
+
+
+		  result = rer_none;
+
+
+	}else if  ( rcc_csr & RCC_CSR_IWDGRSTF){
+		result = rer_independendWatchdog;
+	}else if  ( rcc_csr & RCC_CSR_WWDGRSTF){
+		result = rer_windowWatchdog;
+	}else if  ( rcc_csr & RCC_CSR_SFTRSTF){
+		result = rer_softwareReset;
+	} else if  ( rcc_csr & RCC_CSR_PORRSTF){
+		 result = rer_powerOnReset;  //works
+	} else if  (rcc_csr & RCC_CSR_PINRSTF){
+		 result = rer_resetPin;   //works
+	} else {
+		result = rer_none;
+		//shouldnt happen
+	}
+#endif
+	return result;
 }

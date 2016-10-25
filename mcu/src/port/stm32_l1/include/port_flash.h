@@ -77,6 +77,7 @@ void portFlashSetProtection();
 void portFlashGetProtection();
 
 void portFlashJumpToApplication();
+void portFlashRunApplicationAfterReset();
 
 void portFlashGetGUID(uint8_t guid[12]);
 uint32_t portFlashGetFlashSize();//F_SIZE

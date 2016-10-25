@@ -16,8 +16,12 @@
 
 uint32_t TIMEOUT_ms = 1000;
 
-void RPC_SET_timeout(uint32_t timeout_ms){
+void RPC_setTimeout(uint32_t timeout_ms){
     TIMEOUT_ms = timeout_ms;
+}
+
+uint32_t RPC_getTimeout(){
+    return TIMEOUT_ms;
 }
 
 QMutex mutexes[RPC_number_of_mutexes];

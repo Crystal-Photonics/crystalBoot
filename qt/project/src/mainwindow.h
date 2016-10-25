@@ -4,13 +4,15 @@
 #include <QMainWindow>
 #include <QSettings>
 #include <QCloseEvent>
+#include <QComboBox>
+#include <QTimer>
 #include "serialworker.h"
 #include "channel_codec/channel_codec_types.h"
 
 #include "rpc_transmission/server/app/mcu2qt.h"
 extern channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
-void RPC_SET_timeout(uint32_t timeout_ms);
-
+void RPC_setTimeout(uint32_t timeout_ms);
+uint32_t RPC_getTimeout(void);
 namespace Ui {
 class MainWindow;
 }
@@ -18,28 +20,51 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
+    enum ConnectionState {none,Connecting, Connected, Disconnected};
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void closeEvent(QCloseEvent *event);
 
 private slots:
-    void on_btnRefresh_clicked();
-    void on_btnConnect_clicked();
+    void on_tryConnect_timer();
 
 
-    void on_btnSend_clicked();
+    void on_actionOpen_triggered();
 
-    void on_btnRunApplication_clicked();
+    void on_actionConnect_triggered();
 
-    void on_btnChipInfo_clicked();
+    void on_actionGet_Info_triggered();
+
+    void on_actionRun_triggered();
+
+    void on_actionTransfer_triggered();
+
+    void on_actionRefresh_triggered();
+
+    void on_actionInfo_triggered();
 
 private:
+
     Ui::MainWindow *ui;
 
     SerialThread* serialThread;
     QSettings settings;
+
+    QTimer *connectTimer;
+    QComboBox *cmbPort;
+    QString fileNameToSend;
+    bool fileLoaded;
+    void sendfirmware(QString fileName);
+    void getDeviceInfo();
+    void runApplication();
+    void connectComPort(bool shallBeOpened);
+    void refreshComPortList();
+    void log(QString str);
+    void loadFile(QString fileName);
+    void recalcUIState();
+    void setConnState(ConnectionState connState);
+    ConnectionState connState;
 
 
 };

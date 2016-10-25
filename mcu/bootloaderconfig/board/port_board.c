@@ -60,7 +60,7 @@ void boardInit(void){
 }
 
 bool getEnterBootloaderKeyState(){
-	return true;
+	return GET_KEY_1();
 }
 
 

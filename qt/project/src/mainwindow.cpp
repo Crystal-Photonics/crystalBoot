@@ -1,10 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "infodialog.h"
 #include <QtSerialPort/QSerialPortInfo>
 #include <QStringList>
 #include <QDebug>
 #include <QFile>
 #include <QTime>
+#include <QFileDialog>
 
 
 channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
@@ -16,21 +18,32 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
     ui->setupUi(this);
-    on_btnRefresh_clicked();
+    fileLoaded = false;
+    ui->progressBar->setVisible(false);
+    cmbPort = new QComboBox (this);
+    ui->mainToolBar->addAction(ui->actionOpen);
+    ui->mainToolBar->addWidget(cmbPort);
+    ui->mainToolBar->addAction(ui->actionRefresh);
+    ui->mainToolBar->addAction(ui->actionConnect);
+    ui->mainToolBar->addSeparator();
+    ui->mainToolBar->addAction(ui->actionTransfer);
+    ui->mainToolBar->addAction(ui->actionRun);
+    ui->mainToolBar->addAction(ui->actionGet_Info);
+    refreshComPortList();
+    connectTimer = new QTimer(this);
+    connect(connectTimer, SIGNAL(timeout()), this, SLOT(on_tryConnect_timer()));
     //qRegisterMetaType<rpcKeyStatus_t>("rpcKeyStatus_t");
 
     QStringList bdl;
     bdl << "75" << "300" << "1200" << "2400" << "4800" << "9600" << "14400" << "19200" << "28800" << "38400" << "57600" << "115200";
-    ui->cmbBaud->addItems(bdl);
-    ui->cmbBaud->setCurrentIndex(11);
 
-    ui->edtFileName->setText(settings.value("lastFirmwareFile","").toString());
-    qDebug() << "gui:" << QThread::currentThreadId();
+    cmbPort->setCurrentIndex( settings.value("lastComPort",0).toInt());
+        qDebug() << "gui:" << QThread::currentThreadId();
 
 
     serialThread = new SerialThread(this);
-    //connect(serialThread, SIGNAL(updateADC(float)), this, SLOT(updateADC(float)));
-
+    setConnState(MainWindow::Disconnected);
+    loadFile(settings.value("lastFirmwareFile","").toString());
 }
 
 MainWindow::~MainWindow()
@@ -41,92 +54,72 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    settings.setValue("lastFirmwareFile",ui->edtFileName->text());
-    settings.setValue("lastComPort",ui->cmbPort->currentIndex());
+    settings.setValue("lastFirmwareFile",fileNameToSend);
+    settings.setValue("lastComPort",cmbPort->currentIndex());
     settings.sync();
     event->accept();
 }
 
-void MainWindow::on_btnRefresh_clicked()
+void MainWindow::on_tryConnect_timer()
 {
-    ui->cmbPort->clear();
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
-        ui->cmbPort->addItem(info.portName());
-    }
-    ui->cmbPort->setCurrentIndex(settings.value("lastComPort",0).toInt());
+    if (serialThread->isOpen()){
 
-}
-
-void MainWindow::on_btnConnect_clicked()
-{
-    bool shallBeOpened = true;
-    QPushButton* button = ui->btnConnect;
-    if( button != NULL )
-    {
-        if (button->property("connected").toBool() == true){
-            button->setText("Connect");
-            button->setProperty("connected",false);
-            shallBeOpened = false;
-        }else{
-            button->setText("Disconnect");
-            button->setProperty("connected",true);
-            shallBeOpened = true;
-        }
-
-        if (shallBeOpened){
-            QString serialPortName = ui->cmbPort->currentText();
-
-            int baudrate = ui->cmbBaud->currentText().toInt();
-
-#if 0
-
-            int dataBits = comData->currentText().toInt();
-            serialport->setDataBits((QSerialPort::DataBits)dataBits);
-
-
-            QSerialPort::StopBits stopBits = stopBitDescriptionToStopBit(comStop->currentText());
-            serialport->setStopBits(stopBits);
-
-#endif
-
-
-
-            qDebug() << "open" << serialPortName << baudrate;
-            serialThread->open(serialPortName,baudrate);
-
-			if (serialThread->isOpen()){
-				if (!serialThread->rpcIsCorrectHash()){
-					qDebug() << "opened but incorrect hash, closing";
-					serialThread->close();
-				}
-				else{
-                    qDebug() << "opened";
-				}
-
+        log( "try to connect..");
+        uint32_t timeout = RPC_getTimeout();
+        RPC_setTimeout(50);
+        if (serialThread->rpcEnterProgrammingMode() == RPC_SUCCESS){
+            connectTimer->stop();
+            bool corr_hash = serialThread->rpcIsCorrectHash();
+            if (corr_hash){
+                log("bootloader found.");
+                setConnState(MainWindow::Connected);
             }else{
-                qDebug() << "still closed";
-            }
-
-        }else{
-           // qDebug() << "close" << serialport->portName();
-            serialThread->close();
-
-            if (serialThread->isOpen()){
-                qDebug() << "still opened";
-            }else{
-                qDebug() << "closed";
+                log("bootloader found but incorrect hash, disconnecting..");
+                statusBar()->showMessage("bootloader found but incorrect hash.");
+                serialThread->close();
+                setConnState(MainWindow::Disconnected);
             }
         }
-
+        RPC_setTimeout(timeout);
     }
 }
 
-void MainWindow::on_btnSend_clicked()
+void MainWindow::connectComPort(bool shallBeOpened)
+{
+    if (shallBeOpened){
+        QString serialPortName = cmbPort->currentText();
+        int baudrate = 115200;//ui->cmbBaud->currentText().toInt();
+        qDebug() << "open" << serialPortName << baudrate;
+        serialThread->open(serialPortName,baudrate);
+
+        if (serialThread->isOpen()){
+            setConnState(MainWindow::Connecting);
+            connectTimer->start(10);
+
+        }else{
+            log("still closed");
+        }
+    }else{
+        serialThread->close();
+
+        if (serialThread->isOpen()){
+            log("still opened");
+
+        }else{
+            setConnState(MainWindow::Disconnected);
+        }
+    }
+}
+
+
+void MainWindow::sendfirmware(QString fileName)
 {
 #define BLOCKLENGTH 128
 
-    QFile firmwareFile( ui->edtFileName->text());
+    QFile firmwareFile( fileName);
     if (firmwareFile.open( QIODevice::ReadOnly )){
+        ui->progressBar->setValue(0);
+        ui->progressBar->setVisible(true);
         RPC_RESULT result = RPC_SUCCESS;
         qint64 fileSize =  firmwareFile.size();
         qint64 byteCounter = 0;
@@ -135,28 +128,28 @@ void MainWindow::on_btnSend_clicked()
         bool fail = false;
         runtime.start();
         totalRuntime.start();
-        qDebug() << "erasing..";
-        RPC_SET_timeout(20*1000);
+        log("erasing..");
+        RPC_setTimeout(20*1000);
         result = serialThread->rpcEraseFlash();
         if (result != RPC_SUCCESS){
             fail = true;
-            qDebug() << "erasing fail";
+           log("erasing fail");
         }else{
-            qDebug() << "erase ok. " << runtime.elapsed()/1000.0<< "seconds needed";
+            log("erase ok. " + QString::number(runtime.elapsed()/1000.0)+" seconds needed");
         }
 
-        qDebug() << "resetting write/read pointer..";
+        log("resetting write/read pointer..");
 
         result = serialThread->rpcResetFirmwarePointer();
         if (result != RPC_SUCCESS){
             fail = true;
-            qDebug() << "pointer reset fail.";
+             log("pointer reset fail.");
         }else{
-            qDebug() << "pointer reset ok. ";
+             log("pointer reset ok. ");
         }
 
         runtime.start();
-        RPC_SET_timeout(1*1000);
+        RPC_setTimeout(1*1000);
 
 #if 1
         while (!firmwareFile.atEnd() && fail == false){
@@ -192,7 +185,8 @@ void MainWindow::on_btnSend_clicked()
             qint64 progress = 100*byteCounter;
             progress /=  fileSize ;
             if (progress_old != progress){
-                qDebug() << "progress: " << progress << "%";
+               log("progress: " + QString::number(progress)+ "%");
+               ui->progressBar->setValue(progress);
             }
             progress_old = progress;
 
@@ -214,36 +208,27 @@ void MainWindow::on_btnSend_clicked()
                 resultstr = "RPC_COMMAND_INCOMPLETE";
                 break;
             }
-            qDebug() << resultstr;
+           log(resultstr);
         }else{
-            qDebug() << "tranfer ok. " << runtime.elapsed()/1000.0<< "seconds needed. In Total: "<< totalRuntime.elapsed()/1000.0 << "seconds needed.";
+            log("tranfer ok. " +QString::number( runtime.elapsed()/1000.0)+ " seconds needed. In Total: "+QString::number(totalRuntime.elapsed()/1000.0)+ "seconds needed.");
         }
 
         (void)fileSize;
         (void)byteCounter;
 
     }else{
-        qDebug() << "cant open file" << ui->edtFileName->text();
+       log("cant open file " +fileName);
     }
+    ui->progressBar->setVisible(false);
 }
 
-void MainWindow::on_btnRunApplication_clicked()
-{
-    RPC_RESULT result = serialThread->rpcRunApplication();
-    if (result == RPC_SUCCESS){
-        qDebug() << "application startet";
-    }else{
-        qDebug() << "application start failed"<<result;
-    }
-}
-
-void MainWindow::on_btnChipInfo_clicked()
+void MainWindow::getDeviceInfo()
 {
     mcu_descriptor_t descriptor;
 
     RPC_RESULT result = serialThread->rpcGetMCUDescriptor(&descriptor);
     if (result == RPC_SUCCESS){
-        qDebug() << "mcu info requested";
+        log( "mcu info requested");
 
         QString uid;
         for (int i=0;i<12;i++){
@@ -276,7 +261,140 @@ void MainWindow::on_btnChipInfo_clicked()
         ui->plainTextEdit->appendPlainText(QString("minimal entrypoint: ")+"0x"+QString::number(descriptor.minimalFirmwareEntryPoint,16).toUpper());
 
     }else{
-        qDebug() << "mcu info request"<<result;
+       log("mcu info request error ("+QString::number(result)+")");
     }
 
+}
+
+void MainWindow::runApplication()
+{
+    RPC_RESULT result = serialThread->rpcRunApplication();
+    log("starting application..");
+    if (result == RPC_SUCCESS){
+        qDebug() << "application startet";
+    }else{
+        qDebug() << "application start failed"<<result;
+    }
+    setConnState(MainWindow::Disconnected);
+}
+
+
+
+void MainWindow::refreshComPortList()
+{
+    cmbPort->clear();
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+        cmbPort->addItem(info.portName());
+    }
+    cmbPort->setCurrentIndex(settings.value("lastComPort",0).toInt());
+
+}
+
+void MainWindow::log(QString str)
+{
+    qDebug() << str;
+    ui->plainTextEdit->appendPlainText(str);
+    QApplication::processEvents();
+}
+
+void MainWindow::loadFile(QString fileName)
+{
+    QFile firmwareFile( fileName);
+    if (firmwareFile.open( QIODevice::ReadOnly )){
+        fileNameToSend = fileName;
+        fileLoaded = true;
+    }else{
+        fileLoaded = false;
+        fileNameToSend = "";
+    }
+
+    recalcUIState();
+}
+
+void MainWindow::setConnState(MainWindow::ConnectionState connState)
+{
+    this->connState = connState;
+    recalcUIState();
+}
+
+void MainWindow::recalcUIState()
+{
+    if (fileLoaded){
+        ui->actionConnect->setEnabled(true);
+        switch (connState){
+        case ConnectionState::Disconnected:
+            statusBar()->showMessage("disconnected");
+            log("disconnected");
+            ui->actionConnect->setText("connect");
+            ui->actionRun->setEnabled(false);
+            ui->actionGet_Info->setEnabled(false);
+            ui->actionTransfer->setEnabled(false);
+            break;
+        case ConnectionState::Connected:
+            statusBar()->showMessage("connected");
+            log("connected");
+            ui->actionConnect->setText("disconnect");
+            ui->actionRun->setEnabled(true);
+            ui->actionGet_Info->setEnabled(true);
+            ui->actionTransfer->setEnabled(true);
+            break;
+        case ConnectionState::Connecting:
+            statusBar()->showMessage("connecting..");
+            log("connecting");
+            ui->actionConnect->setText("stop");
+            ui->actionRun->setEnabled(false);
+            ui->actionGet_Info->setEnabled(false);
+            ui->actionTransfer->setEnabled(false);
+            break;
+        case ConnectionState::none:
+            break;
+        }
+    }else{
+        ui->actionRun->setEnabled(false);
+        ui->actionConnect->setEnabled(false);
+        ui->actionGet_Info->setEnabled(false);
+        ui->actionTransfer->setEnabled(false);
+    }
+}
+
+void MainWindow::on_actionGet_Info_triggered()
+{
+    getDeviceInfo();
+}
+
+void MainWindow::on_actionRun_triggered()
+{
+    runApplication();
+}
+
+void MainWindow::on_actionTransfer_triggered()
+{
+    sendfirmware(fileNameToSend);
+}
+
+void MainWindow::on_actionRefresh_triggered()
+{
+    refreshComPortList();
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        "OpenFirmwareImage", fileNameToSend, tr("Firmware Image (*.cfw)"));
+    loadFile(fileName);
+}
+
+void MainWindow::on_actionConnect_triggered()
+{
+    if(connState == ConnectionState::Disconnected){
+        connectComPort(true);
+    }else{
+        connectComPort(false);
+    }
+}
+
+void MainWindow::on_actionInfo_triggered()
+{
+    InfoDialog infodiag(this);
+    infodiag.exec();
 }

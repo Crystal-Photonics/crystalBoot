@@ -142,6 +142,16 @@ SECTIONS
     __bss_end__ = _ebss;
   } >RAM
 
+/*https://mcuoneclipse.com/2014/04/19/gnu-linker-can-you-not-initialize-my-variable/*/
+  /* Uninitialized data section */
+
+  .un_init (NOLOAD):
+  {
+  	. = ALIGN(4);
+    *(.un_init)
+    . = ALIGN(4);
+  } >RAM
+  
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :
   {

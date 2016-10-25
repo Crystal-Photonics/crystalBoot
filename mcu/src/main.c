@@ -19,6 +19,7 @@
 //#include <stdio.h>
 #include <assert.h>
 #include "vc.h"
+#include "bootloader_config.h"
 #include "port_chip.h"
 #include "port_board.h"
 #include "main.h"
@@ -35,15 +36,20 @@
 #include "channel_codec/phylayer.h"
 #include "errorlogger/generic_eeprom_errorlogger.h"
 
+typedef enum{blm_none, blm_direct_into_bootloader_mode,blm_direct_to_application, blm_timeout_waiting_till_communication} bootloaderJumpMode_t;
+
+
+#if BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION == 0 && BOOTLOADER_WITH_DECRYPT_SUPPORT == 0
+#error "this way no communication is possible"
+#endif
+
+#ifndef BOORLOADER_WAITTIME_FOR_APP_BOOT_ms
+#error "please define this"
+#endif
 
 uint32_t sysTick_ms;
 
-
-
-resetReason_t mainResetReason;
-uint32_t FlashDestination;
-
-
+static volatile bootloaderJumpMode_t blJumpMode = blm_none;
 
 
 #if 0
@@ -75,7 +81,7 @@ static void Int2Str(uint8_t* str, int32_t intnum)
 }
 #endif
 
-
+#if 0
 static void printResetReason_t(resetReason_t reason){
 	switch(reason){
 	case rer_resetPin:
@@ -106,79 +112,9 @@ static void printResetReason_t(resetReason_t reason){
 
 	}
 }
-
-
-
-
-
-static resetReason_t mainTestResetSource(void){
-	// test the reset flags in order because the pin reset is always set.
-	//http://www.micromouseonline.com/2012/03/29/stm32-reset-source/
-	resetReason_t result = rer_none;
-#if 1
-	uint32_t rcc_csr = RCC->CSR;
-	uint32_t pwr_csr = PWR->CSR;
-	//printf("reset reason PWR_CSR 0x%08"PRIX32 " RCC_CSR 0x%08"PRIX32 " RTC_ISR 0x%08"PRIX32"\n",rcc_csr,pwr_csr,RTC->ISR);
-
-	if ((pwr_csr & PWR_CSR_WUF) && (pwr_csr & PWR_CSR_SBF)){
-		//PWR_CSR_WUF: Wakeup flag
-		//	This bit is set by hardware and cleared by a system reset or by setting the CWUF bit in the
-		//	PWR power control register (PWR_CR)
-		//	0: No wakeup event occurred
-		//	1: A wakeup event was received from the WKUP pin or from the RTC alarm (Alarm A or
-		//	Alarm B), RTC Tamper event, RTC TimeStamp event or RTC Wakeup).
-
-		//PWR_CSR_SBF: Standby flag
-		//	This bit is set by hardware and cleared only by a POR/PDR (power on reset/power down reset)
-		//	or by setting the CSBF bit in the PWR power control register (PWR_CR)
-		//	0: Device has not been in Standby mode
-		//	1: Device has been in Standby mode
-
-		  result = rer_wupin;
-		  if(RTC->ISR & RTC_ISR_WUTF){
-			  result = rer_rtc; 			//works
-		  }else{
-
-			  result = rer_none;
-			  //assert(0);
-		  }
-
-	}else if  ( rcc_csr & RCC_CSR_LPWRRSTF){
-
-		//Low-power management reset
-		//	There are two ways to generate a low-power management reset:
-		//
-		//	1.Reset generated when entering Standby mode:
-		//		This type of reset is enabled by resetting nRST_STDBY bit in user option bytes. In this
-		//		case, whenever a Standby mode entry sequence is successfully executed, the device
-		//		is reset instead of entering Standby mode.
-		//
-		//	2. Reset when entering Stop mode:
-		//		This type of reset is enabled by resetting nRST_STOP bit in user option bytes. In this
-		//		case, whenever a Stop mode entry sequence
-
-		//shouldnt happen..
-		result = rer_none;
-		assert(0);
-
-
-	}else if  ( rcc_csr & RCC_CSR_IWDGRSTF){
-		result = rer_independendWatchdog;
-	}else if  ( rcc_csr & RCC_CSR_WWDGRSTF){
-		result = rer_windowWatchdog;
-	}else if  ( rcc_csr & RCC_CSR_SFTRSTF){
-		result = rer_softwareReset;
-	} else if  ( rcc_csr & RCC_CSR_PORRSTF){
-		 result = rer_powerOnReset;  //works
-	} else if  (rcc_csr & RCC_CSR_PINRSTF){
-		 result = rer_resetPin;   //works
-	} else {
-		result = rer_none;
-		assert(0);
-	}
 #endif
-	return result;
-}
+
+
 
 
 
@@ -188,28 +124,27 @@ bool testIfStartIntoProgrammingMode(){
 	return true;
 }
 
-typedef enum{blm_direct_into_bootloader_mode,blm_direct_to_application, blm_timeout_waiting_till_communication} bootloaderJumpMode_t;
+
+
+void mainEnterProgrammingMode(){
+	blJumpMode = blm_direct_into_bootloader_mode;
+}
 
 int main(void)
 {
 
 	bool hardreset=true;
-	bootloaderJumpMode_t blJumpMode = blm_timeout_waiting_till_communication;
-	 /* Flash unlock */
-	//FLASH_Unlock();
-
-	/* Initialize Key Button mounted on STM3210X-EVAL board */
-
-//	portFlashRunApplication();
+	blJumpMode = blm_timeout_waiting_till_communication;
 
 	boardInit();
 	if (getEnterBootloaderKeyState()){
 		blJumpMode = blm_direct_into_bootloader_mode;
 	}
 
-	resetReason_t resetReason = mainTestResetSource();
+	resetReason_t resetReason = portTestResetSource();
 
 	switch (resetReason){
+		case rer_none:
 		case rer_resetPin:
 		case rer_powerOnReset:
 			break;
@@ -220,7 +155,7 @@ int main(void)
 			break;
 
 
-		case rer_none:
+
 		case rer_independendWatchdog:
 		case rer_windowWatchdog:
 		case rer_rtc:
@@ -238,71 +173,39 @@ int main(void)
 	port_chipInit();
 	portSerialInit(115200);
 
-
-
-
-	mainResetReason = mainTestResetSource();
-	printResetReason_t(mainResetReason);
+	//printResetReason_t(mainResetReason);
 #if 1
 	printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR,hardreset);
 	printf("githash = %X\n", GITHASH);
 	printf("gitdate = %s %u\n", GITDATE, GITUNIX);
 #endif
 	SET_LED_BUSY();
-	if(mainResetReason == rer_rtc){
-
-
-	}else if(mainResetReason == rer_resetPin){
-
-
-	}
-
-
 
 	rpc_receiver_init();
-
-	/* Test if Key push-button on STM3210X-EVAL Board is pressed */
-	if (testIfStartIntoProgrammingMode())
+	uint32_t startSysTick = sysTick_ms;
+	while (1)
 	{
+		static uint32_t oldTick100ms;
 
+		uint32_t tick100ms = sysTick_ms/100;
+		rpc_receive();
 
-		while (1)
-		{
-			static uint32_t oldTick;
-			uint32_t tick = sysTick_ms/100;
-			rpc_receive();
-			//printf("Halloasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd\n");
-			if (oldTick != tick){
-				if (tick & 1){
-					SET_LED_BUSY();
-					//programmerErase();
-				}else{
-					CLEAR_LED_BUSY();
-					//printf("hallo\n");
-					//portSerialPutString("Hallo\n");
-				}
+		if ((blJumpMode == blm_timeout_waiting_till_communication) && ((sysTick_ms - startSysTick) > BOORLOADER_WAITTIME_FOR_APP_BOOT_ms)){
+			programmerRunApplication();
+
+		}
+		if (oldTick100ms != tick100ms){
+			if (tick100ms & 1){
+				SET_LED_BUSY();
+			}else{
+				CLEAR_LED_BUSY();
+				//printf("hallo\n");
+				//portSerialPutString("Hallo\n");
 			}
-			oldTick = tick;
-			//sysTick_ms++;
 		}
+		oldTick100ms = tick100ms;
+	}
 
-	}
-	/* Keep the user application running */
-	else
-	{
-#if 0
-		/* Test if user code is programmed starting from address "ApplicationAddress" */
-		if (((*(__IO uint32_t*)ApplicationAddress) & 0x2FFE0000 ) == 0x20000000)
-		{
-			/* Jump to user application */
-			JumpAddress = *(__IO uint32_t*) (ApplicationAddress + 4);
-			Jump_To_Application = (pFunction) JumpAddress;
-			/* Initialize user application's Stack Pointer */
-			__set_MSP(*(__IO uint32_t*) ApplicationAddress);
-			Jump_To_Application();
-		}
-#endif
-	}
 
 	while(1){
 

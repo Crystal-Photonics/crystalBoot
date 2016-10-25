@@ -9,6 +9,7 @@
 #include "../../../include/rpc_transmission/server/app/qt2mcu.h"
 //#include "board.h"
 #include "programmer.h"
+#include "main.h"
 
 
 uint8_t mcuEraseFlash(){
@@ -60,7 +61,7 @@ void mcuReboot(void){
 }
 
 void mcuEnterProgrammerMode(void){
-
+	mainEnterProgrammingMode();
 }
 
 void mcuRunApplication(void){

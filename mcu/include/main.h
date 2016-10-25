@@ -20,22 +20,7 @@
 #define MAIN_H_
 
 
-//#include "port_board.h"
-
-//#include "channel_codec/channel_codec_types.h"
-
-typedef enum{rer_none,
-	rer_resetPin,
-	rer_powerOnReset,
-	rer_independendWatchdog,
-	rer_windowWatchdog,
-	rer_softwareReset,
-	rer_rtc,
-	rer_wupin
-	} resetReason_t;
-
-extern resetReason_t mainResetReason;
-
 extern uint32_t sysTick_ms;
+void mainEnterProgrammingMode(void);
 
 #endif /* MAIN_H_ */
