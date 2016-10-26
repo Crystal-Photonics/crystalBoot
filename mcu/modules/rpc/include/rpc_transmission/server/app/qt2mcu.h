@@ -18,6 +18,7 @@ typedef enum {crystalBool_Fail,crystalBool_OK} crystalBoolResult_t;
 typedef struct{
 	uint32_t githash;
 	uint32_t gitDate_unix;
+	uint16_t nameCRC16;
 	char name[8];
 	char version[8];
 } firmware_descriptor_t;
@@ -37,8 +38,8 @@ typedef struct{
 	uint32_t gitDate_unix;
 
 	uint32_t serialnumber;
-	uint32_t guid;
 	uint16_t deviceID;
+	uint8_t guid[12];
 	uint8_t boardRevision;
 
 	char name[8];

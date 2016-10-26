@@ -56,6 +56,7 @@ public:
 
     void sendByteData(QByteArray data);
     bool rpcIsCorrectHash(void);
+    bool rpcGetRemoteHashVersion(unsigned char hash[16], uint16_t *version);
 
     RPC_RESULT rpcEraseFlash();
     RPC_RESULT rpcWriteFirmwareBlock(uint8_t *data, size_t size);
@@ -64,6 +65,7 @@ public:
     RPC_RESULT rpcRunApplication(void);
     RPC_RESULT rpcEnterProgrammingMode(void);
     RPC_RESULT rpcGetMCUDescriptor(mcu_descriptor_t *descriptor);
+    RPC_RESULT rpcGetDeviceDescriptor(device_descriptor_t *descriptor);
 
 signals:
 

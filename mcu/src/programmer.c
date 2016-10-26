@@ -68,11 +68,15 @@ firmware_descriptor_t programmerGetFirmwareDescriptor( ){
 	return result;
 }
 
+void programmerGetGUID(uint8_t guid[12]){
+	portFlashGetGUID(guid);
+}
+
 mcu_descriptor_t programmerGetMCUDescriptor( ){
 	mcu_descriptor_t result;
 	memset(&result,0,sizeof(result));
 
-	portFlashGetGUID(result.guid);
+	programmerGetGUID(result.guid);
 	result.devID = 						portFlashGetDeviceID();
 	result.revision = 					portFlashGetRevisionID();
 	result.flashsize = 					portFlashGetFlashSize();

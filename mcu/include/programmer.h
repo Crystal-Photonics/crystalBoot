@@ -22,5 +22,6 @@ void programmerRunApplication(void);
 
 firmware_descriptor_t programmerGetFirmwareDescriptor( );
 mcu_descriptor_t programmerGetMCUDescriptor( );
+void programmerGetGUID(uint8_t guid[12]);
 
 #endif /* MCU_INCLUDE_PROGRAMMER_H_ */

@@ -271,7 +271,30 @@ RPC_RESULT SerialThread::rpcGetMCUDescriptor(mcu_descriptor_t *descriptor)
     }
 
 //  qDebug() << "sending data return: "  << " with : "<< resultstr;
-return result;
+    return result;
+}
+
+RPC_RESULT SerialThread::rpcGetDeviceDescriptor(device_descriptor_t *descriptor)
+{
+    QString resultstr;
+    RPC_RESULT result = mcuGetDeviceDescriptor(descriptor);
+    switch(result){
+    case RPC_SUCCESS:
+        resultstr = "RPC_SUCCESS";
+        break;
+    case RPC_FAILURE:
+        resultstr = "RPC_FAILURE";
+        break;
+    case RPC_COMMAND_UNKNOWN:
+        resultstr = "RPC_COMMAND_UNKNOWN";
+        break;
+    case RPC_COMMAND_INCOMPLETE:
+        resultstr = "RPC_COMMAND_INCOMPLETE";
+        break;
+    }
+
+//  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
 }
 
 
@@ -293,6 +316,16 @@ bool SerialThread::rpcIsCorrectHash(void)
 		return false;
 	}
     return memcmp(hash, RPC_TRANSMISSION_HASH, RPC_TRANSMISSION_HASH_SIZE) == 0;
+}
+
+bool SerialThread::rpcGetRemoteHashVersion(unsigned char hash[16], uint16_t *version)
+{
+    unsigned char start_command_id;
+    auto result = RPC_TRANSMISSION_get_hash(hash, &start_command_id, version);
+    if (result != RPC_SUCCESS){
+        return false;
+    }
+    return true;
 }
 
 

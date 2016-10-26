@@ -11,6 +11,25 @@
 
 channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
 
+QString arrayToHexString(uint8_t *buff, const size_t length, int insertNewLine){
+    QString result;
+    int insNewLineCounter=insertNewLine;
+    for (size_t i=0;i<length;i++){
+        result += "0x"+QString::number(buff[i],16).toUpper();
+        if (i<length-1){
+            result += ", ";
+            if (insertNewLine){
+                insNewLineCounter--;
+                if (insNewLineCounter==0){
+                    result += "\n";
+                    insNewLineCounter = insertNewLine;
+                }
+            }
+        }
+    }
+    return result;
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -28,7 +47,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction(ui->actionTransfer);
     ui->mainToolBar->addAction(ui->actionRun);
-    ui->mainToolBar->addAction(ui->actionGet_Info);
     refreshComPortList();
     connectTimer = new QTimer(this);
     connect(connectTimer, SIGNAL(timeout()), this, SLOT(on_tryConnect_timer()));
@@ -73,9 +91,14 @@ void MainWindow::on_tryConnect_timer()
             if (corr_hash){
                 log("bootloader found.");
                 setConnState(MainWindow::Connected);
+                getDeviceInfo();
             }else{
-                log("bootloader found but incorrect hash, disconnecting..");
-                statusBar()->showMessage("bootloader found but incorrect hash.");
+                uint8_t hash[16];
+                uint16_t version;
+                serialThread->rpcGetRemoteHashVersion(hash, &version);
+                log("");
+                log("bootloader found but incorrect RPC hash("+arrayToHexString(hash,16,0) +", V. "+QString::number(version)+"), disconnecting..");
+                log("");
                 serialThread->close();
                 setConnState(MainWindow::Disconnected);
             }
@@ -225,18 +248,14 @@ void MainWindow::sendfirmware(QString fileName)
 void MainWindow::getDeviceInfo()
 {
     mcu_descriptor_t descriptor;
+    device_descriptor_t deviceDescriptor;
 
     RPC_RESULT result = serialThread->rpcGetMCUDescriptor(&descriptor);
     if (result == RPC_SUCCESS){
+        result = serialThread->rpcGetDeviceDescriptor(&deviceDescriptor);
+    }
+    if (result == RPC_SUCCESS){
         log( "mcu info requested");
-
-        QString uid;
-        for (int i=0;i<12;i++){
-            uid += "0x"+QString::number(descriptor.guid[i],16).toUpper();
-            if (i<11){
-                uid += ", ";
-            }
-        }
 
         QString cat;
         if (descriptor.devID == 0x416){
@@ -253,12 +272,32 @@ void MainWindow::getDeviceInfo()
         ui->plainTextEdit->clear();
         ui->plainTextEdit->appendPlainText(QString("MCU devID: ")+"0x"+QString::number(descriptor.devID,16).toUpper()+" "+cat);
         ui->plainTextEdit->appendPlainText(QString("MCU revID: ")+"0x"+QString::number(descriptor.revision,16).toUpper());
-        ui->plainTextEdit->appendPlainText(QString("Flashsize: ")+"0x"+QString::number(descriptor.flashsize,16).toUpper());
-        ui->plainTextEdit->appendPlainText(QString("Unique ID: ")+uid);
+        ui->plainTextEdit->appendPlainText(QString("Flashsize: ")+QString::number(descriptor.flashsize/1024)+"kB (0x"+QString::number(descriptor.flashsize,16).toUpper()+")");
+        ui->plainTextEdit->appendPlainText(QString("Unique ID: ")+arrayToHexString(descriptor.guid,12,0));
         ui->plainTextEdit->appendPlainText(QString(""));
         ui->plainTextEdit->appendPlainText(QString("Available flashsize: ")+"0x"+QString::number(descriptor.availFlashSize,16).toUpper());
         ui->plainTextEdit->appendPlainText(QString("Entrypoint: ")+"0x"+QString::number(descriptor.firmwareEntryPoint,16).toUpper());
         ui->plainTextEdit->appendPlainText(QString("minimal entrypoint: ")+"0x"+QString::number(descriptor.minimalFirmwareEntryPoint,16).toUpper());
+
+
+        ui->lblMCU_devid->setText("0x"+QString::number(descriptor.devID,16).toUpper()+" "+cat);
+        ui->lblMCU_avSize->setText(QString::number(descriptor.availFlashSize/1024)+"kb");
+        ui->lblMCU_entryPoint->setText("0x"+QString::number(descriptor.firmwareEntryPoint,16).toUpper());
+        ui->lblMCU_fsize->setText(QString::number(descriptor.flashsize/1024)+"kB");
+        ui->lblMCU_guid->setText(arrayToHexString(descriptor.guid,12,4));
+        char blName[9];
+        char blVersion[9];
+        blName[8] = 0;
+        blVersion[8] = 0;
+        memcpy(blName,deviceDescriptor.name,sizeof(blName)-1 );
+        memcpy(blVersion,deviceDescriptor.version,sizeof(blVersion)-1 );
+        ui->lblBL_GitDate->setText( QDateTime::fromTime_t(deviceDescriptor.gitDate_unix).toString("yyyy.MM.dd"));
+        ui->lblBL_GitHash->setText("0x"+QString::number(deviceDescriptor.githash,16).toUpper());
+        ui->lblBL_Name->setText(blName);
+        ui->lblBL_Version->setText(blVersion);
+        ui->lblBL_ID->setText(QString::number(deviceDescriptor.deviceID));
+
+
 
     }else{
        log("mcu info request error ("+QString::number(result)+")");
@@ -321,67 +360,57 @@ void MainWindow::recalcUIState()
 {
     if (fileLoaded){
         ui->actionConnect->setEnabled(true);
+        ui->actionConnect_2->setEnabled(true);
         switch (connState){
         case ConnectionState::Disconnected:
             statusBar()->showMessage("disconnected");
             log("disconnected");
             ui->actionConnect->setText("connect");
             ui->actionRun->setEnabled(false);
-            ui->actionGet_Info->setEnabled(false);
+            ui->actionRun_Application->setEnabled(false);
+            ui->actionGet_Chip_Info->setEnabled(false);
             ui->actionTransfer->setEnabled(false);
+            ui->actionTransfer_2->setEnabled(false);
             break;
         case ConnectionState::Connected:
             statusBar()->showMessage("connected");
             log("connected");
             ui->actionConnect->setText("disconnect");
             ui->actionRun->setEnabled(true);
-            ui->actionGet_Info->setEnabled(true);
+            ui->actionRun_Application->setEnabled(true);
+            ui->actionGet_Chip_Info->setEnabled(true);
             ui->actionTransfer->setEnabled(true);
+            ui->actionTransfer_2->setEnabled(true);
             break;
         case ConnectionState::Connecting:
             statusBar()->showMessage("connecting..");
             log("connecting");
             ui->actionConnect->setText("stop");
             ui->actionRun->setEnabled(false);
-            ui->actionGet_Info->setEnabled(false);
+            ui->actionRun_Application->setEnabled(false);
+            ui->actionGet_Chip_Info->setEnabled(false);
             ui->actionTransfer->setEnabled(false);
+            ui->actionTransfer_2->setEnabled(false);
             break;
         case ConnectionState::none:
             break;
         }
     }else{
         ui->actionRun->setEnabled(false);
+        ui->actionRun_Application->setEnabled(false);
+
+        ui->actionConnect_2->setEnabled(false);
         ui->actionConnect->setEnabled(false);
-        ui->actionGet_Info->setEnabled(false);
+        ui->actionGet_Chip_Info->setEnabled(false);
+
         ui->actionTransfer->setEnabled(false);
+        ui->actionTransfer_2->setEnabled(false);
     }
 }
 
-void MainWindow::on_actionGet_Info_triggered()
+void MainWindow::on_actionConnect_2_triggered()
 {
-    getDeviceInfo();
-}
-
-void MainWindow::on_actionRun_triggered()
-{
-    runApplication();
-}
-
-void MainWindow::on_actionTransfer_triggered()
-{
-    sendfirmware(fileNameToSend);
-}
-
-void MainWindow::on_actionRefresh_triggered()
-{
-    refreshComPortList();
-}
-
-void MainWindow::on_actionOpen_triggered()
-{
-    QString fileName = QFileDialog::getOpenFileName(this,
-        "OpenFirmwareImage", fileNameToSend, tr("Firmware Image (*.cfw)"));
-    loadFile(fileName);
+    on_actionConnect_triggered();
 }
 
 void MainWindow::on_actionConnect_triggered()
@@ -393,8 +422,64 @@ void MainWindow::on_actionConnect_triggered()
     }
 }
 
+void MainWindow::on_actionGet_Chip_Info_triggered()
+{
+    on_actionGet_Info_triggered();
+}
+
+void MainWindow::on_actionGet_Info_triggered()
+{
+    getDeviceInfo();
+}
+
+void MainWindow::on_actionRun_Application_triggered()
+{
+    on_actionRun_triggered();
+}
+
+void MainWindow::on_actionRun_triggered()
+{
+    runApplication();
+}
+
+
+void MainWindow::on_actionTransfer_2_triggered()
+{
+    on_actionTransfer_triggered();
+}
+void MainWindow::on_actionTransfer_triggered()
+{
+    sendfirmware(fileNameToSend);
+}
+
+void MainWindow::on_actionRefresh_triggered()
+{
+    refreshComPortList();
+}
+
+void MainWindow::on_actionOpen_Firmware_Image_triggered()
+{
+    on_actionOpen_triggered();
+}
+
+
+void MainWindow::on_actionOpen_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        "OpenFirmwareImage", fileNameToSend, tr("Firmware Image (*.cfw)"));
+    loadFile(fileName);
+}
+
+
+
 void MainWindow::on_actionInfo_triggered()
 {
     InfoDialog infodiag(this);
     infodiag.exec();
+}
+
+
+void MainWindow::on_actionClose_triggered()
+{
+    close();
 }

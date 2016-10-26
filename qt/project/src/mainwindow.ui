@@ -6,23 +6,394 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>729</width>
+    <height>435</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>crystalBoot</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0" colspan="2">
+    <item row="0" column="2">
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+       <string>Remote firmware</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>Namehash:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Git date:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Version:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Git Hash:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="6" column="1">
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="groupBox_3">
+      <property name="title">
+       <string>MCU</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>MCU Device ID:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>MCU Flash size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>MCU GUID:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Available size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Entry point:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="6" column="1">
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="lblMCU_devid">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLabel" name="lblMCU_fsize">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="lblMCU_guid">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLabel" name="lblMCU_avSize">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="lblMCU_entryPoint">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="4">
+     <widget class="QGroupBox" name="groupBox_5">
+      <property name="title">
+       <string>new firmware</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_6">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>Git Hash:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Git date:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_18">
+         <property name="text">
+          <string>Version:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_19">
+         <property name="text">
+          <string>Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_21">
+         <property name="text">
+          <string>Namehash:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>Size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="label_22">
+         <property name="text">
+          <string>Path:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_23">
+         <property name="text">
+          <string>Entry Point:</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="5">
      <widget class="QPlainTextEdit" name="plainTextEdit"/>
     </item>
-    <item row="2" column="0">
+    <item row="3" column="0" colspan="5">
      <widget class="QProgressBar" name="progressBar">
       <property name="value">
        <number>24</number>
       </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QGroupBox" name="groupBox_4">
+      <property name="title">
+       <string>Bootloader info</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Git date:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Version:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Git Hash:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>ID:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="7" column="1">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLabel" name="lblBL_GitHash">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="lblBL_GitDate">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLabel" name="lblBL_Version">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="lblBL_Name">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLabel" name="lblBL_ID">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
@@ -32,7 +403,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>729</width>
      <height>20</height>
     </rect>
    </property>
@@ -40,10 +411,9 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen_Firmware_Image"/>
-    <addaction name="separator"/>
     <addaction name="actionEncrypt_Firmware"/>
-    <addaction name="actionCalc"/>
+    <addaction name="actionOpen_Firmware_Image"/>
+    <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -98,11 +468,6 @@
     <string>run</string>
    </property>
   </action>
-  <action name="actionGet_Info">
-   <property name="text">
-    <string>get Chip Info</string>
-   </property>
-  </action>
   <action name="actionRefresh">
    <property name="text">
     <string>refresh</string>
@@ -118,7 +483,7 @@
     <string>Encrypt Firmware</string>
    </property>
   </action>
-  <action name="actionCalc">
+  <action name="actionClose">
    <property name="text">
     <string>Close</string>
    </property>

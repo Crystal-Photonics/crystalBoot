@@ -10,6 +10,8 @@
 //#include "board.h"
 #include "programmer.h"
 #include "main.h"
+#include "vc.h"
+#include "version_info.h"
 
 
 uint8_t mcuEraseFlash(){
@@ -52,7 +54,19 @@ mcu_descriptor_t mcuGetMCUDescriptor( ){
 
 device_descriptor_t mcuGetDeviceDescriptor(void){
 	device_descriptor_t result;
+	uint8_t devName[] = VERSION_INFO_NAME;
+	uint8_t versionString[] = VERSION_INFO_VERSION;
 	memset(&result,0,sizeof(result));
+
+	result.githash = GITHASH;
+	result.gitDate_unix = GITUNIX;
+	result.serialnumber = 0;
+	programmerGetGUID(result.guid);
+
+	result.deviceID = VERSION_INFO_ID;
+	result.boardRevision = 0;
+	memcpy(result.name,devName,sizeof(result.name));
+	memcpy(result.version,versionString,sizeof(result.version));
 	return result;
 }
 
