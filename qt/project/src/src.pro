@@ -55,23 +55,16 @@ INCLUDEPATH += ../libs/rpc/include/rpc_transmission/client/generated_app
 FORMS    += mainwindow.ui
 FORMS    += infodialog.ui
 
-SH = "C:\Program Files (x86)\Git\usr\bin\sh.exe"
 
-#DEFINES += GIT_CURRENT_SHA1="\\\"$(SH) git.sh\\\""
+SH = c:\Program Files (x86)\Git\usr\bin\sh.exe
 
-GIT_CMD = "$$(UNIXTOOLS)sh git.sh"
+system($$system_quote($$SH) $$PWD/git.sh)
+
+  qmakeforce.target = dummy
+  qmakeforce.commands = rm -f Makefile ##to force rerun of qmake
+  qmakeforce.depends = FORCE
+  PRE_TARGETDEPS += $$qmakeforce.target
+  QMAKE_EXTRA_TARGETS += qmakeforce
 
 
-
-versionTarget.target = vc.h
-versionTarget.depends = FORCE
-
-win32: versionTarget.commands = $$SH $$PWD/git.sh
-#else:  versionTarget.commands = cd $$PWD; python ./version_getter.py -p $$TARGET
-
-PRE_TARGETDEPS += vc.h
-QMAKE_EXTRA_TARGETS += versionTarget
-
-#DEPENDPATH += ../
-#INCLUDEPATH += ../
 HEADERS += vc.h
