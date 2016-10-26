@@ -19,3 +19,6 @@
 [submodule "qt/project/libs/googletest"]
 	path = qt/project/libs/googletest
 	url = https://github.com/google/googletest.git
+[submodule "qt/project/libs/Intel-HEX-Class"]
+	path = qt/project/libs/Intel-HEX-Class
+	url = https://github.com/codinghead/Intel-HEX-Class.git
