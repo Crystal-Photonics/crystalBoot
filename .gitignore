@@ -96,6 +96,9 @@ local.properties
 
 qt/builds
 qt/project/libs/build/
+
+imageCreator/builds
+imageCreator/project/libs/build/
 vc.h
 
 qt/project/libs/rpc/doc

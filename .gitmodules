@@ -22,3 +22,6 @@
 [submodule "qt/project/libs/Intel-HEX-Class"]
 	path = qt/project/libs/Intel-HEX-Class
 	url = https://github.com/codinghead/Intel-HEX-Class.git
+[submodule "imageCreator/project/libs/googletest"]
+	path = imageCreator/project/libs/googletest
+	url = https://github.com/google/googletest.git
