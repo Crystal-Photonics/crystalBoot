@@ -9,6 +9,7 @@ InfoDialog::InfoDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->plainTextEdit->appendPlainText("");
+    ui->plainTextEdit->appendPlainText(QString("Build:  ")+__DATE__+"    "+__TIME__);
     ui->plainTextEdit->appendPlainText(QString("Git Hash: ")+QString::number(GITHASH,16).toUpper());
     ui->plainTextEdit->appendPlainText(QString("Git Date: ") + GITDATE);
 }
