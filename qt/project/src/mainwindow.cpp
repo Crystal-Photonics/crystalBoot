@@ -338,8 +338,9 @@ void MainWindow::log(QString str)
 
 void MainWindow::loadFile(QString fileName)
 {
-    QFile firmwareFile( fileName);
-    if (firmwareFile.open( QIODevice::ReadOnly )){
+//    QFile firmwareFile( fileName);
+    if (fwImage.open(fileName)){
+            //firmwareFile.open( QIODevice::ReadOnly )){
         fileNameToSend = fileName;
         fileLoaded = true;
     }else{
@@ -465,9 +466,16 @@ void MainWindow::on_actionOpen_Firmware_Image_triggered()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-        "OpenFirmwareImage", fileNameToSend, tr("Firmware Image (*.cfw)"));
-    loadFile(fileName);
+    //QString fn = "";
+    QFileDialog dialog(this);
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    //dialog.selectFile(fn);
+    //dialog.setDirectory(fn);
+    dialog.setNameFilter(tr("Firmware Image (*.cfw)"));
+    if (dialog.exec()){
+        loadFile(dialog.selectedFiles()[0]);
+       // loadUIFromSettings();
+    }
 }
 
 

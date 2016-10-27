@@ -9,6 +9,7 @@ public:
     explicit FirmwareImage();
     void clear();
     void save(QString targetFile);
+    bool open(QString fileName);
 
     uint32_t firmware_githash;
     QDateTime firmware_gitdate;

@@ -13,14 +13,17 @@ TEMPLATE = lib
 
 DEFINES += EXPORT_LIBRARY
 
-SOURCES += main.cpp \
-    infodialog.cpp
+SOURCES += main.cpp
+SOURCES += infodialog.cpp
 SOURCES += serialworker.cpp
 SOURCES += mainwindow.cpp
 
 
 SOURCES += ../libs/rpc/src/server/app/rpc_func_qt.cpp
 SOURCES += ../libs/rpc/src/server/app/rpc_service_qt.cpp
+
+SOURCES += $$PWD/../../../qt_common/firmwareimage.cpp
+HEADERS += $$PWD/../../../qt_common/firmwareimage.h
 
 HEADERS += mainwindow.h
 HEADERS += infodialog.h

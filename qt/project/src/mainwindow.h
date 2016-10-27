@@ -10,6 +10,8 @@
 #include "channel_codec/channel_codec_types.h"
 
 #include "rpc_transmission/server/app/mcu2qt.h"
+#include "firmwareimage.h"
+
 extern channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
 
 void RPC_setTimeout(uint32_t timeout_ms);
@@ -72,6 +74,8 @@ private:
     void recalcUIState();
     void setConnState(ConnectionState connState);
     ConnectionState connState;
+
+    FirmwareImage fwImage;
 
 
 };

@@ -411,7 +411,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionEncrypt_Firmware"/>
     <addaction name="actionOpen_Firmware_Image"/>
     <addaction name="actionClose"/>
    </widget>
@@ -476,11 +475,6 @@
   <action name="actionOpen_Firmware_Image">
    <property name="text">
     <string>Open Firmware Image</string>
-   </property>
-  </action>
-  <action name="actionEncrypt_Firmware">
-   <property name="text">
-    <string>Encrypt Firmware</string>
    </property>
   </action>
   <action name="actionClose">
