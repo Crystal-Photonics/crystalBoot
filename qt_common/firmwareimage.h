@@ -8,6 +8,7 @@ class FirmwareImage{
 public:
     explicit FirmwareImage();
     void clear();
+    void save(QString targetFile);
 
     uint32_t firmware_githash;
     QDateTime firmware_gitdate;
@@ -16,6 +17,10 @@ public:
 
     uint32_t firmware_entryPoint;
     uint32_t firmware_size;
+
+    QByteArray binary;
+
+
 private:
 
 };

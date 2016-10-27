@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <iostream>
 #include <fstream>
-#include <QXmlStreamWriter>
+
 #include <QRegularExpression>
 #include <QFile>
 
@@ -158,36 +158,12 @@ void FirmwareEncoder::fetchMetaData()
 
 void FirmwareEncoder::createImage()
 {
-
-    QXmlStreamWriter xml;
-    QFile file(imageCreatorSettings.targetFileName_abs);
-    file.open(QIODevice::WriteOnly);
-
-    xml.setDevice(&file);
-
-    xml.writeStartDocument();
-    xml.writeDTD("<!DOCTYPE crystalBoot>");
-    xml.writeStartElement("crystalBoot");
-    xml.writeAttribute("version", "1.0");
-
-    xml.writeStartElement("meta");
-    xml.writeAttribute("githash", "0x"+QString::number(fwImage.firmware_githash,16).toUpper());
-    xml.writeAttribute("gitdate", QString::number(fwImage.firmware_gitdate.toTime_t()));
-    xml.writeAttribute("firmware_version", fwImage.firmware_version);
-    xml.writeAttribute("firmware_name", fwImage.firmware_name);
-    xml.writeAttribute("firmware_entrypoint","0x"+QString::number(fwImage.firmware_entryPoint,16).toUpper() );
-    xml.writeAttribute("firmware_size",QString::number(fwImage.firmware_size));
-    xml.writeEndElement();
     ihex.begin();
     uint8_t hexByte=0;
-    QByteArray imageBinary;//(firmware_size,0);
+    fwImage.binary.clear();
     while (ihex.getData(&hexByte)){
-        imageBinary.append(hexByte);
+        fwImage.binary.append(hexByte);
         ++ihex;
     }
-    QByteArray imageBinary64 = imageBinary.toBase64();
-    xml.writeTextElement("binary",imageBinary64.data() );
-    qDebug() << imageBinary.size();
-    xml.writeEndElement();
-    xml.writeEndDocument();
+    fwImage.save(imageCreatorSettings.targetFileName_abs);
 }
