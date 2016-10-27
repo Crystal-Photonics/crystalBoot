@@ -4,16 +4,14 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QDebug>
+#include <iostream>
+#include <fstream>
+#include <QXmlStreamWriter>
 
-bool fileExists(QString path) {
-    QFileInfo check_file(path);
-    // check if file exists and if yes: Is it really a file and no directory?
-    if (check_file.exists() && check_file.isFile()) {
-        return true;
-    } else {
-        return false;
-    }
-}
+#include "firmwareimage.h"
+#include "firmwareencoder.h"
+
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -42,9 +40,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::loadUIFromSettings()
 {
-
-
-
     ui->lblEntryPoint->setText("");
     ui->lblGitDate->setText("");
     ui->lblGitHash->setText("");
@@ -93,101 +88,6 @@ void MainWindow::saveUIToSettings()
     imageCreatorSettings.keyWord_name = ui->edt_name->text();
     imageCreatorSettings.headerFiles =  ui->edt_versionInfoHeader->toPlainText().split('\n', QString::SkipEmptyParts);
 }
-
-
-ImageCreatorSettings::ImageCreatorSettings(QWidget *parent)
-{
-    this->parent = parent;
-    isExistingFileName = false;
-}
-
-void ImageCreatorSettings::setAbsoluteFilePaths()
-{
-    QDir dir(fileRootPath);
-    encryptKeyFileName_abs = dir.absoluteFilePath(encryptKeyFileName);
-    signKeyFileName_abs = dir.absoluteFilePath(signKeyFileName);
-    hexFileName_abs = dir.absoluteFilePath(hexFileName);
-    targetFileName_abs = dir.absoluteFilePath(targetFileName);
-    //qDebug() << "hexfilename: "<< hexFileName_abs;
-    headerFiles_abs.clear();
-    for (int i = 0; i<headerFiles.count();i++){
-        headerFiles_abs.append(dir.absoluteFilePath(headerFiles[i]));
-    }
-}
-
-void ImageCreatorSettings::load(QString filename)
-{
-    settingsFileName = filename;
-    QFileInfo fi(settingsFileName);
-    fileRootPath =fi.absoluteDir().absolutePath();
-
-    isExistingFileName = fileExists(settingsFileName);
-    QSettings settings(filename, QSettings::IniFormat, parent);
-
-    encryptKeyFileName = settings.value("encryptKeyFileName","").toString();
-    signKeyFileName = settings.value("signKeyFileName","").toString();
-    hexFileName = settings.value("hexFileName","").toString();
-    targetFileName = settings.value("targetFileName","").toString();
-
-    keyWord_githash = settings.value("keyWord_githash","GITHASH").toString();
-    keyWord_gitdate = settings.value("keyWord_gitdate_unix","GITUNIX").toString();
-    keyWord_version = settings.value("keyWord_version","VERSION_INFO_VERSION").toString();
-    keyWord_name = settings.value("keyWord_name","VERSION_INFO_NAME").toString();
-    settings.beginGroup("Version_Info_Header_Files");
-    QStringList keys = settings.childKeys();
-    headerFiles.clear();
-    for (int i = 0; i<keys.count();i++){
-        headerFiles.append(settings.value(keys[i],"").toString());
-    }
-    setAbsoluteFilePaths();
-}
-
-
-
-void ImageCreatorSettings::save()
-{
-    QSettings settings(settingsFileName, QSettings::IniFormat, parent);
-
-    settings.setValue("encryptKeyFileName",encryptKeyFileName);
-    settings.setValue("signKeyFileName",signKeyFileName);
-    settings.setValue("hexFileName",hexFileName);
-    settings.setValue("targetFileName",targetFileName);
-
-    settings.setValue("keyWord_githash",keyWord_githash);
-    settings.setValue("keyWord_gitdate_unix",keyWord_gitdate);
-    settings.setValue("keyWord_version",keyWord_version);
-    settings.setValue("keyWord_name",keyWord_name);
-
-    settings.beginGroup("Version_Info_Header_Files");
-
-    QStringList keys = settings.childKeys();
-    for (int i = 0; i<keys.count();i++){
-        settings.remove(keys[i]);
-    }
-
-    for (int i = 0; i<headerFiles.count();i++){
-        settings.setValue(QString("file")+QString::number(i),headerFiles[i]);
-    }
-    settings.sync();
-    setAbsoluteFilePaths();
-    isExistingFileName = true;
-}
-
-QString ImageCreatorSettings::getFileName()
-{
-    return settingsFileName;
-}
-
-QString ImageCreatorSettings::getRootPath()
-{
-    return fileRootPath;
-}
-
-bool ImageCreatorSettings::getIsExistingFileName()
-{
-    return isExistingFileName;
-}
-
 
 
 
@@ -239,81 +139,29 @@ void MainWindow::on_btnSaveAs_clicked()
 }
 
 
-FirmwareImage::FirmwareImage()
-{
-    firmware_githash = 0;
-    firmware_gitdate = QDate();
-    firmware_version = "";
-    firmware_name = "";
-}
-
-QString FirmwareImage::parseADefine(QString key, QString line)
-{
-    (void)key;
-    (void)line;
-    return "";
-
-}
-
-bool FirmwareImage::isTheDefine(QString defineName, QString line)
-{
-
-    line = line.left(line.indexOf("\\\\"));
-    if (line.toLower().contains("#define")){
-        return false;
-    }
-    line = line.right(line.indexOf("#define")+QString("#define").length());
-    if (!line[0].isSpace()){
-        return false;
-    }
-    line = line.trimmed();
-    if (!line.startsWith(defineName)){
-        return false;
-    }
-    if (!line[defineName.length()+1].isSpace()){
-        return false;
-    }
-    return true;
-}
-
-void FirmwareImage::parseHeaderFiles(ImageCreatorSettings &imageCreatorSettings)
-{
-    firmware_githash = 0;
-    firmware_gitdate = QDate();
-    firmware_version = "";
-    firmware_name = "";
-
-
-    for (int i = 0;i<imageCreatorSettings.headerFiles_abs.count();i++){
-        QString filename = imageCreatorSettings.headerFiles_abs[i];
-        //bool withiinComment=false;
-        QFile file(filename);
-        file.open(QIODevice::ReadOnly);
-        if (!file.isOpen()){
-            qDebug() << "cant open file " << imageCreatorSettings.headerFiles_abs[i];
-        }else{
-            QTextStream in(&file);
-            while(!in.atEnd()){
-                QString line = in.readLine();
-                line = line.left(line.indexOf("\\\\"));
-                if (line.contains(imageCreatorSettings.keyWord_gitdate)){
-
-                }else if (line.contains(imageCreatorSettings.keyWord_githash)){
-
-                }else if (line.contains(imageCreatorSettings.keyWord_name)){
-
-                }else if (line.contains(imageCreatorSettings.keyWord_version)){
-                    firmware_version = parseADefine(imageCreatorSettings.keyWord_version,line);
-                }
-            }
-        }
-    }
-}
-
-
-
 void MainWindow::on_btnPreview_clicked()
 {
-    FirmwareImage fwImage;
-    fwImage.parseHeaderFiles(imageCreatorSettings);
+    FirmwareEncoder fwImageEncode(imageCreatorSettings);
+    fwImageEncode.fetchMetaData();
+    FirmwareImage fwImage = fwImageEncode.fwImage;
+    ui->lblGitHash->setText("0x"+QString::number(fwImage.firmware_githash,16).toUpper());
+    ui->lblName->setText(fwImage.firmware_name);
+    ui->lblVersion->setText(fwImage.firmware_version);
+    ui->lblGitDate->setText(fwImage.firmware_gitdate.toString("yyyy.mm.dd HH:MM"));
+    ui->lblEntryPoint->setText("0x"+QString::number(fwImage.firmware_entryPoint,16).toUpper());
+    ui->lblSize->setText(QString::number(fwImage.firmware_size).toUpper());
+}
+
+void MainWindow::on_btnCreateImage_clicked()
+{
+    FirmwareEncoder fwImageEncode(imageCreatorSettings);
+    fwImageEncode.fetchMetaData();
+    FirmwareImage fwImage = fwImageEncode.fwImage;
+    ui->lblGitHash->setText("0x"+QString::number(fwImage.firmware_githash,16).toUpper());
+    ui->lblName->setText(fwImage.firmware_name);
+    ui->lblVersion->setText(fwImage.firmware_version);
+    ui->lblGitDate->setText(fwImage.firmware_gitdate.toString("yyyy.mm.dd HH:MM"));
+    ui->lblEntryPoint->setText("0x"+QString::number(fwImage.firmware_entryPoint,16).toUpper());
+    ui->lblSize->setText(QString::number(fwImage.firmware_size).toUpper());
+    fwImageEncode.createImage();
 }
