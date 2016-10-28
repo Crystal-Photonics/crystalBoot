@@ -10,6 +10,20 @@
 /*
  * deviceIDs.h is a catalog of our device portfolio and is something like this:
  *
+ *
+ *  typedef struct{
+ * 		uint32_t githash;
+ * 		uint32_t gitDate_unix;
+ *
+ *		uint32_t serialnumber;
+ *		uint16_t deviceID;
+ *		uint8_t guid[12];
+ *		uint8_t boardRevision;
+ *
+ *		char name[12];
+ *		char version[8];
+ *  } device_descriptor_v1_t;
+ *
  * 	typedef enum{deviceID_none=0,
  *		deviceID_CrystalBoot=1,
  *		..,
@@ -19,7 +33,7 @@
  *
  * */
 
-#include "../../../_deviceIDs/include/deviceIDs.h"
+#include "device_id_mapper.h"
 
 
 
@@ -30,7 +44,7 @@
 
 #define BOORLOADER_WAITTIME_FOR_APP_BOOT_ms 1000
 
-#define BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION 0
+#define BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION 1
 #define BOOTLOADER_WITH_DECRYPT_SUPPORT 1
 
 

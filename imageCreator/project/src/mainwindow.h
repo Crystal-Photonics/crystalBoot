@@ -8,6 +8,7 @@
 #include <QCloseEvent>
 #include <QDate>
 #include "imagecreatorsettings.h"
+#include "firmwareimage.h"
 
 namespace Ui {
 class MainWindow;
@@ -37,6 +38,7 @@ private slots:
 
 private:
     ImageCreatorSettings imageCreatorSettings;
+    void loadUIFromFirmwaredata(FirmwareImage fwImage);
     QSettings settings;
     Ui::MainWindow *ui;
 

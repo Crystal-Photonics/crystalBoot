@@ -36,6 +36,8 @@
 #include "channel_codec/phylayer.h"
 #include "errorlogger/generic_eeprom_errorlogger.h"
 
+
+
 typedef enum{blm_none, blm_direct_into_bootloader_mode,blm_direct_to_application, blm_timeout_waiting_till_communication} bootloaderJumpMode_t;
 
 
@@ -141,7 +143,9 @@ int main(void)
 		blJumpMode = blm_direct_into_bootloader_mode;
 	}
 
+
 	resetReason_t resetReason = portTestResetSource();
+
 
 	switch (resetReason){
 		case rer_none:
@@ -164,6 +168,12 @@ int main(void)
 			break;
 
 	}
+
+
+	if (!port_checkFlashConfiguration(false)){
+		blJumpMode = blm_direct_into_bootloader_mode;
+	}
+
 	if(blJumpMode == blm_direct_to_application){
 		portFlashRunApplication();
 		while(1){
@@ -172,7 +182,10 @@ int main(void)
 	}
 	port_chipInit();
 	portSerialInit(115200);
+	programmer_init();
+	while (!port_checkFlashConfiguration(true)){
 
+	}
 	//printResetReason_t(mainResetReason);
 #if 1
 	printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR,hardreset);

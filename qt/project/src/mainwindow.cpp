@@ -7,6 +7,8 @@
 #include <QFile>
 #include <QTime>
 #include <QFileDialog>
+#include <QPainter>
+#include <QBuffer>
 
 
 channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
@@ -135,16 +137,16 @@ void MainWindow::connectComPort(bool shallBeOpened)
 }
 
 
-void MainWindow::sendfirmware(QString fileName)
+void MainWindow::sendfirmware()
 {
 #define BLOCKLENGTH 128
 
-    QFile firmwareFile( fileName);
-    if (firmwareFile.open( QIODevice::ReadOnly )){
+    if (fwImage.isValid()){
+
         ui->progressBar->setValue(0);
         ui->progressBar->setVisible(true);
         RPC_RESULT result = RPC_SUCCESS;
-        qint64 fileSize =  firmwareFile.size();
+        qint64 fileSize =  fwImage.binary.size();
         qint64 byteCounter = 0;
         QTime runtime;
         QTime totalRuntime;
@@ -161,58 +163,62 @@ void MainWindow::sendfirmware(QString fileName)
             log("erase ok. " + QString::number(runtime.elapsed()/1000.0)+" seconds needed");
         }
 
-        log("resetting write/read pointer..");
+        log("Initializing transfer..");
 
-        result = serialThread->rpcResetFirmwarePointer();
+        result = serialThread->rpcInitFirmwareTransfer(fwImage);
         if (result != RPC_SUCCESS){
             fail = true;
-             log("pointer reset fail.");
+             log("Transfer init fail.");
         }else{
-             log("pointer reset ok. ");
+             log("Transfer init ok. ");
         }
 
         runtime.start();
         RPC_setTimeout(1*1000);
 
 #if 1
-        while (!firmwareFile.atEnd() && fail == false){
+        {
+            QBuffer firmwareFile(&fwImage.binary);
+            firmwareFile.open(QIODevice::ReadOnly);
+            while (!firmwareFile.atEnd() && fail == false){
 
-            char blockData[BLOCKLENGTH];
-            char blockDataTest[BLOCKLENGTH];
-            memset(blockData,0, BLOCKLENGTH);
-            byteCounter += firmwareFile.read(blockData,BLOCKLENGTH);
-            result = serialThread->rpcWriteFirmwareBlock((uint8_t*)blockData,BLOCKLENGTH);
-            if (result != RPC_SUCCESS){
-                break;
-            }
-
-            memset(blockDataTest,0, BLOCKLENGTH);
-            #if 0
-            result = serialThread->rpcReadFirmwareBlock((uint8_t*)blockDataTest,BLOCKLENGTH);
-            if (result != RPC_SUCCESS){
-                break;
-            }
-
-            for(uint8_t i=0;i<BLOCKLENGTH;i++){
-                if (blockData[i] != blockDataTest[i]){
-                    qDebug() << "verify fail at " << i;
-                    fail = true;
+                char blockData[BLOCKLENGTH];
+                char blockDataTest[BLOCKLENGTH];
+                memset(blockData,0, BLOCKLENGTH);
+                byteCounter += firmwareFile.read(blockData,BLOCKLENGTH);
+                result = serialThread->rpcWriteFirmwareBlock((uint8_t*)blockData,BLOCKLENGTH);
+                if (result != RPC_SUCCESS){
                     break;
                 }
-            }
-            if (fail){
-                break;
-            }
-#endif
-            static qint64 progress_old = 100;
-            qint64 progress = 100*byteCounter;
-            progress /=  fileSize ;
-            if (progress_old != progress){
-               log("progress: " + QString::number(progress)+ "%");
-               ui->progressBar->setValue(progress);
-            }
-            progress_old = progress;
 
+                memset(blockDataTest,0, BLOCKLENGTH);
+#if 0
+                result = serialThread->rpcReadFirmwareBlock((uint8_t*)blockDataTest,BLOCKLENGTH);
+                if (result != RPC_SUCCESS){
+                    break;
+                }
+
+                for(uint8_t i=0;i<BLOCKLENGTH;i++){
+                    if (blockData[i] != blockDataTest[i]){
+                        qDebug() << "verify fail at " << i;
+                        fail = true;
+                        break;
+                    }
+                }
+                if (fail){
+                    break;
+                }
+#endif
+                static qint64 progress_old = 100;
+                qint64 progress = 100*byteCounter;
+                progress /=  fileSize ;
+                if (progress_old != progress){
+                    log("progress: " + QString::number(progress)+ "%");
+                    ui->progressBar->setValue(progress);
+                }
+                progress_old = progress;
+
+            }
         }
 #endif
         if ((result != RPC_SUCCESS) || fail){
@@ -240,7 +246,7 @@ void MainWindow::sendfirmware(QString fileName)
         (void)byteCounter;
 
     }else{
-       log("cant open file " +fileName);
+       log("firmware file not valid ");
     }
     ui->progressBar->setVisible(false);
 }
@@ -248,13 +254,24 @@ void MainWindow::sendfirmware(QString fileName)
 void MainWindow::getDeviceInfo()
 {
     mcu_descriptor_t descriptor;
-    device_descriptor_t deviceDescriptor;
+    device_descriptor_v1_t deviceDescriptor;
+    firmware_descriptor_t  firmwareDescriptor;
+    bool rpcOK = true;
 
     RPC_RESULT result = serialThread->rpcGetMCUDescriptor(&descriptor);
-    if (result == RPC_SUCCESS){
-        result = serialThread->rpcGetDeviceDescriptor(&deviceDescriptor);
+    if (!result == RPC_SUCCESS){
+        rpcOK = false;
     }
-    if (result == RPC_SUCCESS){
+    result = serialThread->rpcGetDeviceDescriptor(&deviceDescriptor);
+    if (!result == RPC_SUCCESS){
+        rpcOK = false;
+    }
+    result = serialThread->rpcGetFirmwareDescriptor(&firmwareDescriptor);
+    if (!result == RPC_SUCCESS){
+        rpcOK = false;
+    }
+
+    if (rpcOK){
         log( "mcu info requested");
 
         QString cat;
@@ -285,9 +302,9 @@ void MainWindow::getDeviceInfo()
         ui->lblMCU_entryPoint->setText("0x"+QString::number(descriptor.firmwareEntryPoint,16).toUpper());
         ui->lblMCU_fsize->setText(QString::number(descriptor.flashsize/1024)+"kB");
         ui->lblMCU_guid->setText(arrayToHexString(descriptor.guid,12,4));
-        char blName[9];
+        char blName[12];
         char blVersion[9];
-        blName[8] = 0;
+        blName[12] = 0;
         blVersion[8] = 0;
         memcpy(blName,deviceDescriptor.name,sizeof(blName)-1 );
         memcpy(blVersion,deviceDescriptor.version,sizeof(blVersion)-1 );
@@ -296,6 +313,21 @@ void MainWindow::getDeviceInfo()
         ui->lblBL_Name->setText(blName);
         ui->lblBL_Version->setText(blVersion);
         ui->lblBL_ID->setText(QString::number(deviceDescriptor.deviceID));
+
+
+        char rfName[12];
+        char rfVersion[9];
+        rfName[12] = 0;
+        rfVersion[8] = 0;
+        memcpy(rfName,firmwareDescriptor.name,sizeof(rfName)-1 );
+        memcpy(rfVersion,firmwareDescriptor.version,sizeof(rfVersion)-1 );
+
+        ui->lbl_rf_githash->setText("0x"+QString::number(firmwareDescriptor.githash,16).toUpper());
+        ui->lbl_rf_gitdate->setText(QDateTime::fromTime_t(firmwareDescriptor.gitDate_unix).toString("yyyy.MM.dd HH:mm"));
+        ui->lbl_rf_namehash->setText("0x"+QString::number(firmwareDescriptor.nameCRC16,16).toUpper());
+        ui->lbl_rf_name->setText(rfName);
+        ui->lbl_rf_version->setText(rfVersion);
+
 
 
 
@@ -336,18 +368,34 @@ void MainWindow::log(QString str)
     QApplication::processEvents();
 }
 
+
+
+void MainWindow::loadUIFromFile(){
+    ui->lbl_nf_name->setText(fwImage.firmware_name);
+    ui->lbl_nf_namehash->setText("0x"+QString::number( fwImage.getNameCRC16(),16).toUpper());
+    ui->lbl_nf_version->setText(fwImage.firmware_version);
+    ui->lbl_nf_githash->setText("0x"+QString::number( fwImage.firmware_githash,16).toUpper());
+    ui->lbl_nf_gitdate->setText(fwImage.firmware_gitdate_dt.toString("yyyy.MM.dd HH:mm"));
+    ui->lbl_nf_size->setText( QString::number( fwImage.firmware_size/1024,10) +"kB ("+  QString::number( fwImage.firmware_size,10)+" Bytes)");
+    ui->lbl_nf_entrypoint->setText("0x"+QString::number( fwImage.firmware_entryPoint,16).toUpper());
+    QPainter painter(ui->lbl_nf_path);
+    QFontMetrics fontMetrics = painter.fontMetrics();
+
+    QString elidedPath = fontMetrics.elidedText(fileNameToSend, Qt::ElideLeft, ui->lbl_nf_path->width());
+    ui->lbl_nf_path->setText(elidedPath);
+}
+
 void MainWindow::loadFile(QString fileName)
 {
-//    QFile firmwareFile( fileName);
     if (fwImage.open(fileName)){
-            //firmwareFile.open( QIODevice::ReadOnly )){
-        fileNameToSend = fileName;
+
+        loadUIFromFile();
         fileLoaded = true;
     }else{
         fileLoaded = false;
-        fileNameToSend = "";
+        log("couldnt load file "+fileName);
     }
-
+    fileNameToSend = fileName;
     recalcUIState();
 }
 
@@ -450,7 +498,7 @@ void MainWindow::on_actionTransfer_2_triggered()
 }
 void MainWindow::on_actionTransfer_triggered()
 {
-    sendfirmware(fileNameToSend);
+    sendfirmware();
 }
 
 void MainWindow::on_actionRefresh_triggered()

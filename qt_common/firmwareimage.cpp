@@ -15,17 +15,32 @@ FirmwareImage::FirmwareImage()
 void FirmwareImage::clear()
 {
     firmware_githash = 0;
-    firmware_gitdate = QDateTime();
+    firmware_gitdate = 0;
+    firmware_gitdate_dt = QDateTime();
     firmware_version = "";
     firmware_name = "";
+
+    firmware_entryPoint = 0;
+    firmware_size = 0;
+
+    crypto = Crypto::Plain;
+    binary.clear();
 }
 
+bool FirmwareImage::isValid()
+{
+    //signature check
+    return firmware_githash && firmware_gitdate && firmware_entryPoint && firmware_size && binary.size() && ((size_t)firmware_size == (size_t)binary.size()) ;
+}
 
-void FirmwareImage::save(QString targetFile){
+bool FirmwareImage::save(QString targetFile){
     QXmlStreamWriter xml;
     QFile file(targetFile);
-    file.open(QIODevice::WriteOnly);
 
+    if(!file.open(QIODevice::WriteOnly)){
+        qDebug() << "cant open file"<< targetFile;
+        return false;
+    }
     xml.setDevice(&file);
 
     xml.writeStartDocument();
@@ -35,7 +50,7 @@ void FirmwareImage::save(QString targetFile){
 
     xml.writeStartElement("meta");
     xml.writeAttribute("githash", "0x"+QString::number(firmware_githash,16).toUpper());
-    xml.writeAttribute("gitdate", QString::number(firmware_gitdate.toTime_t()));
+    xml.writeAttribute("gitdate", QString::number(firmware_gitdate));
     xml.writeAttribute("firmware_version", firmware_version);
     xml.writeAttribute("firmware_name", firmware_name);
     xml.writeAttribute("firmware_entrypoint","0x"+QString::number(firmware_entryPoint,16).toUpper() );
@@ -47,6 +62,7 @@ void FirmwareImage::save(QString targetFile){
     xml.writeTextElement("binary",imageBinary64.data() );
     xml.writeEndElement();
     xml.writeEndDocument();
+    return true;
 }
 
 bool FirmwareImage::open(QString fileName)
@@ -89,8 +105,8 @@ bool FirmwareImage::open(QString fileName)
     bool ok = false;
     firmware_githash = metaNodeElement.attribute("githash","").toInt(&ok,0);
     if (!ok) {return false;}
-    uint32_t unixdate = metaNodeElement.attribute("gitdate","").toInt(&ok,0);;
-    firmware_gitdate.fromTime_t(unixdate);
+    firmware_gitdate = metaNodeElement.attribute("gitdate","").toInt(&ok,0);;
+    firmware_gitdate_dt = QDateTime::fromTime_t(firmware_gitdate);
     if (!ok) {return false;}
     firmware_version = metaNodeElement.attribute("firmware_version","");
 
@@ -113,5 +129,18 @@ bool FirmwareImage::open(QString fileName)
 
     qDebug() <<"first byte" << binary.at(0);
     qDebug() <<"size" << binary.size();
-    return true;
+
+    return isValid();
+}
+
+
+
+QString FirmwareImage::getNameShort(int len)
+{
+    return firmware_name.left(len);
+}
+
+uint16_t FirmwareImage::getNameCRC16()
+{
+    return qChecksum(firmware_name.toStdString().c_str(),firmware_name.length());
 }

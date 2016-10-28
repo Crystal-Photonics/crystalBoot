@@ -6,12 +6,14 @@
 #include "imagecreatorsettings.h"
 #include <QString>
 
+bool readHexFile(QString fileName, QByteArray &result, uint32_t &startAddress);
+bool readBinFile(QString fileName, QByteArray &result);
+
 class FirmwareEncoder{
 public:
     explicit FirmwareEncoder(ImageCreatorSettings imageCreatorSettings);
-    void fetchMetaData();
-    void createImage();
-
+    bool loadFirmwareData();
+    bool saveImage();
 
     FirmwareImage fwImage;
 private:

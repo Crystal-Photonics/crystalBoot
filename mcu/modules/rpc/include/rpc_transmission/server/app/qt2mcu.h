@@ -9,19 +9,25 @@ extern "C" {
 #pragma RPC version_number 1
 #pragma RPC command_id_start 8
 
+#include "../../../../../_deviceIDs/include/deviceIDs.h"
 
 typedef enum {rpcLEDStatus_none,rpcLEDStatus_off,rpcLEDStatus_on} rpcLEDStatus_t;
 
 typedef enum {crystalBool_VerifyError,crystalBool_VerifySuccess} firmwareVerifyResult_t;
 typedef enum {crystalBool_Fail,crystalBool_OK} crystalBoolResult_t;
+typedef enum {crystalBoolCrypto_Plain,crystalBoolCrypto_AES} crystalBoolCrypto_t;
 
 typedef struct{
 	uint32_t githash;
 	uint32_t gitDate_unix;
 	uint16_t nameCRC16;
-	char name[8];
+	uint32_t size;
+	uint32_t entryPoint;
+	crystalBoolCrypto_t crypto;
+	char name[12];
 	char version[8];
 } firmware_descriptor_t;
+
 
 typedef struct{
 	uint8_t guid[12];
@@ -33,22 +39,10 @@ typedef struct{
 	uint32_t minimalFirmwareEntryPoint;
 } mcu_descriptor_t;
 
-typedef struct{
-	uint32_t githash;
-	uint32_t gitDate_unix;
-
-	uint32_t serialnumber;
-	uint16_t deviceID;
-	uint8_t guid[12];
-	uint8_t boardRevision;
-
-	char name[8];
-	char version[8];
-} device_descriptor_t;
 
 //we want to the testapplication to be able to enumerate devices
 #pragma RPC ID mcuReboot 2
-device_descriptor_t mcuGetDeviceDescriptor(void);
+device_descriptor_v1_t mcuGetDeviceDescriptor(void);
 
 //we want to be able to send the reboot command to the application from the bootloader pc application
 #pragma RPC ID mcuReboot 4
@@ -58,17 +52,17 @@ void mcuReboot(void);
 #pragma RPC ID mcuEnterProgrammerMode 6
 void mcuEnterProgrammerMode(void);
 
-crystalBoolResult_t mcuSetApplicationAddress(uint32_t applicationAddress);
-uint32_t mcuGetApplicationAddress(void);
+crystalBoolResult_t mcuInitFirmwareTransfer( firmware_descriptor_t firmwareDescriptor_in[1]);
+firmware_descriptor_t mcuGetFirmwareDescriptor( );
 
-void mcuResetReadWritePointerToApplicationAddress(void);
 crystalBoolResult_t mcuWriteFirmwareBlock(uint8_t data_in[128]);
 crystalBoolResult_t mcuReadFirmwareBlock(uint8_t data_out[128]);
 crystalBoolResult_t mcuEraseFlash();
 
 firmwareVerifyResult_t mcuVerifyFirmware();
-firmware_descriptor_t mcuGetFirmwareDescriptor( );
 mcu_descriptor_t mcuGetMCUDescriptor( );
+
+
 
 
 

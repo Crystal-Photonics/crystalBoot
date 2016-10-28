@@ -27,9 +27,10 @@ uint32_t mcuGetApplicationAddress(void){
 	return 0;
 }
 
-void mcuResetReadWritePointerToApplicationAddress(void){
-	programmerResetReadWritePointerToApplicationAddress();
+crystalBoolResult_t mcuInitFirmwareTransfer(firmware_descriptor_t firmwareDescriptor_in[1]){
+	return programmerInitFirmwareTransfer(firmwareDescriptor_in);
 }
+
 
 crystalBoolResult_t mcuWriteFirmwareBlock(uint8_t data_in[128]){
 	return programmerWriteBlock(data_in,128);
@@ -52,8 +53,8 @@ mcu_descriptor_t mcuGetMCUDescriptor( ){
 	return programmerGetMCUDescriptor();
 }
 
-device_descriptor_t mcuGetDeviceDescriptor(void){
-	device_descriptor_t result;
+device_descriptor_v1_t mcuGetDeviceDescriptor(void){
+	device_descriptor_v1_t result;
 	uint8_t devName[] = VERSION_INFO_NAME;
 	uint8_t versionString[] = VERSION_INFO_VERSION;
 	memset(&result,0,sizeof(result));

@@ -14,6 +14,8 @@ private slots:
     void toUpper();
     void isSpace();
     void testDefineRegex();
+    void testHexFile();
+    void testHexFile_error();
 };
 DECLARE_TEST(TestQString)
 #endif // TESTQSTRING_H

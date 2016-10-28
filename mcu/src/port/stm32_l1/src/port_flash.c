@@ -20,6 +20,7 @@ static uint32_t stackAddressOfApplication;
 static uint32_t JumpAddress;
 
 
+static uint8_t firmwareDescriptorBuffer[FIRMWARE_DESCRIPTION_BUFFER_SIZE] __attribute__((section(".FirmwareDescriptorBuffer")));
 
 
 
@@ -278,6 +279,24 @@ uint32_t FLASH_PagesMask(__IO uint32_t Size)
 	return pagenumber;
 }
 #endif
+
+bool portFlashSaveFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size){
+	if (size > sizeof(firmwareDescriptorBuffer)){
+		return false;
+	}
+	uint8_t buffer128[FIRMWARE_DESCRIPTION_BUFFER_SIZE];
+	memset(buffer128,0,sizeof(buffer128));
+	memcpy(buffer128,buffer,size);
+	return portFlashWrite((uint32_t)firmwareDescriptorBuffer, buffer128,FIRMWARE_DESCRIPTION_BUFFER_SIZE);
+}
+
+bool portFlashReadFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size){
+	if (size > sizeof(firmwareDescriptorBuffer)){
+		return false;
+	}
+	memcpy(buffer,&firmwareDescriptorBuffer,size);
+	return true;
+}
 
 bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const size_t size){
 

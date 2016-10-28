@@ -23,6 +23,7 @@ void port_chipInit();
 void port_chipDeinit();
 bool port_isDirectApplicationLaunchProgrammed(void);
 void port_programDirectApplicationLaunch(void);
+bool port_checkFlashConfiguration(bool usePrintf);
 
 #define configPRIO_BITS       		4        /* 15 priority levels */
 

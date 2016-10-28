@@ -8,6 +8,7 @@
 //#include "rpc_transmission/server/app/mcu2qt.h"
 #include "rpc_transmission/client/generated_app/RPC_TRANSMISSION_qt2mcu.h"
 #include "rpc_transmission/server/generated_general/RPC_types.h"
+#include "firmwareimage.h"
 
 struct SerialThread;
 
@@ -61,11 +62,12 @@ public:
     RPC_RESULT rpcEraseFlash();
     RPC_RESULT rpcWriteFirmwareBlock(uint8_t *data, size_t size);
     RPC_RESULT rpcReadFirmwareBlock(uint8_t *data, size_t size);
-    RPC_RESULT rpcResetFirmwarePointer();
+    RPC_RESULT rpcInitFirmwareTransfer(FirmwareImage &fwImage);
     RPC_RESULT rpcRunApplication(void);
     RPC_RESULT rpcEnterProgrammingMode(void);
     RPC_RESULT rpcGetMCUDescriptor(mcu_descriptor_t *descriptor);
-    RPC_RESULT rpcGetDeviceDescriptor(device_descriptor_t *descriptor);
+    RPC_RESULT rpcGetDeviceDescriptor(device_descriptor_v1_t *descriptor);
+    RPC_RESULT rpcGetFirmwareDescriptor(firmware_descriptor_t *descriptor);
 
 signals:
 

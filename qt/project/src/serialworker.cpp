@@ -182,9 +182,51 @@ RPC_RESULT SerialThread::rpcEraseFlash()
     return result;
 }
 
-RPC_RESULT SerialThread::rpcResetFirmwarePointer(){
+RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
     QString resultstr;
-    RPC_RESULT result = mcuResetReadWritePointerToApplicationAddress();
+    RPC_RESULT result;
+
+    crystalBoolResult_t return_value = crystalBool_OK;
+
+    firmware_descriptor_t firmwareDescriptor;
+
+    memset(&firmwareDescriptor,0,sizeof(firmware_descriptor_t));
+
+    switch(fwImage.crypto){
+    case FirmwareImage::Crypto::Plain:
+        firmwareDescriptor.crypto = crystalBoolCrypto_Plain;
+        break;
+    case FirmwareImage::Crypto::AES:
+        firmwareDescriptor.crypto = crystalBoolCrypto_AES;
+        break;
+    }
+    firmwareDescriptor.entryPoint = fwImage.firmware_entryPoint;
+    firmwareDescriptor.gitDate_unix = fwImage.firmware_gitdate;
+    firmwareDescriptor.githash = fwImage.firmware_githash;
+    QString nameShort =  fwImage.getNameShort(sizeof(firmwareDescriptor.name));
+    int len = sizeof(firmwareDescriptor.name);
+    if (nameShort.length() < len){
+        len = nameShort.length();
+    }
+
+    memcpy(firmwareDescriptor.name,nameShort.toStdString().c_str(),len);
+
+    len = sizeof(firmwareDescriptor.version);
+
+    if (fwImage.firmware_version.length() < len){
+        len = fwImage.firmware_version.length();
+    }
+    memcpy(firmwareDescriptor.version,fwImage.firmware_version.toStdString().c_str(),len);
+    firmwareDescriptor.nameCRC16 = fwImage.getNameCRC16();
+    firmwareDescriptor.size = fwImage.firmware_size;
+
+
+    result = mcuInitFirmwareTransfer(&return_value, &firmwareDescriptor);
+
+    if (return_value == crystalBool_Fail){
+        result = RPC_FAILURE;
+    }
+
     switch(result){
     case RPC_SUCCESS:
         resultstr = "RPC_SUCCESS";
@@ -274,7 +316,32 @@ RPC_RESULT SerialThread::rpcGetMCUDescriptor(mcu_descriptor_t *descriptor)
     return result;
 }
 
-RPC_RESULT SerialThread::rpcGetDeviceDescriptor(device_descriptor_t *descriptor)
+RPC_RESULT SerialThread::rpcGetFirmwareDescriptor(firmware_descriptor_t *descriptor)
+{
+    QString resultstr;
+    RPC_RESULT result = mcuGetFirmwareDescriptor(descriptor);
+    switch(result){
+    case RPC_SUCCESS:
+        resultstr = "RPC_SUCCESS";
+        break;
+    case RPC_FAILURE:
+        resultstr = "RPC_FAILURE";
+        break;
+    case RPC_COMMAND_UNKNOWN:
+        resultstr = "RPC_COMMAND_UNKNOWN";
+        break;
+    case RPC_COMMAND_INCOMPLETE:
+        resultstr = "RPC_COMMAND_INCOMPLETE";
+        break;
+    }
+
+//  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
+
+
+RPC_RESULT SerialThread::rpcGetDeviceDescriptor(device_descriptor_v1_t *descriptor)
 {
     QString resultstr;
     RPC_RESULT result = mcuGetDeviceDescriptor(descriptor);

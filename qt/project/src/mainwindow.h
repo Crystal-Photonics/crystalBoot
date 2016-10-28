@@ -19,7 +19,7 @@ uint32_t RPC_getTimeout(void);
 
 class TargetInfo{
     mcu_descriptor_t mcu_descriptor;
-    device_descriptor_t device_descriptor;
+    device_descriptor_v1_t device_descriptor;
     firmware_descriptor_t remoteFirmwareDescriptor;
 };
 
@@ -64,7 +64,7 @@ private:
     QComboBox *cmbPort;
     QString fileNameToSend;
     bool fileLoaded;
-    void sendfirmware(QString fileName);
+    void sendfirmware();
     void getDeviceInfo();
     void runApplication();
     void connectComPort(bool shallBeOpened);
@@ -78,6 +78,8 @@ private:
     FirmwareImage fwImage;
 
 
+    void loadUIFromFile();
+    uint16_t getNameHash(QString name);
 };
 
 #endif // MAINWINDOW_H

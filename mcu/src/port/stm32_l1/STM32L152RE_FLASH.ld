@@ -110,6 +110,17 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
 
+  .FirmwareDescriptorBuffer :
+  {
+    . = ALIGN(128);
+    PROVIDE(__firmware_descriptor_buffer_start = .);
+    *(.FirmwareDescriptorBuffer)    
+    *(.FirmwareDescriptorBuffer*)   
+    PROVIDE(__firmware_descriptor_buffer_end = .);
+    . = ALIGN(128);
+  } >FLASH
+  
+
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 
@@ -123,7 +134,7 @@ SECTIONS
 	*(.RamFunc)        /* .RamFunc sections */
 	
     . = ALIGN(4);
-    _edata = .;        /* define a global symbol at data end */
+   PROVIDE( _edata = .);        /* define a global symbol at data end */
   } >RAM AT> FLASH
 
   /* Uninitialized data section */

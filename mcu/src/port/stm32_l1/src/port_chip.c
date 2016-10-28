@@ -1,7 +1,11 @@
 
 #include "port_chip.h"
 #include "port_board.h"
+#include "port_flash.h"
+#include "programmer.h"
+#include <stdio.h>
 
+extern uint32_t __firmware_descriptor_buffer_end;
 
 const uint32_t MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_APPMODE = 0x5868FE4A;
 const uint32_t BACKUPADDRESS_OF_DIRECTLY_START_IN_APPMODE_VALUE = RTC_BKP_DR31;
@@ -216,4 +220,29 @@ resetReason_t portTestResetSource(void){
 	}
 #endif
 	return result;
+}
+
+bool port_checkFlashConfiguration(bool usePrintf){
+	if (portFlashGetFlashSize() != FLASH_SIZE){
+		if(usePrintf){
+			printf("Flash size malconfigured");
+		}
+		return false;
+	}
+
+	if (sizeof(firmware_meta_t) > FIRMWARE_DESCRIPTION_BUFFER_SIZE){
+		if(usePrintf){
+			printf("Application meta data too big for buffer");
+		}
+		return false;
+	}
+
+	uint32_t lastUsedAddressInFlash = (uint32_t)&__firmware_descriptor_buffer_end;
+	if (MINIMAL_APPLICATION_ADDRESS < lastUsedAddressInFlash){
+		if(usePrintf){
+			printf("Bootloader flash region overlaps with application memory");
+		}
+		return false;
+	}
+	return true;
 }

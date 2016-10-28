@@ -17,9 +17,10 @@
 #include "stm32l1xx.h"
 
 
-#define MINIMAL_APPLICATION_ADDRESS 	0x8006000
-#define APPLICATION_ADDRESS  			0x8006000
-#define FLASH_ADDRESS                	FLASH_BASE
+#define MINIMAL_APPLICATION_ADDRESS 		0x8006000
+#define APPLICATION_ADDRESS  				0x8006000
+#define FLASH_ADDRESS                		FLASH_BASE
+#define FIRMWARE_DESCRIPTION_BUFFER_SIZE	128
 
 #if 1
 #if defined (STM32L1XX_XL)
@@ -64,6 +65,8 @@ void FLASH_DisableWriteProtectionPages(void);
 
 
 bool portFlashEraseApplication();
+bool portFlashSaveFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size);
+bool portFlashReadFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size);
 bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const size_t size);
 bool portFlashVerifyAgainstBuffer(const uint32_t startAddress, uint8_t *buffer, const size_t size);
 bool portFlashRead(const uint32_t startAddress, uint8_t *buffer, const size_t size);

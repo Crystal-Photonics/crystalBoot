@@ -7,6 +7,61 @@
 #include <QRegularExpression>
 #include <QFile>
 
+
+bool readHexFile(QString fileName, QByteArray &result, uint32_t &startAddress)
+{
+    intelhex ihex;
+    std::ifstream intelHexFile;
+    intelHexFile.open(fileName.toStdString(), std::ifstream::in);
+
+    if(!intelHexFile.good())
+    {
+        qDebug() << "Error: couldn't open " << fileName;
+        return false;
+    }
+    intelHexFile >> ihex;
+    ihex.begin();
+    startAddress = ihex.currentAddress();
+    ihex.begin();
+    uint8_t hexByte=0;
+    result.clear();
+    uint32_t oldAddress = ihex.currentAddress();
+    while (ihex.getData(&hexByte)){
+        uint32_t newAddress = ihex.currentAddress();    //fill "blank address spaces" with 0
+        uint32_t diffAddress = newAddress-oldAddress;
+        for(uint32_t diff=1; diff < diffAddress;diff++){
+            uint8_t val = 0;
+            result.append(val);
+        }
+        result.append(hexByte);
+        oldAddress = newAddress;
+        ++ihex;
+    }
+    int numberWarnings = ihex.getNoWarnings();
+    if (numberWarnings){
+        qDebug() << "reading hexfile number of warnings:" << numberWarnings;
+        return false;
+    }
+    int numberErrors = ihex.getNoErrors();
+    if (numberErrors){
+        qDebug() << "reading hexfile number of errors:" << numberErrors;
+        return false;
+    }
+    return true;
+}
+
+
+bool readBinFile(QString fileName, QByteArray &result)
+{
+    QFile firmwareFile( fileName);
+    if (!firmwareFile.open( QIODevice::ReadOnly )){
+        return false;
+    }
+    result = firmwareFile.readAll();
+    return true;
+}
+
+
 FirmwareEncoder::FirmwareEncoder(ImageCreatorSettings imageCreatorSettings):imageCreatorSettings(imageCreatorSettings)
 {
     fwImage.clear();
@@ -63,7 +118,7 @@ bool FirmwareEncoder::parseTheDefine(QString defineName, DefineType defineType, 
     return true;
 }
 
-void FirmwareEncoder::fetchMetaData()
+bool FirmwareEncoder::loadFirmwareData()
 {
     fwImage.clear();
 
@@ -79,56 +134,60 @@ void FirmwareEncoder::fetchMetaData()
         file.open(QIODevice::ReadOnly);
         if (!file.isOpen()){
             qDebug() << "cant open file " << imageCreatorSettings.headerFiles_abs[i];
-        }else{
-            QTextStream in(&file);
-            while(!in.atEnd()){
-                QString line = in.readLine();
-                line = line.left(line.indexOf("\\\\"));
-                QString value;
-                if (parseTheDefine(imageCreatorSettings.keyWord_gitdate,DefineType::Number, line, value)){
-                    int v = value.toInt();
-                    fwImage.firmware_gitdate = QDateTime::fromTime_t(v);
-                    qDebug() << "found firmware_gitdate";
-                    if (firmware_gitdate_found){
-                        qDebug() << "gitdate found more than once.";
-                        exit_loop_due_error = true;
-                        break;
-                    }
-                    firmware_gitdate_found = true;
-
-                }else if (parseTheDefine(imageCreatorSettings.keyWord_githash, DefineType::Number, line, value)){
-                    fwImage.firmware_githash = value.toInt();
-                    qDebug() << "found firmware_githash";
-                    if (firmware_githash_found){
-                        qDebug() << "githash found more than once.";
-                        exit_loop_due_error = true;
-                        break;
-                    }
-                    firmware_githash_found = true;
-                }else if (parseTheDefine(imageCreatorSettings.keyWord_name,DefineType::String, line, value)){
-                    fwImage.firmware_name = value;
-                    qDebug() << "found firmware_name";
-                    if (firmware_name_found){
-                        qDebug() << "firmware name found more than once.";
-                        exit_loop_due_error = true;
-                        break;
-                    }
-                    firmware_name_found = true;
-                }else if (parseTheDefine(imageCreatorSettings.keyWord_version,DefineType::String,line, value) ){
-                    fwImage.firmware_version = value;
-                    qDebug() << "found firmware_version";
-                    if (firmware_version_found){
-                        qDebug() << "firmware version found more than once.";
-                        exit_loop_due_error = true;
-                        break;
-                    }
-                    firmware_version_found = true;
+            return false;
+        }
+        QTextStream in(&file);
+        while(!in.atEnd()){
+            QString line = in.readLine();
+            line = line.left(line.indexOf("\\\\"));
+            QString value;
+            if (parseTheDefine(imageCreatorSettings.keyWord_gitdate,DefineType::Number, line, value)){
+                int v = value.toInt();
+                fwImage.firmware_gitdate = v;
+                fwImage.firmware_gitdate_dt = QDateTime::fromTime_t(v);
+                qDebug() << "found firmware_gitdate";
+                if (firmware_gitdate_found){
+                    qDebug() << "gitdate found more than once.";
+                    exit_loop_due_error = true;
+                    break;
                 }
-            }
-            if (exit_loop_due_error){
-                break;
+                firmware_gitdate_found = true;
+
+            }else if (parseTheDefine(imageCreatorSettings.keyWord_githash, DefineType::Number, line, value)){
+                fwImage.firmware_githash = value.toInt();
+                qDebug() << "found firmware_githash";
+                if (firmware_githash_found){
+                    qDebug() << "githash found more than once.";
+                    exit_loop_due_error = true;
+                    break;
+                }
+                firmware_githash_found = true;
+            }else if (parseTheDefine(imageCreatorSettings.keyWord_name,DefineType::String, line, value)){
+                fwImage.firmware_name = value;
+                qDebug() << "found firmware_name";
+                if (firmware_name_found){
+                    qDebug() << "firmware name found more than once.";
+                    exit_loop_due_error = true;
+                    break;
+                }
+                firmware_name_found = true;
+            }else if (parseTheDefine(imageCreatorSettings.keyWord_version,DefineType::String,line, value) ){
+                fwImage.firmware_version = value;
+                qDebug() << "found firmware_version";
+                if (firmware_version_found){
+                    qDebug() << "firmware version found more than once.";
+                    exit_loop_due_error = true;
+                    break;
+                }
+                firmware_version_found = true;
             }
         }
+        if (exit_loop_due_error){
+            break;
+        }
+    }
+    if (exit_loop_due_error){
+        return false;
     }
     if (firmware_version_found && firmware_name_found && firmware_githash_found && firmware_gitdate_found){
         qDebug() << "found all fields";
@@ -138,32 +197,19 @@ void FirmwareEncoder::fetchMetaData()
     qDebug() << "firmware_version" << fwImage.firmware_version;
     qDebug() << "firmware_name" << fwImage.firmware_name;
 
-    std::ifstream intelHexFile;
-    intelHexFile.open(imageCreatorSettings.hexFileName_abs.toStdString(), std::ifstream::in);
-
-    if(!intelHexFile.good())
-    {
-        qDebug() << "Error: couldn't open " << imageCreatorSettings.hexFileName_abs;
-        //usage();
+    if (!readHexFile(imageCreatorSettings.hexFileName_abs, fwImage.binary, fwImage.firmware_entryPoint)){
+        qDebug() << "error loading hex file:" << fwImage.firmware_name;
+        return false;
     }
-    intelHexFile >> ihex;
-    ihex.begin();
-    fwImage.firmware_entryPoint = ihex.currentAddress();
-    ihex.end();
-    fwImage.firmware_size = ihex.currentAddress()-fwImage.firmware_entryPoint;
+
+    fwImage.firmware_size = fwImage.binary.size();
     qDebug() << "entrypoint: 0x"+QString::number( fwImage.firmware_entryPoint,16);
     qDebug() << "size: "+QString::number( fwImage.firmware_size);
+    return true;
 }
 
-
-void FirmwareEncoder::createImage()
+bool FirmwareEncoder::saveImage()
 {
-    ihex.begin();
-    uint8_t hexByte=0;
-    fwImage.binary.clear();
-    while (ihex.getData(&hexByte)){
-        fwImage.binary.append(hexByte);
-        ++ihex;
-    }
-    fwImage.save(imageCreatorSettings.targetFileName_abs);
+    return fwImage.save(imageCreatorSettings.targetFileName_abs);
 }
+

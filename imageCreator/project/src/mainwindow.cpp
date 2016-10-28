@@ -138,30 +138,46 @@ void MainWindow::on_btnSaveAs_clicked()
     }
 }
 
-
-void MainWindow::on_btnPreview_clicked()
+void MainWindow::loadUIFromFirmwaredata(FirmwareImage fwImage)
 {
-    FirmwareEncoder fwImageEncode(imageCreatorSettings);
-    fwImageEncode.fetchMetaData();
-    FirmwareImage fwImage = fwImageEncode.fwImage;
     ui->lblGitHash->setText("0x"+QString::number(fwImage.firmware_githash,16).toUpper());
     ui->lblName->setText(fwImage.firmware_name);
     ui->lblVersion->setText(fwImage.firmware_version);
-    ui->lblGitDate->setText(fwImage.firmware_gitdate.toString("yyyy.mm.dd HH:MM"));
+    ui->lblGitDate->setText(fwImage.firmware_gitdate_dt.toString("yyyy.mm.dd HH:MM"));
     ui->lblEntryPoint->setText("0x"+QString::number(fwImage.firmware_entryPoint,16).toUpper());
     ui->lblSize->setText(QString::number(fwImage.firmware_size).toUpper());
+}
+
+void MainWindow::on_btnPreview_clicked()
+{
+    bool result = false;
+    FirmwareEncoder fwImageEncode(imageCreatorSettings);
+    result = fwImageEncode.loadFirmwareData();
+    if (!result){
+        ui->statusBar->showMessage("error loading firmware data");
+    }
+    loadUIFromFirmwaredata(fwImageEncode.fwImage);
+    if (result){
+        ui->statusBar->showMessage("");
+    }
 }
 
 void MainWindow::on_btnCreateImage_clicked()
 {
     FirmwareEncoder fwImageEncode(imageCreatorSettings);
-    fwImageEncode.fetchMetaData();
-    FirmwareImage fwImage = fwImageEncode.fwImage;
-    ui->lblGitHash->setText("0x"+QString::number(fwImage.firmware_githash,16).toUpper());
-    ui->lblName->setText(fwImage.firmware_name);
-    ui->lblVersion->setText(fwImage.firmware_version);
-    ui->lblGitDate->setText(fwImage.firmware_gitdate.toString("yyyy.mm.dd HH:MM"));
-    ui->lblEntryPoint->setText("0x"+QString::number(fwImage.firmware_entryPoint,16).toUpper());
-    ui->lblSize->setText(QString::number(fwImage.firmware_size).toUpper());
-    fwImageEncode.createImage();
+    bool result1,result2;
+    result1 = fwImageEncode.loadFirmwareData();
+    if (!result1){
+        ui->statusBar->showMessage("error loading firmware data");
+    }
+    loadUIFromFirmwaredata(fwImageEncode.fwImage);
+    result2 = fwImageEncode.saveImage();
+    if (!result1){
+        ui->statusBar->showMessage("error saving firmware data");
+    }
+    if (result1 && result2){
+        ui->statusBar->showMessage("");
+    }
 }
+
+
