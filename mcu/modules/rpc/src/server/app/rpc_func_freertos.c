@@ -40,9 +40,8 @@ crystalBoolResult_t mcuReadFirmwareBlock(uint8_t data_out[128]){
 	return programmerReadBlock(data_out,128);
 }
 
-firmwareVerifyResult_t mcuVerifyFirmware(){
-	firmwareVerifyResult_t result = crystalBool_VerifyError;
-	return result;
+crystalBoolResult_t mcuVerifyFirmware(){
+	return programmerVerify();
 }
 
 firmware_descriptor_t mcuGetFirmwareDescriptor( ){

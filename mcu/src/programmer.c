@@ -9,6 +9,7 @@
 #include "programmer.h"
 #include "port_flash.h"
 #include "device_id_mapper.h"
+#include "channel_codec/crc16.h"
 
 #define BLOCK_LENGTH 128
 static uint32_t programmWritePointerAddress = APPLICATION_ADDRESS;
@@ -24,11 +25,40 @@ static firmware_meta_t firmwareMetaData;
 #error "please define BOOTLOADER_BOOT_APP_USING_RESET"
 #endif
 
-void programmer_init(){
+
+static void programmer_destroyMetaData(){
+	memset(&firmwareMetaData,0,sizeof(firmware_meta_t));
+	portFlashSaveFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof(firmware_meta_t));
+}
+
+static void programer_readMetaData(){
 	portFlashReadFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof(firmware_meta_t));
+
+	uint16_t oldCRC = firmwareMetaData.crc16OfMetaData;
+	firmwareMetaData.crc16OfMetaData = 0xFFFF;
+	uint16_t calcedCRC = crc16_buffer((uint8_t*) &firmwareMetaData, sizeof(firmware_meta_t));
+	firmwareMetaData.crc16OfMetaData = oldCRC;
+	if (firmwareMetaData.crc16OfMetaData != calcedCRC){
+		programmer_destroyMetaData();
+	}else{
+		firmwareMetaData.valid = true;
+	}
+}
+
+static void programer_writeMetaData(){
+	firmwareMetaData.valid = false;
+	firmwareMetaData.crc16OfMetaData = 0xFFFF;
+	firmwareMetaData.crc16OfMetaData = crc16_buffer((uint8_t*)&firmwareMetaData, sizeof(firmware_meta_t));
+	portFlashSaveFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof(firmware_meta_t));
+	firmwareMetaData.valid = true;
+}
+
+void programmer_init(){
+	programer_readMetaData();
 }
 
 crystalBoolResult_t programmerErase(){
+	programmer_destroyMetaData();
 	if (portFlashEraseApplication()){
 		return crystalBool_OK;
 	}else{
@@ -36,10 +66,39 @@ crystalBoolResult_t programmerErase(){
 	}
 }
 
+crystalBoolResult_t programmerVerify(void){
+	crystalBoolResult_t result = crystalBool_OK;
+	if (!firmwareMetaData.valid){
+		return crystalBool_Fail;
+	}
+	for (int i=0;i<CHECKSUM_SIZE;i++){
+		if (firmwareMetaData.sha256[i] != 0xAA){
+			result = crystalBool_Fail;
+		}
+	}
+	if (result == crystalBool_OK){
+		firmwareMetaData.checksumVerified = 1;
+	}
+	programer_writeMetaData();
+	return result;
+}
+
+crystalBoolResult_t programmerQuickVerify(void){
+	if (!firmwareMetaData.valid){
+		return crystalBool_Fail;
+	}
+	if (firmwareMetaData.checksumVerified == 1){
+		return crystalBool_OK;
+	}else{
+		return programmerVerify();
+	}
+}
+
 crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor, uint8_t sha256[32]){
 	if (firmwareDescriptor->entryPoint < MINIMAL_APPLICATION_ADDRESS){
 		return crystalBool_Fail;
 	}
+
 	uint32_t flashSize = portFlashGetFlashSize();
 	if (firmwareDescriptor->entryPoint+firmwareDescriptor->size > flashSize+FLASH_ADDRESS){
 		return crystalBool_Fail;
@@ -56,7 +115,7 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 
 	firmwareMetaData.checksumVerified = 0;
 	memcpy(firmwareMetaData.sha256,sha256,sizeof(firmwareMetaData.sha256));
-	portFlashSaveFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof(firmware_meta_t));
+	programer_writeMetaData();
 	return crystalBool_OK;
 }
 

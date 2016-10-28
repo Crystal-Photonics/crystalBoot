@@ -152,6 +152,37 @@ RPC_RESULT SerialThread::rpcReadFirmwareBlock(uint8_t *data, size_t size){
     return result;
 }
 
+RPC_RESULT SerialThread::rpcVerifyChecksum()
+{
+    RPC_RESULT result;
+
+    crystalBoolResult_t return_value = crystalBool_OK;
+
+    result = mcuVerifyFirmware(&return_value);
+    if (return_value == crystalBool_Fail){
+        result = RPC_FAILURE;
+    }
+
+    QString resultstr;
+    switch(result){
+    case RPC_SUCCESS:
+        resultstr = "RPC_SUCCESS";
+        break;
+    case RPC_FAILURE:
+        resultstr = "RPC_FAILURE";
+        break;
+    case RPC_COMMAND_UNKNOWN:
+        resultstr = "RPC_COMMAND_UNKNOWN";
+        break;
+    case RPC_COMMAND_INCOMPLETE:
+        resultstr = "RPC_COMMAND_INCOMPLETE";
+        break;
+    }
+
+  //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
 RPC_RESULT SerialThread::rpcEraseFlash()
 {
     RPC_RESULT result;
@@ -228,8 +259,12 @@ RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
         return RPC_FAILURE;
     }
     QBuffer shaStream(&fwImage.sha256);
+    shaStream.open(QIODevice::ReadOnly);
     uint8_t sha256[32];
-    shaStream.read((char*)sha256,32);
+    if (shaStream.read((char*)sha256,32)!=32){
+        qDebug() << "checksum copy wrong size";
+        return RPC_FAILURE;
+    }
     result = mcuInitFirmwareTransfer(&return_value, &firmwareDescriptor,sha256);
 
     if (return_value == crystalBool_Fail){

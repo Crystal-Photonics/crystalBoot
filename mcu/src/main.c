@@ -169,7 +169,9 @@ int main(void)
 
 	}
 
-
+	if (programmerQuickVerify() == crystalBool_Fail){
+		blJumpMode = blm_direct_into_bootloader_mode;
+	}
 	if (!port_checkFlashConfiguration(false)){
 		blJumpMode = blm_direct_into_bootloader_mode;
 	}
@@ -186,6 +188,7 @@ int main(void)
 	while (!port_checkFlashConfiguration(true)){
 
 	}
+
 	//printResetReason_t(mainResetReason);
 #if 1
 	printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR,hardreset);
@@ -193,6 +196,11 @@ int main(void)
 	printf("gitdate = %s %u\n", GITDATE, GITUNIX);
 #endif
 	SET_LED_BUSY();
+
+	if (programmerQuickVerify() == crystalBool_Fail){
+		printf("application Checksum verify fail\n");
+	}
+
 
 	rpc_receiver_init();
 	uint32_t startSysTick = sysTick_ms;

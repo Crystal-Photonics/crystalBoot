@@ -188,6 +188,7 @@ void MainWindow::sendfirmware()
                 byteCounter += firmwareFile.read(blockData,BLOCKLENGTH);
                 result = serialThread->rpcWriteFirmwareBlock((uint8_t*)blockData,BLOCKLENGTH);
                 if (result != RPC_SUCCESS){
+                    fail = true;
                     break;
                 }
 
@@ -241,6 +242,15 @@ void MainWindow::sendfirmware()
         }else{
             log("tranfer ok. " +QString::number( runtime.elapsed()/1000.0)+ " seconds needed. In Total: "+QString::number(totalRuntime.elapsed()/1000.0)+ "seconds needed.");
         }
+
+        result = serialThread->rpcVerifyChecksum();
+        if (result != RPC_SUCCESS){
+            fail = true;
+           log("verify fail");
+        }else{
+            log("verify ok. ");
+        }
+
 
         (void)fileSize;
         (void)byteCounter;

@@ -13,7 +13,6 @@ extern "C" {
 
 typedef enum {rpcLEDStatus_none,rpcLEDStatus_off,rpcLEDStatus_on} rpcLEDStatus_t;
 
-typedef enum {crystalBool_VerifyError,crystalBool_VerifySuccess} firmwareVerifyResult_t;
 typedef enum {crystalBool_Fail,crystalBool_OK} crystalBoolResult_t;
 typedef enum {crystalBoolCrypto_Plain,crystalBoolCrypto_AES} crystalBoolCrypto_t;
 
@@ -59,7 +58,7 @@ crystalBoolResult_t mcuWriteFirmwareBlock(uint8_t data_in[128]);
 crystalBoolResult_t mcuReadFirmwareBlock(uint8_t data_out[128]);
 crystalBoolResult_t mcuEraseFlash();
 
-firmwareVerifyResult_t mcuVerifyFirmware();
+crystalBoolResult_t mcuVerifyFirmware();
 mcu_descriptor_t mcuGetMCUDescriptor( );
 
 

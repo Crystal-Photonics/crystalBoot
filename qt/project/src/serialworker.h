@@ -62,6 +62,8 @@ public:
     RPC_RESULT rpcEraseFlash();
     RPC_RESULT rpcWriteFirmwareBlock(uint8_t *data, size_t size);
     RPC_RESULT rpcReadFirmwareBlock(uint8_t *data, size_t size);
+    RPC_RESULT rpcVerifyChecksum();
+
     RPC_RESULT rpcInitFirmwareTransfer(FirmwareImage &fwImage);
     RPC_RESULT rpcRunApplication(void);
     RPC_RESULT rpcEnterProgrammingMode(void);

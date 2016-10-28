@@ -17,11 +17,16 @@ typedef struct{
 	firmware_descriptor_t firmwareDescriptor;
 
 	bool checksumVerified;
+	bool valid;
 	uint8_t sha256[CHECKSUM_SIZE];
+	uint16_t crc16OfMetaData;
+
 }firmware_meta_t;
 
 void programmer_init();
 crystalBoolResult_t programmerErase(void);
+crystalBoolResult_t programmerVerify(void);
+crystalBoolResult_t programmerQuickVerify(void);
 crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor,  uint8_t sha256[32] );
 crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size);
 crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size);
