@@ -201,8 +201,11 @@ bool FirmwareEncoder::loadFirmwareData()
         qDebug() << "error loading hex file:" << fwImage.firmware_name;
         return false;
     }
-
     fwImage.firmware_size = fwImage.binary.size();
+
+    QByteArray checksum(32,0xAA);
+    fwImage.sha256 = checksum;
+
     qDebug() << "entrypoint: 0x"+QString::number( fwImage.firmware_entryPoint,16);
     qDebug() << "size: "+QString::number( fwImage.firmware_size);
     return true;

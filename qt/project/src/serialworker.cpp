@@ -1,6 +1,7 @@
 #include <qdebug.h>
 #include <thread>
 #include <chrono>
+#include <QBuffer>
 #include "serialworker.h"
 #include "mainwindow.h"
 
@@ -221,7 +222,15 @@ RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
     firmwareDescriptor.size = fwImage.firmware_size;
 
 
-    result = mcuInitFirmwareTransfer(&return_value, &firmwareDescriptor);
+
+    if (fwImage.sha256.size() != 32){
+        qDebug() << "checksum wrong size";
+        return RPC_FAILURE;
+    }
+    QBuffer shaStream(&fwImage.sha256);
+    uint8_t sha256[32];
+    shaStream.read((char*)sha256,32);
+    result = mcuInitFirmwareTransfer(&return_value, &firmwareDescriptor,sha256);
 
     if (return_value == crystalBool_Fail){
         result = RPC_FAILURE;

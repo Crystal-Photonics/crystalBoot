@@ -12,16 +12,17 @@
 #include <stdbool.h>
 #include "rpc_transmission/server/app/qt2mcu.h"
 
+#define CHECKSUM_SIZE 32
 typedef struct{
 	firmware_descriptor_t firmwareDescriptor;
 
 	bool checksumVerified;
-	uint8_t sha256[32];
+	uint8_t sha256[CHECKSUM_SIZE];
 }firmware_meta_t;
 
 void programmer_init();
 crystalBoolResult_t programmerErase(void);
-crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor);
+crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor,  uint8_t sha256[32] );
 crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size);
 crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size);
 

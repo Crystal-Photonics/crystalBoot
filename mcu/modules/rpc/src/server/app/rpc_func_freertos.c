@@ -27,8 +27,8 @@ uint32_t mcuGetApplicationAddress(void){
 	return 0;
 }
 
-crystalBoolResult_t mcuInitFirmwareTransfer(firmware_descriptor_t firmwareDescriptor_in[1]){
-	return programmerInitFirmwareTransfer(firmwareDescriptor_in);
+crystalBoolResult_t mcuInitFirmwareTransfer(firmware_descriptor_t firmwareDescriptor_in[1], uint8_t sha256_in[32]){
+	return programmerInitFirmwareTransfer(firmwareDescriptor_in,sha256_in);
 }
 
 

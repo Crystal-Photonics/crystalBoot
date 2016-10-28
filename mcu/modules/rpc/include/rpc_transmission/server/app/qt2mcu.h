@@ -52,7 +52,7 @@ void mcuReboot(void);
 #pragma RPC ID mcuEnterProgrammerMode 6
 void mcuEnterProgrammerMode(void);
 
-crystalBoolResult_t mcuInitFirmwareTransfer( firmware_descriptor_t firmwareDescriptor_in[1]);
+crystalBoolResult_t mcuInitFirmwareTransfer( firmware_descriptor_t firmwareDescriptor_in[1], uint8_t sha256_in[32]);
 firmware_descriptor_t mcuGetFirmwareDescriptor( );
 
 crystalBoolResult_t mcuWriteFirmwareBlock(uint8_t data_in[128]);

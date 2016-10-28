@@ -25,12 +25,15 @@ void FirmwareImage::clear()
 
     crypto = Crypto::Plain;
     binary.clear();
+    sha256.clear();
 }
 
 bool FirmwareImage::isValid()
 {
+    const uint32_t CHECKSUM_SIZE = 32;
     //signature check
-    return firmware_githash && firmware_gitdate && firmware_entryPoint && firmware_size && binary.size() && ((size_t)firmware_size == (size_t)binary.size()) ;
+
+    return firmware_githash && sha256.size() == CHECKSUM_SIZE && firmware_gitdate && firmware_entryPoint && firmware_size && binary.size() && ((size_t)firmware_size == (size_t)binary.size()) ;
 }
 
 bool FirmwareImage::save(QString targetFile){
@@ -56,11 +59,21 @@ bool FirmwareImage::save(QString targetFile){
     xml.writeAttribute("firmware_entrypoint","0x"+QString::number(firmware_entryPoint,16).toUpper() );
     xml.writeAttribute("firmware_size",QString::number(firmware_size));
     xml.writeAttribute("creation_date",QDateTime(QDateTime::currentDateTime()).toString("yyyy.mm.dd HH:MM"));
+    if (crypto == Crypto::Plain){
+        xml.writeAttribute("crypto","plain");
+    }else if(crypto == Crypto::AES){
+        xml.writeAttribute("crypto","aes");
+    }
     xml.writeEndElement();
+
+    QByteArray checkSumBinary64 = sha256.toBase64();
+    xml.writeTextElement("sha256",checkSumBinary64.data() );
+  //  xml.writeEndElement();
 
     QByteArray imageBinary64 = binary.toBase64();
     xml.writeTextElement("binary",imageBinary64.data() );
-    xml.writeEndElement();
+  //  xml.writeEndElement();
+
     xml.writeEndDocument();
     return true;
 }
@@ -76,11 +89,11 @@ bool FirmwareImage::open(QString fileName)
      *      firmware_entrypoint="0x8006000"
      *      firmware_size="229911"
      *      creation_date="2016.28.27 18:10"
+     *      crypto = "plain"
      *  />
      *  <binary></binary>
      *</crystalBoot>*/
 
-    QXmlStreamReader xml;
 
     QDomDocument doc("mydocument");
     QFile file(fileName);
@@ -116,10 +129,27 @@ bool FirmwareImage::open(QString fileName)
     firmware_size = metaNodeElement.attribute("firmware_size","").toInt(&ok,0);
     if (!ok) {return false;}
 
+    QString crpt = firmware_name = metaNodeElement.attribute("crypto","").toLower();
+    if (crpt == "plain"){
+        crypto = Crypto::Plain;
+    }else if (crpt == "aes"){
+        crypto = Crypto::AES;
+    }else{
+        return false;
+    }
+
+    QDomElement checksumNodeElement = crystalBootNode.firstChildElement("sha256");
+    if (checksumNodeElement.isNull()){
+        return false;
+    }
+    QByteArray checksum_base64 = checksumNodeElement.text().toUtf8();
+    sha256 = QByteArray::fromBase64(checksum_base64);
+
     QDomElement binNodeElement = crystalBootNode.firstChildElement("binary");
-    QString bin64_str = binNodeElement.text();
-    QByteArray bin_base64 = bin64_str.toUtf8();
-    //bin_base64 = bin64_str.c_str();
+    if (binNodeElement.isNull()){
+        return false;
+    }
+    QByteArray bin_base64 = binNodeElement.text().toUtf8();
     binary =  QByteArray::fromBase64(bin_base64);
 
     QFile testFile("test.bin");

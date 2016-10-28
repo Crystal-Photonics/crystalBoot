@@ -27,7 +27,7 @@ public:
 
     Crypto crypto;
     QByteArray binary;
-
+    QByteArray sha256;
 
 private:
 

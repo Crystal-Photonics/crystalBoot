@@ -36,7 +36,7 @@ crystalBoolResult_t programmerErase(){
 	}
 }
 
-crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor){
+crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor, uint8_t sha256[32]){
 	if (firmwareDescriptor->entryPoint < MINIMAL_APPLICATION_ADDRESS){
 		return crystalBool_Fail;
 	}
@@ -55,13 +55,20 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 	programmReadPointerAddress  = APPLICATION_ADDRESS;
 
 	firmwareMetaData.checksumVerified = 0;
-	memset(firmwareMetaData.sha256,0,sizeof(firmwareMetaData.sha256));
+	memcpy(firmwareMetaData.sha256,sha256,sizeof(firmwareMetaData.sha256));
 	portFlashSaveFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof(firmware_meta_t));
 	return crystalBool_OK;
+}
 
+firmware_descriptor_t programmerGetFirmwareDescriptor( ){
+	firmware_descriptor_t result;
+	memcpy(&result,&firmwareMetaData.firmwareDescriptor,sizeof(result));
+	return result;
 }
 
 crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size){
+	//programmer_decode_block(programmWritePointerAddress, data,  &size);
+
 	if (portFlashWrite(programmWritePointerAddress, data,  size)){
 		if (!portFlashVerifyAgainstBuffer(programmWritePointerAddress, data,  size)){
 			return crystalBool_Fail;
@@ -92,11 +99,7 @@ void programmerRunApplication(void){
 
 }
 
-firmware_descriptor_t programmerGetFirmwareDescriptor( ){
-	firmware_descriptor_t result;
-	memcpy(&result,&firmwareMetaData.firmwareDescriptor,sizeof(result));
-	return result;
-}
+
 
 void programmerGetGUID(uint8_t guid[12]){
 	portFlashGetGUID(guid);
