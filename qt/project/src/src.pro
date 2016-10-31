@@ -13,7 +13,9 @@ TEMPLATE = lib
 
 DEFINES += EXPORT_LIBRARY
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    options.cpp \
+    crystalsettings.cpp
 SOURCES += infodialog.cpp
 SOURCES += serialworker.cpp
 SOURCES += mainwindow.cpp
@@ -23,7 +25,9 @@ SOURCES += ../libs/rpc/src/server/app/rpc_func_qt.cpp
 SOURCES += ../libs/rpc/src/server/app/rpc_service_qt.cpp
 
 SOURCES += $$PWD/../../../qt_common/firmwareimage.cpp
-HEADERS += $$PWD/../../../qt_common/firmwareimage.h
+HEADERS += $$PWD/../../../qt_common/firmwareimage.h \
+    options.h \
+    crystalsettings.h
 
 HEADERS += mainwindow.h
 HEADERS += infodialog.h
@@ -55,7 +59,8 @@ INCLUDEPATH += ../libs/rpc/include/
 INCLUDEPATH += ../libs/rpc/include/rpc_transmission/client/generated_app
 
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    optionsdiag.ui
 FORMS    += infodialog.ui
 
 

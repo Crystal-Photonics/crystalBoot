@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "infodialog.h"
+#include "options.h"
 #include <QtSerialPort/QSerialPortInfo>
 #include <QStringList>
 #include <QDebug>
@@ -35,12 +36,17 @@ QString arrayToHexString(uint8_t *buff, const size_t length, int insertNewLine){
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    settings("crystalBoot.ini", QSettings::IniFormat, parent)
+    settings(parent)
 {
 
     ui->setupUi(this);
     fileLoaded = false;
     ui->progressBar->setVisible(false);
+
+    QSettings lastSettings("crystalBoot.ini", QSettings::IniFormat, parent);
+
+    settings.load(lastSettings.value("lastSettingsfile","crytalBootSettings.ini").toString());
+
     cmbPort = new QComboBox (this);
     ui->mainToolBar->addAction(ui->actionOpen);
     ui->mainToolBar->addWidget(cmbPort);
@@ -57,26 +63,33 @@ MainWindow::MainWindow(QWidget *parent) :
     QStringList bdl;
     bdl << "75" << "300" << "1200" << "2400" << "4800" << "9600" << "14400" << "19200" << "28800" << "38400" << "57600" << "115200";
 
-    cmbPort->setCurrentIndex( settings.value("lastComPort",0).toInt());
-        qDebug() << "gui:" << QThread::currentThreadId();
+
+
+    qDebug() << "gui:" << QThread::currentThreadId();
 
 
     serialThread = new SerialThread(this);
     setConnState(MainWindow::Disconnected);
-    loadFile(settings.value("lastFirmwareFile","").toString());
+        loadFile(settings.imageFile);
+        loadUIFromSettigns();
+
 }
 
 MainWindow::~MainWindow()
 {
-
     delete ui;
+}
+
+void MainWindow::loadUIFromSettigns(){
+        cmbPort->setCurrentIndex( cmbPort->findText(settings.COMPortName)                              );
+
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    settings.setValue("lastFirmwareFile",fileNameToSend);
-    settings.setValue("lastComPort",cmbPort->currentIndex());
-    settings.sync();
+    settings.imageFile = fileNameToSend;
+    settings.COMPortName = cmbPort->currentText();
+    settings.save();
     event->accept();
 }
 
@@ -155,6 +168,7 @@ void MainWindow::sendfirmware()
         totalRuntime.start();
         log("erasing..");
         RPC_setTimeout(20*1000);
+#if 1
         result = serialThread->rpcEraseFlash();
         if (result != RPC_SUCCESS){
             fail = true;
@@ -162,22 +176,24 @@ void MainWindow::sendfirmware()
         }else{
             log("erase ok. " + QString::number(runtime.elapsed()/1000.0)+" seconds needed");
         }
-
+#endif
         log("Initializing transfer..");
 
-        result = serialThread->rpcInitFirmwareTransfer(fwImage);
-        if (result != RPC_SUCCESS){
-            fail = true;
-             log("Transfer init fail.");
-        }else{
-             log("Transfer init ok. ");
+        if (!fail){
+            result = serialThread->rpcInitFirmwareTransfer(fwImage);
+            if (result != RPC_SUCCESS){
+                fail = true;
+                log("Transfer init fail.");
+            }else{
+                log("Transfer init ok. ");
+            }
+
+            runtime.start();
         }
-
-        runtime.start();
         RPC_setTimeout(1*1000);
-
 #if 1
         {
+#if 1
             QBuffer firmwareFile(&fwImage.binary);
             firmwareFile.open(QIODevice::ReadOnly);
             while (!firmwareFile.atEnd() && fail == false){
@@ -220,6 +236,7 @@ void MainWindow::sendfirmware()
                 progress_old = progress;
 
             }
+#endif
         }
 #endif
         if ((result != RPC_SUCCESS) || fail){
@@ -243,14 +260,15 @@ void MainWindow::sendfirmware()
             log("tranfer ok. " +QString::number( runtime.elapsed()/1000.0)+ " seconds needed. In Total: "+QString::number(totalRuntime.elapsed()/1000.0)+ "seconds needed.");
         }
 
-        result = serialThread->rpcVerifyChecksum();
-        if (result != RPC_SUCCESS){
-            fail = true;
-           log("verify fail");
-        }else{
-            log("verify ok. ");
+        if (!fail){
+            result = serialThread->rpcVerifyChecksum();
+            if (result != RPC_SUCCESS){
+                fail = true;
+                log("verify fail");
+            }else{
+                log("verify ok. ");
+            }
         }
-
 
         (void)fileSize;
         (void)byteCounter;
@@ -367,7 +385,8 @@ void MainWindow::refreshComPortList()
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
         cmbPort->addItem(info.portName());
     }
-    cmbPort->setCurrentIndex(settings.value("lastComPort",0).toInt());
+    //  cmbPort->setCurrentIndex(settings.value("lastComPort",0).toInt());
+    loadUIFromSettigns();
 
 }
 
@@ -527,8 +546,8 @@ void MainWindow::on_actionOpen_triggered()
     //QString fn = "";
     QFileDialog dialog(this);
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
-    //dialog.selectFile(fn);
-    //dialog.setDirectory(fn);
+    dialog.selectFile(fileNameToSend);
+    dialog.setDirectory(fileNameToSend);
     dialog.setNameFilter(tr("Firmware Image (*.cfw)"));
     if (dialog.exec()){
         loadFile(dialog.selectedFiles()[0]);
@@ -544,8 +563,16 @@ void MainWindow::on_actionInfo_triggered()
     infodiag.exec();
 }
 
+void MainWindow::on_actionOptions_triggered()
+{
+    OptionsDiag optionDiag(&settings,this);
+    optionDiag.exec();
+
+}
 
 void MainWindow::on_actionClose_triggered()
 {
     close();
 }
+
+

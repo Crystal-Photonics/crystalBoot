@@ -129,7 +129,7 @@ bool FirmwareImage::open(QString fileName)
     firmware_size = metaNodeElement.attribute("firmware_size","").toInt(&ok,0);
     if (!ok) {return false;}
 
-    QString crpt = firmware_name = metaNodeElement.attribute("crypto","").toLower();
+    QString crpt = metaNodeElement.attribute("crypto","").toLower();
     if (crpt == "plain"){
         crypto = Crypto::Plain;
     }else if (crpt == "aes"){

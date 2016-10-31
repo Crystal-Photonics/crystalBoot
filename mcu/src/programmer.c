@@ -5,6 +5,7 @@
  *      Author: ak
  */
 #include <string.h>
+#include <assert.h>
 #include "bootloader_config.h"
 #include "programmer.h"
 #include "port_flash.h"
@@ -18,7 +19,7 @@ static uint32_t programmReadPointerAddress = APPLICATION_ADDRESS;
 
 
 static firmware_meta_t firmwareMetaData;
-
+static bool firmware_meta_is_valid = false;
 
 
 #ifndef  BOOTLOADER_BOOT_APP_USING_RESET
@@ -27,30 +28,33 @@ static firmware_meta_t firmwareMetaData;
 
 
 static void programmer_destroyMetaData(){
-	memset(&firmwareMetaData,0,sizeof(firmware_meta_t));
-	portFlashSaveFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof(firmware_meta_t));
+#if 1
+	memset(&firmwareMetaData,(uint8_t) 0x00,sizeof firmwareMetaData );
+	firmwareMetaData.d.checksumVerified = 0;
+	assert(portFlashSaveFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof firmwareMetaData ));
+#endif
+	firmware_meta_is_valid = false;
 }
 
 static void programer_readMetaData(){
-	portFlashReadFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof(firmware_meta_t));
+	assert(portFlashReadFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof(firmwareMetaData)));
 
-	uint16_t oldCRC = firmwareMetaData.crc16OfMetaData;
-	firmwareMetaData.crc16OfMetaData = 0xFFFF;
-	uint16_t calcedCRC = crc16_buffer((uint8_t*) &firmwareMetaData, sizeof(firmware_meta_t));
-	firmwareMetaData.crc16OfMetaData = oldCRC;
+	uint16_t calcedCRC = crc16_buffer((uint8_t*) &firmwareMetaData.d, sizeof(firmwareMetaData.d));
 	if (firmwareMetaData.crc16OfMetaData != calcedCRC){
 		programmer_destroyMetaData();
+		firmware_meta_is_valid = false;
+
 	}else{
-		firmwareMetaData.valid = true;
+		firmware_meta_is_valid = true;
 	}
 }
 
 static void programer_writeMetaData(){
-	firmwareMetaData.valid = false;
-	firmwareMetaData.crc16OfMetaData = 0xFFFF;
-	firmwareMetaData.crc16OfMetaData = crc16_buffer((uint8_t*)&firmwareMetaData, sizeof(firmware_meta_t));
-	portFlashSaveFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof(firmware_meta_t));
-	firmwareMetaData.valid = true;
+#if 1
+	firmwareMetaData.crc16OfMetaData = crc16_buffer((uint8_t*)&firmwareMetaData.d, sizeof firmwareMetaData.d);
+	assert(portFlashSaveFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof(firmwareMetaData)));
+	firmware_meta_is_valid = true;
+#endif
 }
 
 void programmer_init(){
@@ -58,36 +62,43 @@ void programmer_init(){
 }
 
 crystalBoolResult_t programmerErase(){
+#if 1
 	programmer_destroyMetaData();
 	if (portFlashEraseApplication()){
 		return crystalBool_OK;
 	}else{
 		return crystalBool_Fail;
 	}
+#else
+	return crystalBool_Fail;
+#endif
 }
 
 crystalBoolResult_t programmerVerify(void){
+
 	crystalBoolResult_t result = crystalBool_OK;
-	if (!firmwareMetaData.valid){
+#if 1
+	if (!firmware_meta_is_valid){
 		return crystalBool_Fail;
 	}
 	for (int i=0;i<CHECKSUM_SIZE;i++){
-		if (firmwareMetaData.sha256[i] != 0xAA){
+		if (firmwareMetaData.d.sha256[i] != 0xAA){
 			result = crystalBool_Fail;
 		}
 	}
 	if (result == crystalBool_OK){
-		firmwareMetaData.checksumVerified = 1;
+		firmwareMetaData.d.checksumVerified = 1;
 	}
 	programer_writeMetaData();
+#endif
 	return result;
 }
 
 crystalBoolResult_t programmerQuickVerify(void){
-	if (!firmwareMetaData.valid){
+	if (!firmware_meta_is_valid){
 		return crystalBool_Fail;
 	}
-	if (firmwareMetaData.checksumVerified == 1){
+	if (firmwareMetaData.d.checksumVerified == 1){
 		return crystalBool_OK;
 	}else{
 		return programmerVerify();
@@ -108,24 +119,25 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 		return crystalBool_Fail;
 	}
 
-	memcpy(&firmwareMetaData.firmwareDescriptor,firmwareDescriptor,sizeof(firmware_descriptor_t));
+	memcpy(&firmwareMetaData.d.firmwareDescriptor,firmwareDescriptor,sizeof(firmware_descriptor_t));
 
 	programmWritePointerAddress = APPLICATION_ADDRESS;
 	programmReadPointerAddress  = APPLICATION_ADDRESS;
 
-	firmwareMetaData.checksumVerified = 0;
-	memcpy(firmwareMetaData.sha256,sha256,sizeof(firmwareMetaData.sha256));
+	firmwareMetaData.d.checksumVerified = 0;
+	memcpy(firmwareMetaData.d.sha256,sha256,sizeof(firmwareMetaData.d.sha256));
 	programer_writeMetaData();
 	return crystalBool_OK;
 }
 
 firmware_descriptor_t programmerGetFirmwareDescriptor( ){
 	firmware_descriptor_t result;
-	memcpy(&result,&firmwareMetaData.firmwareDescriptor,sizeof(result));
+	memcpy(&result,&firmwareMetaData.d.firmwareDescriptor,sizeof(result));
 	return result;
 }
 
 crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size){
+#if 1
 	//programmer_decode_block(programmWritePointerAddress, data,  &size);
 
 	if (portFlashWrite(programmWritePointerAddress, data,  size)){
@@ -138,6 +150,9 @@ crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size){
 	}else{
 		return crystalBool_Fail;
 	}
+#else
+	return crystalBool_Fail;
+#endif
 }
 
 crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size){
@@ -178,3 +193,4 @@ mcu_descriptor_t programmerGetMCUDescriptor( ){
 
 	return result;
 }
+//(void)programmer_destroyMetaData();

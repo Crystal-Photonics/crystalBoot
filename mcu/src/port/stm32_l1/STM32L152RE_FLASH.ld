@@ -112,12 +112,12 @@ SECTIONS
 
   .FirmwareDescriptorBuffer :
   {
-    . = ALIGN(128);
+    . = ALIGN(256);
     PROVIDE(__firmware_descriptor_buffer_start = .);
     *(.FirmwareDescriptorBuffer)    
     *(.FirmwareDescriptorBuffer*)   
     PROVIDE(__firmware_descriptor_buffer_end = .);
-    . = ALIGN(128);
+    . = ALIGN(256);
   } >FLASH
   
 

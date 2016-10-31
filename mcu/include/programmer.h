@@ -17,11 +17,16 @@ typedef struct{
 	firmware_descriptor_t firmwareDescriptor;
 
 	bool checksumVerified;
-	bool valid;
-	uint8_t sha256[CHECKSUM_SIZE];
-	uint16_t crc16OfMetaData;
 
+	uint8_t sha256[CHECKSUM_SIZE];
+
+}firmware_meta_data_t;
+
+typedef struct{
+	uint16_t crc16OfMetaData;
+	firmware_meta_data_t d;
 }firmware_meta_t;
+
 
 void programmer_init();
 crystalBoolResult_t programmerErase(void);

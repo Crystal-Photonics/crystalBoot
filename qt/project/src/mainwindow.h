@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QTimer>
 #include "serialworker.h"
+#include "crystalsettings.h"
 #include "channel_codec/channel_codec_types.h"
 
 #include "rpc_transmission/server/app/mcu2qt.h"
@@ -37,6 +38,7 @@ public:
     ~MainWindow();
     void closeEvent(QCloseEvent *event);
 
+    void loadUIFromSettigns();
 private slots:
     void on_tryConnect_timer();
     void on_actionOpen_triggered();
@@ -53,12 +55,14 @@ private slots:
     void on_actionOpen_Firmware_Image_triggered();
     void on_actionClose_triggered();
 
+    void on_actionOptions_triggered();
+
 private:
 
     Ui::MainWindow *ui;
 
     SerialThread* serialThread;
-    QSettings settings;
+    CrystalSettings settings;
 
     QTimer *connectTimer;
     QComboBox *cmbPort;
