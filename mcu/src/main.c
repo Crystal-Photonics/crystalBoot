@@ -139,14 +139,14 @@ int main(void)
 	blJumpMode = blm_timeout_waiting_till_communication;
 
 	boardInit();
-	if (getEnterBootloaderKeyState()){
-		blJumpMode = blm_direct_into_bootloader_mode;
-	}
+
 
 
 	resetReason_t resetReason = portTestResetSource();
 
-
+	if (getEnterBootloaderKeyState()){
+		blJumpMode = blm_direct_into_bootloader_mode;
+	}
 	switch (resetReason){
 		case rer_none:
 		case rer_resetPin:
@@ -155,6 +155,9 @@ int main(void)
 		case rer_softwareReset:
 			if (port_isDirectApplicationLaunchProgrammed()){
 				blJumpMode = blm_direct_to_application;
+				if (getEnterBootloaderKeyState()){
+					blJumpMode = blm_direct_into_bootloader_mode;
+				}
 			}
 			break;
 
@@ -168,6 +171,8 @@ int main(void)
 			break;
 
 	}
+
+
 	programmer_init();
 	if (programmerQuickVerify() == crystalBool_Fail){
 		blJumpMode = blm_direct_into_bootloader_mode;

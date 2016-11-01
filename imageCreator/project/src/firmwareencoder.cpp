@@ -6,6 +6,7 @@
 
 #include <QRegularExpression>
 #include <QFile>
+#include <QCryptographicHash>
 
 
 bool readHexFile(QString fileName, QByteArray &result, uint32_t &startAddress)
@@ -203,11 +204,19 @@ bool FirmwareEncoder::loadFirmwareData()
     }
     fwImage.firmware_size = fwImage.binary.size();
 
-    QByteArray checksum(32,0xAA);
-    fwImage.sha256 = checksum;
+    QCryptographicHash sha256_check(QCryptographicHash::Sha256);
+
+
+    QByteArray toBeChecked(fwImage.binary);
+
+    //toBeChecked  = toBeChecked.left(512);
+    sha256_check.addData(toBeChecked);
+    fwImage.sha256 = sha256_check.result();
 
     qDebug() << "entrypoint: 0x"+QString::number( fwImage.firmware_entryPoint,16);
     qDebug() << "size: "+QString::number( fwImage.firmware_size);
+
+    qDebug() << "sha256: " << fwImage.sha256.toHex();
     return true;
 }
 

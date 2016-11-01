@@ -28,3 +28,6 @@
 [submodule "imageCreator/project/libs/Intel-HEX-Class"]
 	path = imageCreator/project/libs/Intel-HEX-Class
 	url = https://github.com/codinghead/Intel-HEX-Class.git
+[submodule "mcu/modules/crypto-algorithms"]
+	path = mcu/modules/crypto-algorithms
+	url = https://github.com/B-Con/crypto-algorithms.git

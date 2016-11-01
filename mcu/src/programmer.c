@@ -11,6 +11,9 @@
 #include "port_flash.h"
 #include "device_id_mapper.h"
 #include "channel_codec/crc16.h"
+#include "sha256.h"
+
+SHA256_CTX sha56_ctx;
 
 #define BLOCK_LENGTH 128
 static uint32_t programmWritePointerAddress = APPLICATION_ADDRESS;
@@ -81,11 +84,42 @@ crystalBoolResult_t programmerVerify(void){
 	if (!firmware_meta_is_valid){
 		return crystalBool_Fail;
 	}
+#define FLASH_BLOCK_BUFFER_SIZE 32
+
+	uint8_t sha256_calced_hash[SHA256_BLOCK_SIZE];
+	uint8_t flash_bloc_buffer[FLASH_BLOCK_BUFFER_SIZE];
+
+	sha256_init(&sha56_ctx);
+	uint32_t pos=0;
+	while(pos < firmwareMetaData.d.firmwareDescriptor.size){
+		uint32_t size = FLASH_BLOCK_BUFFER_SIZE;
+		if (pos+size > firmwareMetaData.d.firmwareDescriptor.size){
+			size = firmwareMetaData.d.firmwareDescriptor.size - pos;
+		}
+		portFlashRead(APPLICATION_ADDRESS+pos, flash_bloc_buffer, size);
+		sha256_update(&sha56_ctx,flash_bloc_buffer,size);
+		pos += size;
+	}
+
+	sha256_final(&sha56_ctx,sha256_calced_hash);
+
+#if CHECKSUM_SIZE != FLASH_BLOCK_BUFFER_SIZE
+#error "both sha256 lengths should be the same"
+#endif
+
+	if (memcmp(sha256_calced_hash,firmwareMetaData.d.sha256,CHECKSUM_SIZE) == 0){
+		firmwareMetaData.d.checksumVerified = 1;
+	}else{
+		firmwareMetaData.d.checksumVerified = 0;
+		result = crystalBool_Fail;
+	}
+#if 0
 	for (int i=0;i<CHECKSUM_SIZE;i++){
 		if (firmwareMetaData.d.sha256[i] != 0xAA){
 			result = crystalBool_Fail;
 		}
 	}
+#endif
 	if (result == crystalBool_OK){
 		firmwareMetaData.d.checksumVerified = 1;
 	}
