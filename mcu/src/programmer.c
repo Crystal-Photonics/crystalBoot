@@ -113,13 +113,7 @@ crystalBoolResult_t programmerVerify(void){
 		firmwareMetaData.d.checksumVerified = 0;
 		result = crystalBool_Fail;
 	}
-#if 0
-	for (int i=0;i<CHECKSUM_SIZE;i++){
-		if (firmwareMetaData.d.sha256[i] != 0xAA){
-			result = crystalBool_Fail;
-		}
-	}
-#endif
+
 	if (result == crystalBool_OK){
 		firmwareMetaData.d.checksumVerified = 1;
 	}

@@ -173,6 +173,7 @@ int main(void)
 	}
 
 
+#if 1
 	programmer_init();
 	if (programmerQuickVerify() == crystalBool_Fail){
 		blJumpMode = blm_direct_into_bootloader_mode;
@@ -180,13 +181,15 @@ int main(void)
 	if (!port_checkFlashConfiguration(false)){
 		blJumpMode = blm_direct_into_bootloader_mode;
 	}
-
+#endif
 	if(blJumpMode == blm_direct_to_application){
 		portFlashRunApplication();
 		while(1){
 
 		}
 	}
+
+	programmer_init();
 	port_chipInit();
 	portSerialInit(115200);
 
