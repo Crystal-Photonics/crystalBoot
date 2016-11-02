@@ -3,7 +3,8 @@
 #include <QDebug>
 #include <iostream>
 #include <fstream>
-
+#include <time.h>
+#include <stdlib.h>
 #include <QRegularExpression>
 #include <QFile>
 #include <QCryptographicHash>
@@ -66,6 +67,7 @@ bool readBinFile(QString fileName, QByteArray &result)
 FirmwareEncoder::FirmwareEncoder(ImageCreatorSettings imageCreatorSettings):imageCreatorSettings(imageCreatorSettings)
 {
     fwImage.clear();
+    srand(time(NULL));
 }
 
 
@@ -213,6 +215,10 @@ bool FirmwareEncoder::loadFirmwareData()
     sha256_check.addData(toBeChecked);
     fwImage.sha256 = sha256_check.result();
 
+    fwImage.aes128_iv.clear();
+    for (int i = 0; i < 16;i++){
+        fwImage.aes128_iv.append(rand() & 0xFF);
+    }
     qDebug() << "entrypoint: 0x"+QString::number( fwImage.firmware_entryPoint,16);
     qDebug() << "size: "+QString::number( fwImage.firmware_size);
 

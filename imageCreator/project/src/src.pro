@@ -13,7 +13,8 @@ TEMPLATE = lib
 
 DEFINES += EXPORT_LIBRARY
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    aeskeyfile.cpp
 SOURCES += imagecreatorsettings.cpp
 
 SOURCES += $$PWD/../../../qt_common/firmwareimage.cpp
@@ -22,9 +23,9 @@ SOURCES += mainwindow.cpp
 
 SOURCES += $$PWD/../libs/Intel-HEX-Class/intelhex_class/intelhexclass.cpp
 
-SOURCES += $$PWD/../libs/libsodium/src/libsodium/randombytes/randombytes.c
 
-HEADERS += $$PWD/../libs/Intel-HEX-Class/intelhex_class/intelhexclass.h
+HEADERS += $$PWD/../libs/Intel-HEX-Class/intelhex_class/intelhexclass.h \
+    aeskeyfile.h
 HEADERS += imagecreatorsettings.h
 HEADERS += $$PWD/../../../qt_common/firmwareimage.h
 HEADERS += firmwareencoder.h

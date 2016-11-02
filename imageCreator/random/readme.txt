@@ -1,0 +1,1 @@
+in case Mingw can not create random numbers with sufficient entropy. It is possible to use this binary compiled with visual C++.

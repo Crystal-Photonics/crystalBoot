@@ -6,8 +6,9 @@
 #include <QWidget>
 
 class ImageCreatorSettings {
-    public:
 
+    public:
+    enum Crypt{Plain,AES128};
     explicit ImageCreatorSettings(QWidget *parent);
 
     void load(QString filename);
@@ -34,6 +35,7 @@ class ImageCreatorSettings {
 
     QString getRootPath();
     bool getIsExistingFileName();
+    Crypt crypt;
 private:
     QWidget *parent;
     QString settingsFileName;

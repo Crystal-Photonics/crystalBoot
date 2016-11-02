@@ -27,17 +27,17 @@ uint32_t mcuGetApplicationAddress(void){
 	return 0;
 }
 
-crystalBoolResult_t mcuInitFirmwareTransfer(firmware_descriptor_t firmwareDescriptor_in[1], uint8_t sha256_in[32], crystalBoolCrypto_t crypto){
-	return programmerInitFirmwareTransfer(firmwareDescriptor_in,sha256_in, crypto);
+crystalBoolResult_t mcuInitFirmwareTransfer(firmware_descriptor_t firmwareDescriptor_in[1], uint8_t sha256_in[32], uint8_t aes128_iv_in[16], crystalBoolCrypto_t crypto){
+	return programmerInitFirmwareTransfer(firmwareDescriptor_in,sha256_in,aes128_iv_in, crypto);
 }
 
 
-crystalBoolResult_t mcuWriteFirmwareBlock(uint8_t data_in[128]){
-	return programmerWriteBlock(data_in,128);
+crystalBoolResult_t mcuWriteFirmwareBlock(uint8_t data_in[TRANSMISSION_BLOCK_SIZE]){
+	return programmerWriteBlock(data_in,TRANSMISSION_BLOCK_SIZE);
 }
 
-crystalBoolResult_t mcuReadFirmwareBlock(uint8_t data_out[128]){
-	return programmerReadBlock(data_out,128);
+crystalBoolResult_t mcuReadFirmwareBlock(uint8_t data_out[TRANSMISSION_BLOCK_SIZE]){
+	return programmerReadBlock(data_out,TRANSMISSION_BLOCK_SIZE);
 }
 
 crystalBoolResult_t mcuVerifyFirmware(){

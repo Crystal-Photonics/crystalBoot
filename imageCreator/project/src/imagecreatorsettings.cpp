@@ -50,6 +50,15 @@ void ImageCreatorSettings::load(QString filename)
     keyWord_gitdate = settings.value("keyWord_gitdate_unix","GITUNIX").toString();
     keyWord_version = settings.value("keyWord_version","VERSION_INFO_VERSION").toString();
     keyWord_name = settings.value("keyWord_name","VERSION_INFO_NAME").toString();
+
+    QString cryptStr=settings.value("encryption","plain").toString();
+    if(cryptStr == "plain"){
+        crypt = Crypt::Plain;
+    }else if(cryptStr == "aes128"){
+        crypt = Crypt::AES128;
+    }
+
+
     settings.beginGroup("Version_Info_Header_Files");
     QStringList keys = settings.childKeys();
     headerFiles.clear();
@@ -74,6 +83,14 @@ void ImageCreatorSettings::save()
     settings.setValue("keyWord_gitdate_unix",keyWord_gitdate);
     settings.setValue("keyWord_version",keyWord_version);
     settings.setValue("keyWord_name",keyWord_name);
+
+    if (crypt == Crypt::Plain){
+        settings.setValue("encryption","plain");
+    }else if(crypt == Crypt::AES128){
+        settings.setValue("encryption","aes128");
+    }else{
+        settings.setValue("encryption","");
+    }
 
     settings.beginGroup("Version_Info_Header_Files");
 

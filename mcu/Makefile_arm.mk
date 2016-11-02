@@ -2,7 +2,7 @@
 #     0 = turn off optimization. s = optimize for size.
 # 
 
-OPT = 0
+OPT = s
 
 SILENCE = @
 
@@ -17,7 +17,7 @@ include $(PORT_DIR)/makefile.port
 BOOTLOADER_CONFIG_DIR = bootloaderconfig
 
 PORT_SOURCES += $(BOOTLOADER_CONFIG_DIR)/board/port_board.c
-PORT_SOURCES += $(BOOTLOADER_CONFIG_DIR)/key/aes_256_key.c
+PORT_SOURCES += $(BOOTLOADER_CONFIG_DIR)/key/aes_128_key.c
 
 PORT_CPPFLAGS += -I$(BOOTLOADER_CONFIG_DIR)/board
 PORT_CPPFLAGS += -I$(BOOTLOADER_CONFIG_DIR)/key
@@ -42,6 +42,7 @@ OBJECTS  = $(addprefix $(OBJDIR)/,$(addsuffix .o,$(basename $(SOURCES))))
 DEPENDS  = $(addprefix $(OBJDIR)/,$(addsuffix .d,$(basename $(SOURCES))))
 
 DEFS =  -DHSE_VALUE=$(HSE_VALUE)
+DEFS =  -DECB=0
 DEFS += -D$(MCU)
 DEFS += $(PORT_DEFS)
 
@@ -59,6 +60,7 @@ CPPFLAGS += -Imodules/rpc/include
 CPPFLAGS += -Imodules/RPC-ChannelCodec/include
 CPPFLAGS += -Imodules/RPC-ChannelCodec/include/errorlogger_dummy
 CPPFLAGS += -Imodules/crypto-algorithms
+CPPFLAGS += -Imodules/tiny-AES128-C
 CPPFLAGS += $(PORT_CPPFLAGS)
 
 #---------------- Compiler Options C ----------------

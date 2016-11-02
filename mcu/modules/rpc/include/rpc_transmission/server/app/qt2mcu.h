@@ -9,6 +9,8 @@ extern "C" {
 #pragma RPC version_number 1
 #pragma RPC command_id_start 8
 
+#define TRANSMISSION_BLOCK_SIZE 128
+
 #include "../../../../../_deviceIDs/include/deviceIDs.h"
 
 typedef enum {rpcLEDStatus_none,rpcLEDStatus_off,rpcLEDStatus_on} rpcLEDStatus_t;
@@ -51,8 +53,10 @@ void mcuReboot(void);
 #pragma RPC ID mcuEnterProgrammerMode 6
 void mcuEnterProgrammerMode(void);
 
-crystalBoolResult_t mcuInitFirmwareTransfer( firmware_descriptor_t firmwareDescriptor_in[1], uint8_t sha256_in[32], crystalBoolCrypto_t crypto);
+crystalBoolResult_t mcuInitFirmwareTransfer( firmware_descriptor_t firmwareDescriptor_in[1], uint8_t sha256_in[32], uint8_t aes128_iv_in[16], crystalBoolCrypto_t crypto);
 firmware_descriptor_t mcuGetFirmwareDescriptor( );
+
+//with length = TRANSMISSION_BLOCK_SIZE
 
 crystalBoolResult_t mcuWriteFirmwareBlock(uint8_t data_in[128]);
 crystalBoolResult_t mcuReadFirmwareBlock(uint8_t data_out[128]);

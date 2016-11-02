@@ -90,24 +90,33 @@
         <string>File paths</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="5" column="2">
-         <widget class="QLineEdit" name="edt_targetFile"/>
-        </item>
-        <item row="4" column="0">
+        <item row="5" column="0">
          <widget class="QLabel" name="label_4">
           <property name="text">
            <string>Signing private key:</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
-         <widget class="QLineEdit" name="edt_encryptionKey"/>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_17">
+          <property name="text">
+           <string>relative To:</string>
+          </property>
+         </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QLineEdit" name="edt_hexFile"/>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Encryption key file:</string>
+          </property>
+         </widget>
         </item>
-        <item row="4" column="2">
-         <widget class="QLineEdit" name="edt_signPrivateKey"/>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Target file:</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="label">
@@ -123,31 +132,36 @@
           </property>
          </widget>
         </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_5">
+        <item row="3" column="1">
+         <widget class="QRadioButton" name="rbtn_crypt_plain">
           <property name="text">
-           <string>Target file:</string>
+           <string>No encryption</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_3">
+        <item row="3" column="2">
+         <widget class="QRadioButton" name="rbtn_crypt_aes">
           <property name="text">
-           <string>Encryption key file:</string>
+           <string>AES-128 encryption</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_17">
-          <property name="text">
-           <string>relative To:</string>
-          </property>
-         </widget>
+        <item row="4" column="1" colspan="2">
+         <widget class="QLineEdit" name="edt_encryptionKey"/>
         </item>
-        <item row="2" column="2">
+        <item row="5" column="1" colspan="2">
+         <widget class="QLineEdit" name="edt_signPrivateKey"/>
+        </item>
+        <item row="6" column="1" colspan="2">
+         <widget class="QLineEdit" name="edt_targetFile"/>
+        </item>
+        <item row="2" column="1" colspan="2">
          <widget class="QPlainTextEdit" name="edt_versionInfoHeader"/>
         </item>
-        <item row="0" column="2">
+        <item row="1" column="1" colspan="2">
+         <widget class="QLineEdit" name="edt_hexFile"/>
+        </item>
+        <item row="0" column="1" colspan="2">
          <widget class="QLineEdit" name="edtRelative">
           <property name="autoFillBackground">
            <bool>false</bool>

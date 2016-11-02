@@ -66,6 +66,11 @@ bool FirmwareImage::save(QString targetFile){
     }
     xml.writeEndElement();
 
+
+
+    QByteArray aes128_iv_64 = aes128_iv.toBase64();
+    xml.writeTextElement("aes128_iv",aes128_iv_64.data() );
+
     QByteArray checkSumBinary64 = sha256.toBase64();
     xml.writeTextElement("sha256",checkSumBinary64.data() );
   //  xml.writeEndElement();
@@ -138,12 +143,24 @@ bool FirmwareImage::open(QString fileName)
         return false;
     }
 
+    if (crypto == Crypto::AES){
+        QDomElement aes128_ivNodeElement = crystalBootNode.firstChildElement("aes128_iv");
+        if (aes128_ivNodeElement.isNull()){
+            return false;
+        }
+        QByteArray aes128_iv_64 = aes128_ivNodeElement.text().toUtf8();
+        aes128_iv = QByteArray::fromBase64(aes128_iv_64);
+    }else{
+        aes128_iv = QByteArray(16,0);
+    }
+
     QDomElement checksumNodeElement = crystalBootNode.firstChildElement("sha256");
     if (checksumNodeElement.isNull()){
         return false;
     }
     QByteArray checksum_base64 = checksumNodeElement.text().toUtf8();
     sha256 = QByteArray::fromBase64(checksum_base64);
+
 
     QDomElement binNodeElement = crystalBootNode.firstChildElement("binary");
     if (binNodeElement.isNull()){

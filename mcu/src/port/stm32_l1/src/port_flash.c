@@ -353,28 +353,28 @@ bool portFlashSaveFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size){
 	if (size > FIRMWARE_DESCRIPTION_BUFFER_SIZE){
 		return false;
 	}
-	uint8_t buffer128[FIRMWARE_DESCRIPTION_BUFFER_SIZE];
-	memset(buffer128,0,sizeof(buffer128));
-	memcpy(buffer128,buffer,size);
+	uint8_t buffer256[FIRMWARE_DESCRIPTION_BUFFER_SIZE];
+	memset(buffer256,0,sizeof(buffer256));
+	memcpy(buffer256,buffer,size);
 
 	result = portFlashEraseFlash((uint32_t)firmwareDescriptorBuffer,FIRMWARE_DESCRIPTION_BUFFER_SIZE);
 	if (!result){
 		return false;
 	}
-	return portFlashWrite((uint32_t)firmwareDescriptorBuffer, buffer128,FIRMWARE_DESCRIPTION_BUFFER_SIZE);
+	return portFlashWrite((uint32_t)firmwareDescriptorBuffer, buffer256,FIRMWARE_DESCRIPTION_BUFFER_SIZE);
 }
 
 bool portFlashReadFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size){
 	if (size > FIRMWARE_DESCRIPTION_BUFFER_SIZE){
 		return false;
 	}
-	uint8_t buffer128[FIRMWARE_DESCRIPTION_BUFFER_SIZE];
+	uint8_t buffer256[FIRMWARE_DESCRIPTION_BUFFER_SIZE];
 
-	bool result = portFlashRead((uint32_t)firmwareDescriptorBuffer,buffer128,FIRMWARE_DESCRIPTION_BUFFER_SIZE );
+	bool result = portFlashRead((uint32_t)firmwareDescriptorBuffer,buffer256,FIRMWARE_DESCRIPTION_BUFFER_SIZE );
 	if (!result){
 		return false;
 	}
-	memcpy(buffer,buffer128,size);
+	memcpy(buffer,buffer256,size);
 	//memcpy(buffer,&firmwareDescriptorBuffer,size);
 	return true;
 
