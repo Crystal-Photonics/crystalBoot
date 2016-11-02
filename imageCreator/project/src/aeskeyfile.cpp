@@ -1,7 +1,7 @@
 #include "aeskeyfile.h"
 #include <QSettings>
 #include <QFileInfo>
-
+#include <QBuffer>
 
 bool AESKeyFile::isHex(QString hex_in){
     bool result = true;
@@ -64,4 +64,24 @@ bool AESKeyFile::open(QString fileName)
     creationDateTime = QDateTime::fromString(creation_str, "dd.MM.yyyy hh:mm");
     this->fileName = fileName;
     return true;
+}
+
+bool AESKeyFile::isValid()
+{
+    if (key.length() != 16){
+        return false;
+    }
+    if (!creationDateTime.isValid()){
+        return false;
+    }
+    return true;
+}
+
+void AESKeyFile::fillBuffer(uint8_t outbuffer[16])
+{
+    QBuffer aes128_keyStream(&key);
+    aes128_keyStream.open(QIODevice::ReadOnly);
+
+    aes128_keyStream.read((char*)outbuffer,sizeof outbuffer );
+
 }

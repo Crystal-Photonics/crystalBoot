@@ -8,7 +8,9 @@
 #include <QRegularExpression>
 #include <QFile>
 #include <QCryptographicHash>
-
+#include <QBuffer>
+#include "tiny-aes128-c_wrapper.h"
+#include "aeskeyfile.h"
 
 bool readHexFile(QString fileName, QByteArray &result, uint32_t &startAddress)
 {
@@ -211,13 +213,47 @@ bool FirmwareEncoder::loadFirmwareData()
 
     QByteArray toBeChecked(fwImage.binary);
 
-    //toBeChecked  = toBeChecked.left(512);
     sha256_check.addData(toBeChecked);
     fwImage.sha256 = sha256_check.result();
 
     fwImage.aes128_iv.clear();
-    for (int i = 0; i < 16;i++){
-        fwImage.aes128_iv.append(rand() & 0xFF);
+    uint8_t aes_iv_buffer[16];
+    for (size_t i = 0; i < sizeof aes_iv_buffer;i++){
+        aes_iv_buffer[i] = rand() & 0xFF;
+        fwImage.aes128_iv.append(aes_iv_buffer[i]);
+    }
+    uint8_t *p_aes_iv=aes_iv_buffer;
+
+    AESKeyFile aeskeyfile;
+    if (!aeskeyfile.open(imageCreatorSettings.encryptKeyFileName_abs)){
+        qDebug() << "error loading key file:" << imageCreatorSettings.encryptKeyFileName_abs;
+        return false;
+    }
+
+    if (!aeskeyfile.isValid()){
+        qDebug() << "aes key file not valid";
+        return false;
+    }
+
+    uint8_t aes_key_buffer[16];
+    aeskeyfile.fillBuffer(aes_key_buffer);
+    uint8_t *p_aes_key=aes_key_buffer;
+
+
+    if (imageCreatorSettings.crypt == ImageCreatorSettings::Crypt::AES128){
+        QBuffer inStream(&fwImage.binary);
+        QByteArray outArray;
+        uint8_t inbuffer[128];
+        uint8_t outbuffer[128];
+        inStream.open(QIODevice::ReadOnly);
+        while (!inStream.atEnd()){
+            inStream.read((char*)inbuffer,sizeof inbuffer);
+            AES128_CBC_encrypt_buffer(outbuffer,inbuffer,sizeof inbuffer,p_aes_key,p_aes_iv);
+            outArray.append((char*)outbuffer,sizeof outbuffer);
+            p_aes_key=0;
+            p_aes_iv=0;
+        }
+        fwImage.binary = outArray;
     }
     qDebug() << "entrypoint: 0x"+QString::number( fwImage.firmware_entryPoint,16);
     qDebug() << "size: "+QString::number( fwImage.firmware_size);

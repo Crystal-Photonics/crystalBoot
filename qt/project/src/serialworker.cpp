@@ -254,7 +254,21 @@ RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
     firmwareDescriptor.nameCRC16 = fwImage.getNameCRC16();
     firmwareDescriptor.size = fwImage.firmware_size;
 
+    uint8_t aes128_iv[16];
+    memset(aes128_iv,0,sizeof aes128_iv);
+    if (crypto == crystalBoolCrypto_AES){
+        if (fwImage.aes128_iv.size() != 32){
+            qDebug() << "aes128_iv wrong size";
+            return RPC_FAILURE;
+        }
 
+        QBuffer aes128_ivStream(&fwImage.aes128_iv);
+        aes128_ivStream.open(QIODevice::ReadOnly);
+        if (aes128_ivStream.read((char*)aes128_iv,sizeof aes128_iv )!=sizeof aes128_iv){
+            qDebug() << "aes128_iv copy wrong size";
+            return RPC_FAILURE;
+        }
+    }
 
     if (fwImage.sha256.size() != 32){
         qDebug() << "checksum wrong size";
@@ -263,11 +277,11 @@ RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
     QBuffer shaStream(&fwImage.sha256);
     shaStream.open(QIODevice::ReadOnly);
     uint8_t sha256[32];
-    if (shaStream.read((char*)sha256,32)!=32){
+    if (shaStream.read((char*)sha256,sizeof sha256)!=sizeof sha256){
         qDebug() << "checksum copy wrong size";
         return RPC_FAILURE;
     }
-    result = mcuInitFirmwareTransfer(&return_value, &firmwareDescriptor,sha256, crypto);
+    result = mcuInitFirmwareTransfer(&return_value, &firmwareDescriptor,sha256,aes128_iv, crypto);
 
     if (return_value == crystalBool_Fail){
         result = RPC_FAILURE;

@@ -14,6 +14,7 @@ CONFIG += c++14
 CONFIG += warn
 
 INCLUDEPATH += $$PWD/libs/Intel-HEX-Class/intelhex_class/
+INCLUDEPATH += $$PWD/libs/tiny-AES128-C/
 INCLUDEPATH += $$PWD/../../qt_common/
 #message($$PWD)
 
