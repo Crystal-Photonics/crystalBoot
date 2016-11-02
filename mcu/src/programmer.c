@@ -133,7 +133,7 @@ crystalBoolResult_t programmerQuickVerify(void){
 	}
 }
 
-crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor, uint8_t sha256[32]){
+crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor, uint8_t sha256[32], const crystalBoolCrypto_t crypto){
 	if (firmwareDescriptor->entryPoint < MINIMAL_APPLICATION_ADDRESS){
 		return crystalBool_Fail;
 	}
@@ -143,7 +143,11 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 		return crystalBool_Fail;
 	}
 
-	if ((BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION==0) && (firmwareDescriptor->crypto == crystalBoolCrypto_Plain)){
+	if (firmwareDescriptor->entryPoint  != APPLICATION_ADDRESS){
+		return crystalBool_Fail;
+	}
+
+	if ((BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION==0) && (crypto == crystalBoolCrypto_Plain)){
 		return crystalBool_Fail;
 	}
 
@@ -218,7 +222,7 @@ mcu_descriptor_t programmerGetMCUDescriptor( ){
 	result.firmwareEntryPoint = 		APPLICATION_ADDRESS;
 	result.minimalFirmwareEntryPoint = 	MINIMAL_APPLICATION_ADDRESS;
 	result.availFlashSize = 			FLASH_ADDRESS+result.flashsize - APPLICATION_ADDRESS;
-
+	result.cryptoRequired = 			BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION==0;
 	return result;
 }
 //(void)programmer_destroyMetaData();

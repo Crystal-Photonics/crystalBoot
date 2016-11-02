@@ -222,14 +222,16 @@ RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
 
     firmware_descriptor_t firmwareDescriptor;
 
+   crystalBoolCrypto_t crypto;
+
     memset(&firmwareDescriptor,0,sizeof(firmware_descriptor_t));
 
     switch(fwImage.crypto){
     case FirmwareImage::Crypto::Plain:
-        firmwareDescriptor.crypto = crystalBoolCrypto_Plain;
+        crypto = crystalBoolCrypto_Plain;
         break;
     case FirmwareImage::Crypto::AES:
-        firmwareDescriptor.crypto = crystalBoolCrypto_AES;
+        crypto = crystalBoolCrypto_AES;
         break;
     }
     firmwareDescriptor.entryPoint = fwImage.firmware_entryPoint;
@@ -265,7 +267,7 @@ RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
         qDebug() << "checksum copy wrong size";
         return RPC_FAILURE;
     }
-    result = mcuInitFirmwareTransfer(&return_value, &firmwareDescriptor,sha256);
+    result = mcuInitFirmwareTransfer(&return_value, &firmwareDescriptor,sha256, crypto);
 
     if (return_value == crystalBool_Fail){
         result = RPC_FAILURE;

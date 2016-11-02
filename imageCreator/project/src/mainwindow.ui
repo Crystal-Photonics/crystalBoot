@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>597</width>
-    <height>454</height>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -381,8 +381,26 @@
      <height>20</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuKey">
+    <property name="title">
+     <string>Key</string>
+    </property>
+    <addaction name="actionCreate_AES_128_key"/>
+    <addaction name="actionCreate_RSA_key_for_signature"/>
+   </widget>
+   <addaction name="menuKey"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionCreate_AES_128_key">
+   <property name="text">
+    <string>Create AES-128 key for encryption</string>
+   </property>
+  </action>
+  <action name="actionCreate_RSA_key_for_signature">
+   <property name="text">
+    <string>Create RSA key for signature</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

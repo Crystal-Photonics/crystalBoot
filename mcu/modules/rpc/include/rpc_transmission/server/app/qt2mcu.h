@@ -22,7 +22,6 @@ typedef struct{
 	uint16_t nameCRC16;
 	uint32_t size;
 	uint32_t entryPoint;
-	crystalBoolCrypto_t crypto;
 	char name[12];
 	char version[8];
 } firmware_descriptor_t;
@@ -36,6 +35,7 @@ typedef struct{
 	uint16_t revision;
 	uint32_t firmwareEntryPoint;
 	uint32_t minimalFirmwareEntryPoint;
+	uint8_t cryptoRequired;
 } mcu_descriptor_t;
 
 
@@ -51,7 +51,7 @@ void mcuReboot(void);
 #pragma RPC ID mcuEnterProgrammerMode 6
 void mcuEnterProgrammerMode(void);
 
-crystalBoolResult_t mcuInitFirmwareTransfer( firmware_descriptor_t firmwareDescriptor_in[1], uint8_t sha256_in[32]);
+crystalBoolResult_t mcuInitFirmwareTransfer( firmware_descriptor_t firmwareDescriptor_in[1], uint8_t sha256_in[32], crystalBoolCrypto_t crypto);
 firmware_descriptor_t mcuGetFirmwareDescriptor( );
 
 crystalBoolResult_t mcuWriteFirmwareBlock(uint8_t data_in[128]);

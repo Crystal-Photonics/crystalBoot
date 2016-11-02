@@ -36,6 +36,8 @@ private slots:
 
     void on_btnCreateImage_clicked();
 
+    void on_actionCreate_AES_128_key_triggered();
+
 private:
     ImageCreatorSettings imageCreatorSettings;
     void loadUIFromFirmwaredata(FirmwareImage fwImage);

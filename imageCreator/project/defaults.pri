@@ -15,6 +15,8 @@ CONFIG += warn
 
 INCLUDEPATH += $$PWD/libs/Intel-HEX-Class/intelhex_class/
 INCLUDEPATH += $$PWD/../../qt_common/
+INCLUDEPATH += $$PWD/libs/libsodium/src/libsodium/include/sodium/
+INCLUDEPATH += $$PWD/src/include
 #message($$PWD)
 
 

@@ -330,6 +330,11 @@ void MainWindow::getDeviceInfo()
         ui->lblMCU_entryPoint->setText("0x"+QString::number(descriptor.firmwareEntryPoint,16).toUpper());
         ui->lblMCU_fsize->setText(QString::number(descriptor.flashsize/1024)+"kB");
         ui->lblMCU_guid->setText(arrayToHexString(descriptor.guid,12,4));
+        if (descriptor.cryptoRequired){
+            ui->lblMCU_cryptoRequered->setText("yes");
+        }else{
+            ui->lblMCU_cryptoRequered->setText("no");
+        }
         char blName[12];
         char blVersion[9];
         blName[12] = 0;
@@ -403,6 +408,11 @@ void MainWindow::loadUIFromFile(){
     ui->lbl_nf_name->setText(fwImage.firmware_name);
     ui->lbl_nf_namehash->setText("0x"+QString::number( fwImage.getNameCRC16(),16).toUpper());
     ui->lbl_nf_version->setText(fwImage.firmware_version);
+    if (fwImage.crypto == FirmwareImage::Crypto::AES)
+        ui->lbl_nf_crypto->setText("AES");
+    else if (fwImage.crypto == FirmwareImage::Crypto::Plain){
+        ui->lbl_nf_crypto->setText("Plaintext");
+    }
     ui->lbl_nf_githash->setText("0x"+QString::number( fwImage.firmware_githash,16).toUpper());
     ui->lbl_nf_gitdate->setText(fwImage.firmware_gitdate_dt.toString("yyyy.MM.dd HH:mm"));
     ui->lbl_nf_size->setText( QString::number( fwImage.firmware_size/1024,10) +"kB ("+  QString::number( fwImage.firmware_size,10)+" Bytes)");

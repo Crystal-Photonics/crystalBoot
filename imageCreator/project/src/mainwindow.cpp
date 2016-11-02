@@ -10,6 +10,7 @@
 
 #include "firmwareimage.h"
 #include "firmwareencoder.h"
+#include "sodium.h"
 
 
 
@@ -181,3 +182,18 @@ void MainWindow::on_btnCreateImage_clicked()
 }
 
 
+
+void MainWindow::on_actionCreate_AES_128_key_triggered()
+{
+#if 1
+    const uint32_t AES128_KEY_LENGTH = 128/8;
+    QByteArray key;
+    char myString[AES128_KEY_LENGTH];
+    uint32_t myInt;
+
+    randombytes_buf(myString, AES128_KEY_LENGTH);
+    /* myString will be an array of 32 random bytes, not null-terminated */
+    myInt = randombytes_uniform(10);
+    qDebug() << myInt;
+#endif
+}

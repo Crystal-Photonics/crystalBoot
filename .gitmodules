@@ -31,3 +31,6 @@
 [submodule "mcu/modules/tiny-AES128-C"]
 	path = mcu/modules/tiny-AES128-C
 	url = https://github.com/kokke/tiny-AES128-C.git
+[submodule "imageCreator/project/libs/libsodium"]
+	path = imageCreator/project/libs/libsodium
+	url = https://github.com/jedisct1/libsodium

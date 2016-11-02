@@ -33,7 +33,7 @@ SOURCES += modules/rpc/src/server/app/rpc_func_freertos.c
 SOURCES += modules/RPC-ChannelCodec/src/channel_codec/crc16.c
 SOURCES += modules/RPC-ChannelCodec/src/channel_codec/channel_codec.c
 SOURCES += modules/crypto-algorithms/sha256.c
-SOURCES += modules/crypto-algorithms/aes.c
+SOURCES += modules/tiny-AES128-C/aes.c
 
 SOURCES += $(PORT_SOURCES)
 

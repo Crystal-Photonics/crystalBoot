@@ -22,6 +22,8 @@ SOURCES += mainwindow.cpp
 
 SOURCES += $$PWD/../libs/Intel-HEX-Class/intelhex_class/intelhexclass.cpp
 
+SOURCES += $$PWD/../libs/libsodium/src/libsodium/randombytes/randombytes.c
+
 HEADERS += $$PWD/../libs/Intel-HEX-Class/intelhex_class/intelhexclass.h
 HEADERS += imagecreatorsettings.h
 HEADERS += $$PWD/../../../qt_common/firmwareimage.h
