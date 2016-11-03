@@ -243,13 +243,6 @@
              </property>
             </widget>
            </item>
-           <item row="11" column="1">
-            <widget class="QLabel" name="lbl_nf_path">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
            <item row="4" column="0">
             <widget class="QLabel" name="label_21">
              <property name="text">
@@ -307,6 +300,13 @@
            </item>
            <item row="7" column="1">
             <widget class="QLabel" name="lbl_nf_crypto">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="1" colspan="2">
+            <widget class="QLabel" name="lbl_nf_path">
              <property name="text">
               <string/>
              </property>

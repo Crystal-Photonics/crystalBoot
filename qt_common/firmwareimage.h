@@ -12,8 +12,10 @@ public:
     bool save(QString targetFile);
     bool open(QString fileName);
     bool isValid();
+    bool isFileModified();
 
     QString getNameShort(int len);
+    QString fileName;
     uint16_t getNameCRC16();
 
     uint32_t firmware_githash;
@@ -31,6 +33,7 @@ public:
     QByteArray aes128_iv;
 
 private:
+    QDateTime lastModified;
 
 };
 #endif // FIRMWAREIMAGE_H

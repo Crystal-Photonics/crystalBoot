@@ -37,8 +37,10 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void closeEvent(QCloseEvent *event);
-
+    void resizeEvent(QResizeEvent* event);
+    void paintEvent(QPaintEvent *event);
     void loadUIFromSettigns();
+
 private slots:
     void on_tryConnect_timer();
     void on_actionOpen_triggered();
@@ -83,6 +85,7 @@ private:
 
 
     void loadUIFromFile();
+    void loadFirmwarePathUIFromFile();
     uint16_t getNameHash(QString name);
 };
 

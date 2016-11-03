@@ -10,7 +10,7 @@
 #include <QFileDialog>
 #include <QPainter>
 #include <QBuffer>
-
+#include <QMessageBox>
 
 channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
 
@@ -70,9 +70,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     serialThread = new SerialThread(this);
     setConnState(MainWindow::Disconnected);
-        loadFile(settings.imageFile);
-        loadUIFromSettigns();
-
+    loadUIFromSettigns();
+    loadFile(settings.imageFile);
 }
 
 MainWindow::~MainWindow()
@@ -81,7 +80,7 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::loadUIFromSettigns(){
-        cmbPort->setCurrentIndex( cmbPort->findText(settings.COMPortName)                              );
+    cmbPort->setCurrentIndex( cmbPort->findText(settings.COMPortName));
 
 }
 
@@ -91,6 +90,58 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings.COMPortName = cmbPort->currentText();
     settings.save();
     event->accept();
+}
+
+void MainWindow::paintEvent(QPaintEvent *event){
+    QMainWindow::paintEvent(event);
+    loadFirmwarePathUIFromFile();
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+   QMainWindow::resizeEvent(event);
+   loadFirmwarePathUIFromFile();
+}
+
+void MainWindow::loadUIFromFile(){
+    ui->lbl_nf_name->setText(fwImage.firmware_name);
+    ui->lbl_nf_namehash->setText("0x"+QString::number( fwImage.getNameCRC16(),16).toUpper());
+    ui->lbl_nf_version->setText(fwImage.firmware_version);
+    if (fwImage.crypto == FirmwareImage::Crypto::AES128)
+        ui->lbl_nf_crypto->setText("AES");
+    else if (fwImage.crypto == FirmwareImage::Crypto::Plain){
+        ui->lbl_nf_crypto->setText("Plaintext");
+    }
+    ui->lbl_nf_githash->setText("0x"+QString::number( fwImage.firmware_githash,16).toUpper());
+    ui->lbl_nf_gitdate->setText(fwImage.firmware_gitdate_dt.toString("yyyy.MM.dd HH:mm"));
+    ui->lbl_nf_size->setText( QString::number( fwImage.firmware_size/1024,10) +"kB ("+  QString::number( fwImage.firmware_size,10)+" Bytes)");
+    ui->lbl_nf_entrypoint->setText("0x"+QString::number( fwImage.firmware_entryPoint,16).toUpper());
+    loadFirmwarePathUIFromFile();
+}
+
+void MainWindow::loadFirmwarePathUIFromFile()
+{
+    QPainter painter(ui->lbl_nf_path);
+    QFontMetrics fontMetrics = painter.fontMetrics();
+
+    QString elidedPath = fontMetrics.elidedText(fileNameToSend, Qt::ElideLeft, ui->lbl_nf_path->width());
+    ui->lbl_nf_path->setText(elidedPath);
+}
+
+
+
+void MainWindow::loadFile(QString fileName)
+{
+    if (fwImage.open(fileName)){
+
+        loadUIFromFile();
+        fileLoaded = true;
+    }else{
+        fileLoaded = false;
+        log("couldnt load file "+fileName);
+    }
+    fileNameToSend = fileName;
+    recalcUIState();
 }
 
 void MainWindow::on_tryConnect_timer()
@@ -155,7 +206,19 @@ void MainWindow::sendfirmware()
 #define BLOCKLENGTH 128
 
     if (fwImage.isValid()){
-
+        if (fwImage.isFileModified()){
+            QMessageBox msgBox;
+            msgBox.setText("Firmware image has been modified.");
+            msgBox.setInformativeText("Do you want to reload the file?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::Yes);
+            int ret = msgBox.exec();
+            if (ret == QMessageBox::Yes){
+                loadFile(fwImage.fileName);
+            }
+        }
+    }
+    if (fwImage.isValid()){
         ui->progressBar->setValue(0);
         ui->progressBar->setVisible(true);
         RPC_RESULT result = RPC_SUCCESS;
@@ -379,7 +442,7 @@ void MainWindow::runApplication()
     }else{
         qDebug() << "application start failed"<<result;
     }
-    setConnState(MainWindow::Disconnected);
+    connectComPort(false);
 }
 
 
@@ -404,39 +467,7 @@ void MainWindow::log(QString str)
 
 
 
-void MainWindow::loadUIFromFile(){
-    ui->lbl_nf_name->setText(fwImage.firmware_name);
-    ui->lbl_nf_namehash->setText("0x"+QString::number( fwImage.getNameCRC16(),16).toUpper());
-    ui->lbl_nf_version->setText(fwImage.firmware_version);
-    if (fwImage.crypto == FirmwareImage::Crypto::AES128)
-        ui->lbl_nf_crypto->setText("AES");
-    else if (fwImage.crypto == FirmwareImage::Crypto::Plain){
-        ui->lbl_nf_crypto->setText("Plaintext");
-    }
-    ui->lbl_nf_githash->setText("0x"+QString::number( fwImage.firmware_githash,16).toUpper());
-    ui->lbl_nf_gitdate->setText(fwImage.firmware_gitdate_dt.toString("yyyy.MM.dd HH:mm"));
-    ui->lbl_nf_size->setText( QString::number( fwImage.firmware_size/1024,10) +"kB ("+  QString::number( fwImage.firmware_size,10)+" Bytes)");
-    ui->lbl_nf_entrypoint->setText("0x"+QString::number( fwImage.firmware_entryPoint,16).toUpper());
-    QPainter painter(ui->lbl_nf_path);
-    QFontMetrics fontMetrics = painter.fontMetrics();
 
-    QString elidedPath = fontMetrics.elidedText(fileNameToSend, Qt::ElideLeft, ui->lbl_nf_path->width());
-    ui->lbl_nf_path->setText(elidedPath);
-}
-
-void MainWindow::loadFile(QString fileName)
-{
-    if (fwImage.open(fileName)){
-
-        loadUIFromFile();
-        fileLoaded = true;
-    }else{
-        fileLoaded = false;
-        log("couldnt load file "+fileName);
-    }
-    fileNameToSend = fileName;
-    recalcUIState();
-}
 
 void MainWindow::setConnState(MainWindow::ConnectionState connState)
 {
