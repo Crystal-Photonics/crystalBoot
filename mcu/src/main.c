@@ -173,7 +173,7 @@ int main(void)
 	}
 
 
-#if 1
+
 	programmer_init();
 	if (programmerQuickVerify() == crystalBool_Fail){
 		blJumpMode = blm_direct_into_bootloader_mode;
@@ -181,21 +181,20 @@ int main(void)
 	if (!port_checkFlashConfiguration(false)){
 		blJumpMode = blm_direct_into_bootloader_mode;
 	}
-#endif
+
 	if(blJumpMode == blm_direct_to_application){
 		portFlashRunApplication();
 		while(1){
 
 		}
 	}
-
 	programmer_init();
+
+
 	port_chipInit();
 	portSerialInit(115200);
 
-	while (!port_checkFlashConfiguration(true)){
-
-	}
+	while (!port_checkFlashConfiguration(true)){	}
 
 	//printResetReason_t(mainResetReason);
 #if 1
@@ -203,6 +202,8 @@ int main(void)
 	printf("githash = %X\n", GITHASH);
 	printf("gitdate = %s %u\n", GITDATE, GITUNIX);
 #endif
+
+
 	SET_LED_BUSY();
 
 	if (programmerQuickVerify() == crystalBool_Fail){

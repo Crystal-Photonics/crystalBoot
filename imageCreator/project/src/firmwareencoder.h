@@ -8,6 +8,8 @@
 
 bool readHexFile(QString fileName, QByteArray &result, uint32_t &startAddress);
 bool readBinFile(QString fileName, QByteArray &result);
+QByteArray AES_CBC_128_encrypt(QByteArray &key, QByteArray &iv, QByteArray &plain);
+QByteArray AES_CBC_128_decrypt(QByteArray key, QByteArray iv, QByteArray &cipher);
 
 class FirmwareEncoder{
 public:

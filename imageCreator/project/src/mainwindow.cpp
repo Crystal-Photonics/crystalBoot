@@ -75,7 +75,7 @@ void MainWindow::loadUIFromSettings()
 
     ui->edtRelative->setText(imageCreatorSettings.getRootPath());
     ui->lblFileName->setText(fileInfo.fileName());
-    if (imageCreatorSettings.crypt == ImageCreatorSettings::Crypt::AES128){
+    if (imageCreatorSettings.crypto == ImageCreatorSettings::Crypto::AES128){
         ui->rbtn_crypt_aes->setChecked(true);
         ui->rbtn_crypt_plain->setChecked(false);
     }else{
@@ -97,9 +97,9 @@ void MainWindow::saveUIToSettings()
     imageCreatorSettings.keyWord_name = ui->edt_name->text();
     imageCreatorSettings.headerFiles =  ui->edt_versionInfoHeader->toPlainText().split('\n', QString::SkipEmptyParts);
     if (ui->rbtn_crypt_aes->isChecked()){
-        imageCreatorSettings.crypt = ImageCreatorSettings::Crypt::AES128;
+        imageCreatorSettings.crypto = ImageCreatorSettings::Crypto::AES128;
     }else if (ui->rbtn_crypt_plain->isChecked()){
-        imageCreatorSettings.crypt = ImageCreatorSettings::Crypt::Plain;
+        imageCreatorSettings.crypto = ImageCreatorSettings::Crypto::Plain;
     }
 }
 

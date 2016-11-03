@@ -5,7 +5,7 @@
 OPT = s
 
 SILENCE = @
-
+#SILENCE = 
 TARGETNAME = rpcFreeRTOSTemplate
 
 SRC = src
@@ -41,9 +41,9 @@ OBJECTS  = $(addprefix $(OBJDIR)/,$(addsuffix .o,$(basename $(SOURCES))))
 
 DEPENDS  = $(addprefix $(OBJDIR)/,$(addsuffix .d,$(basename $(SOURCES))))
 
-DEFS =  -DHSE_VALUE=$(HSE_VALUE)
-DEFS =  -DECB=0
-DEFS += -D$(MCU)
+DEFS = -DHSE_VALUE=$(HSE_VALUE)
+DEFS += -DECB=0
+DEFS +=-D$(MCU)
 DEFS += $(PORT_DEFS)
 
 # Object files directory

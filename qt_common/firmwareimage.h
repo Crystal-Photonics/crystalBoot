@@ -6,7 +6,7 @@
 
 class FirmwareImage{
 public:
-    enum Crypto{Plain,AES};
+    enum Crypto{Plain,AES128};
     explicit FirmwareImage();
     void clear();
     bool save(QString targetFile);

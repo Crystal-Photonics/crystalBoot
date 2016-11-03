@@ -53,9 +53,9 @@ void ImageCreatorSettings::load(QString filename)
 
     QString cryptStr=settings.value("encryption","plain").toString();
     if(cryptStr == "plain"){
-        crypt = Crypt::Plain;
+        crypto = Crypto::Plain;
     }else if(cryptStr == "aes128"){
-        crypt = Crypt::AES128;
+        crypto = Crypto::AES128;
     }
 
 
@@ -84,9 +84,9 @@ void ImageCreatorSettings::save()
     settings.setValue("keyWord_version",keyWord_version);
     settings.setValue("keyWord_name",keyWord_name);
 
-    if (crypt == Crypt::Plain){
+    if (crypto == Crypto::Plain){
         settings.setValue("encryption","plain");
-    }else if(crypt == Crypt::AES128){
+    }else if(crypto == Crypto::AES128){
         settings.setValue("encryption","aes128");
     }else{
         settings.setValue("encryption","");

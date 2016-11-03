@@ -16,6 +16,11 @@ private slots:
     void testDefineRegex();
     void testHexFile();
     void testHexFile_error();
+    void testAESDecrypt();
+    void testAESEncrypt();
+    void testAESDecrypt_raw_from_orig();
+    void testAESDecrypt_raw();
+    void testAESDecrypt_raw_append();
 };
 DECLARE_TEST(TestQString)
 #endif // TESTQSTRING_H

@@ -61,7 +61,7 @@ bool FirmwareImage::save(QString targetFile){
     xml.writeAttribute("creation_date",QDateTime(QDateTime::currentDateTime()).toString("yyyy.mm.dd HH:MM"));
     if (crypto == Crypto::Plain){
         xml.writeAttribute("crypto","plain");
-    }else if(crypto == Crypto::AES){
+    }else if(crypto == Crypto::AES128){
         xml.writeAttribute("crypto","aes");
     }
     xml.writeEndElement();
@@ -138,12 +138,12 @@ bool FirmwareImage::open(QString fileName)
     if (crpt == "plain"){
         crypto = Crypto::Plain;
     }else if (crpt == "aes"){
-        crypto = Crypto::AES;
+        crypto = Crypto::AES128;
     }else{
         return false;
     }
 
-    if (crypto == Crypto::AES){
+    if (crypto == Crypto::AES128){
         QDomElement aes128_ivNodeElement = crystalBootNode.firstChildElement("aes128_iv");
         if (aes128_ivNodeElement.isNull()){
             return false;

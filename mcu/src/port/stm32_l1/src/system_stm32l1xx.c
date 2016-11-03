@@ -250,6 +250,7 @@ void SystemInit (void)
   * @param  None
   * @retval None
   */
+
 void SystemCoreClockUpdate (void)
 {
   uint32_t tmp = 0, pllmul = 0, plldiv = 0, pllsource = 0, msirange = 0;

@@ -408,7 +408,7 @@ void MainWindow::loadUIFromFile(){
     ui->lbl_nf_name->setText(fwImage.firmware_name);
     ui->lbl_nf_namehash->setText("0x"+QString::number( fwImage.getNameCRC16(),16).toUpper());
     ui->lbl_nf_version->setText(fwImage.firmware_version);
-    if (fwImage.crypto == FirmwareImage::Crypto::AES)
+    if (fwImage.crypto == FirmwareImage::Crypto::AES128)
         ui->lbl_nf_crypto->setText("AES");
     else if (fwImage.crypto == FirmwareImage::Crypto::Plain){
         ui->lbl_nf_crypto->setText("Plaintext");

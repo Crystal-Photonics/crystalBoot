@@ -14,7 +14,7 @@ InfoDialog::InfoDialog(QWidget *parent) :
     ui->plainTextEdit->appendPlainText(QString("Git Hash: ")+QString::number(GITHASH,16).toUpper());
     ui->plainTextEdit->appendPlainText(QString("Git Date: ") + GITDATE);
     ui->plainTextEdit->appendPlainText("");
-    QByteArray rpc_hash(RPC_TRANSMISSION_HASH);
+    QByteArray rpc_hash(RPC_TRANSMISSION_HASH,RPC_TRANSMISSION_HASH_SIZE);
     ui->plainTextEdit->appendPlainText("RPC Hash: 0x"+rpc_hash.toHex().toUpper());
 }
 

@@ -165,6 +165,10 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 		return crystalBool_Fail;
 	}
 
+	if ((BOOTLOADER_WITH_DECRYPT_SUPPORT==0) && (crypto == crystalBoolCrypto_AES)){
+		return crystalBool_Fail;
+	}
+
 	memcpy(&firmwareMetaData.d.firmwareDescriptor,firmwareDescriptor,sizeof(firmware_descriptor_t));
 
 	programmWritePointerAddress = APPLICATION_ADDRESS;
@@ -215,7 +219,7 @@ crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size){
 	portFlashWrite_result = portFlashWrite(programmWritePointerAddress, data,  size);
 #endif
 	if (portFlashWrite_result){
-		if (!portFlashVerifyAgainstBuffer(programmWritePointerAddress, data,  size)){
+		if (!portFlashVerifyAgainstBuffer(programmWritePointerAddress, dataToBeFlashed,  size)){
 			return crystalBool_Fail;
 
 		}

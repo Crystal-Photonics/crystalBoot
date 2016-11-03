@@ -65,6 +65,75 @@ bool readBinFile(QString fileName, QByteArray &result)
     return true;
 }
 
+QByteArray AES_CBC_128_encrypt(QByteArray &key, QByteArray &iv, QByteArray &plain){
+
+    uint8_t aes_key_buffer[16];
+    uint8_t *p_aes_key=aes_key_buffer;
+    QBuffer aes128_keyStream(&key);
+    aes128_keyStream.open(QIODevice::ReadOnly);
+    aes128_keyStream.read((char*)aes_key_buffer,sizeof aes_key_buffer );
+
+
+    uint8_t aes_iv_buffer[16];
+    uint8_t *p_aes_iv=aes_iv_buffer;
+    QBuffer aes128_ivStream(&iv);
+    aes128_ivStream.open(QIODevice::ReadOnly);
+    aes128_ivStream.read((char*)aes_iv_buffer,sizeof aes_iv_buffer );
+
+
+    QBuffer inStream(&plain);
+    QByteArray cipheredArray;
+
+    uint8_t inbuffer[32];
+    uint8_t outbuffer[32];
+    inStream.open(QIODevice::ReadOnly);
+    while (!inStream.atEnd()){
+        inStream.read((char*)inbuffer,sizeof inbuffer);
+        AES128_CBC_encrypt_buffer(outbuffer,inbuffer,sizeof inbuffer,p_aes_key,p_aes_iv);
+        cipheredArray.append((char*)outbuffer,sizeof outbuffer);
+        p_aes_key=0;
+        p_aes_iv=0;
+    }
+    return cipheredArray;
+}
+
+QByteArray AES_CBC_128_decrypt(QByteArray key, QByteArray iv, QByteArray &cipher){
+    uint8_t aes_key_buffer[16];
+    uint8_t *p_aes_key = aes_key_buffer;
+
+        qDebug() << key.length();
+        qDebug() << iv.length();
+        qDebug() << cipher.length();
+
+    QBuffer aes128_keyStream(&key);
+    aes128_keyStream.open(QIODevice::ReadOnly);
+    qDebug() << aes128_keyStream.read((char*)aes_key_buffer,sizeof aes_key_buffer );
+
+
+    uint8_t aes_iv_buffer[16];
+    uint8_t *p_aes_iv=aes_iv_buffer;
+    QBuffer aes128_ivStream(&iv);
+    aes128_ivStream.open(QIODevice::ReadOnly);
+    qDebug() << aes128_ivStream.read((char*)aes_iv_buffer,sizeof aes_iv_buffer );
+
+
+
+    QBuffer inStream(&cipher);
+    QByteArray plainArray;
+
+    uint8_t inbuffer[32];
+    uint8_t outbuffer[32];
+    inStream.open(QIODevice::ReadOnly);
+    while (!inStream.atEnd()){
+        qDebug() << inStream.read((char*)inbuffer,sizeof inbuffer);
+        AES128_CBC_decrypt_buffer(outbuffer,inbuffer,sizeof inbuffer,p_aes_key,p_aes_iv);
+        plainArray.append((char*)outbuffer,sizeof outbuffer);
+        p_aes_key=0;
+        p_aes_iv=0;
+    }
+    return plainArray;
+}
+
 
 FirmwareEncoder::FirmwareEncoder(ImageCreatorSettings imageCreatorSettings):imageCreatorSettings(imageCreatorSettings)
 {
@@ -217,12 +286,10 @@ bool FirmwareEncoder::loadFirmwareData()
     fwImage.sha256 = sha256_check.result();
 
     fwImage.aes128_iv.clear();
-    uint8_t aes_iv_buffer[16];
-    for (size_t i = 0; i < sizeof aes_iv_buffer;i++){
-        aes_iv_buffer[i] = rand() & 0xFF;
-        fwImage.aes128_iv.append(aes_iv_buffer[i]);
+    for (size_t i = 0; i < 16;i++){
+        uint8_t tmp = rand() & 0xFF;
+        fwImage.aes128_iv.append(tmp);
     }
-    uint8_t *p_aes_iv=aes_iv_buffer;
 
     AESKeyFile aeskeyfile;
     if (!aeskeyfile.open(imageCreatorSettings.encryptKeyFileName_abs)){
@@ -235,25 +302,11 @@ bool FirmwareEncoder::loadFirmwareData()
         return false;
     }
 
-    uint8_t aes_key_buffer[16];
-    aeskeyfile.fillBuffer(aes_key_buffer);
-    uint8_t *p_aes_key=aes_key_buffer;
-
-
-    if (imageCreatorSettings.crypt == ImageCreatorSettings::Crypt::AES128){
-        QBuffer inStream(&fwImage.binary);
-        QByteArray outArray;
-        uint8_t inbuffer[128];
-        uint8_t outbuffer[128];
-        inStream.open(QIODevice::ReadOnly);
-        while (!inStream.atEnd()){
-            inStream.read((char*)inbuffer,sizeof inbuffer);
-            AES128_CBC_encrypt_buffer(outbuffer,inbuffer,sizeof inbuffer,p_aes_key,p_aes_iv);
-            outArray.append((char*)outbuffer,sizeof outbuffer);
-            p_aes_key=0;
-            p_aes_iv=0;
-        }
-        fwImage.binary = outArray;
+    if (imageCreatorSettings.crypto == ImageCreatorSettings::Crypto::AES128){
+        fwImage.crypto = FirmwareImage::Crypto::AES128;
+        fwImage.binary = AES_CBC_128_encrypt(aeskeyfile.key, fwImage.aes128_iv, fwImage.binary);
+    }else{
+        fwImage.crypto = FirmwareImage::Crypto::Plain;
     }
     qDebug() << "entrypoint: 0x"+QString::number( fwImage.firmware_entryPoint,16);
     qDebug() << "size: "+QString::number( fwImage.firmware_size);
