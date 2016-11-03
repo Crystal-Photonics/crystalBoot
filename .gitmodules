@@ -28,3 +28,6 @@
 [submodule "imageCreator/project/libs/Intel-HEX-Class"]
 	path = imageCreator/project/libs/Intel-HEX-Class
 	url = https://github.com/codinghead/Intel-HEX-Class.git
+[submodule "imageCreator/project/libs/tiny-AES128-C"]
+	path = imageCreator/project/libs/tiny-AES128-C
+	url = https://github.com/Crystal-Photonics/tiny-AES128-C.git
