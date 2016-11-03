@@ -9,7 +9,7 @@
 #include <QFile>
 #include <QCryptographicHash>
 #include <QBuffer>
-#include "tiny-aes128-c_wrapper.h"
+#include "aes.h"
 #include "aeskeyfile.h"
 
 bool readHexFile(QString fileName, QByteArray &result, uint32_t &startAddress)
@@ -101,20 +101,18 @@ QByteArray AES_CBC_128_decrypt(QByteArray key, QByteArray iv, QByteArray &cipher
     uint8_t aes_key_buffer[16];
     uint8_t *p_aes_key = aes_key_buffer;
 
-        qDebug() << key.length();
-        qDebug() << iv.length();
-        qDebug() << cipher.length();
+
 
     QBuffer aes128_keyStream(&key);
     aes128_keyStream.open(QIODevice::ReadOnly);
-    qDebug() << aes128_keyStream.read((char*)aes_key_buffer,sizeof aes_key_buffer );
+    aes128_keyStream.read((char*)aes_key_buffer,sizeof aes_key_buffer );
 
 
     uint8_t aes_iv_buffer[16];
     uint8_t *p_aes_iv=aes_iv_buffer;
     QBuffer aes128_ivStream(&iv);
     aes128_ivStream.open(QIODevice::ReadOnly);
-    qDebug() << aes128_ivStream.read((char*)aes_iv_buffer,sizeof aes_iv_buffer );
+    aes128_ivStream.read((char*)aes_iv_buffer,sizeof aes_iv_buffer );
 
 
 
@@ -125,7 +123,7 @@ QByteArray AES_CBC_128_decrypt(QByteArray key, QByteArray iv, QByteArray &cipher
     uint8_t outbuffer[32];
     inStream.open(QIODevice::ReadOnly);
     while (!inStream.atEnd()){
-        qDebug() << inStream.read((char*)inbuffer,sizeof inbuffer);
+        inStream.read((char*)inbuffer,sizeof inbuffer);
         AES128_CBC_decrypt_buffer(outbuffer,inbuffer,sizeof inbuffer,p_aes_key,p_aes_iv);
         plainArray.append((char*)outbuffer,sizeof outbuffer);
         p_aes_key=0;

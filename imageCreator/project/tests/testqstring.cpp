@@ -2,7 +2,7 @@
 #include <QRegularExpression>
 #include <QBuffer>
 #include <firmwareencoder.h>
-#include "tiny-aes128-c_wrapper.h"
+#include "aes.h"
 
 void TestQString::initTestCase(){
 
@@ -102,26 +102,21 @@ void TestQString::testAESDecrypt_raw_append()
     uint8_t tmp_in[16];
     uint8_t tmp_out[16];
     uint8_t buffer[64];
-    uint8_t tmp_iv[16];
 
     memcpy(tmp_in,&in[0], sizeof(tmp_in));
-    memcpy(tmp_iv, iv,sizeof tmp_iv);
-    AES128_CBC_decrypt_buffer(tmp_out, tmp_in,  16, key, tmp_iv);
+    AES128_CBC_decrypt_buffer(tmp_out, tmp_in,  16, key, iv);
     memcpy(&buffer[0],tmp_out,sizeof tmp_out);
-    memcpy(tmp_iv, tmp_in,sizeof tmp_iv);
 
     memcpy(tmp_in,&in[16], sizeof(tmp_in));
-    AES128_CBC_decrypt_buffer(tmp_out, tmp_in, 16, 0, tmp_iv);
-    memcpy(tmp_iv, tmp_in,sizeof tmp_iv);
+    AES128_CBC_decrypt_buffer(tmp_out, tmp_in, 16, 0, 0);
     memcpy(&buffer[16],tmp_out,sizeof tmp_out);
 
     memcpy(tmp_in,&in[32], sizeof(tmp_in));
-    AES128_CBC_decrypt_buffer(tmp_out, tmp_in, 16, 0, tmp_iv);
-    memcpy(tmp_iv, tmp_in,sizeof tmp_iv);
+    AES128_CBC_decrypt_buffer(tmp_out, tmp_in, 16, 0, 0);
     memcpy(&buffer[32],tmp_out,sizeof tmp_out);
 
     memcpy(tmp_in,&in[48], sizeof(tmp_in));
-    AES128_CBC_decrypt_buffer(tmp_out, tmp_in, 16, 0, tmp_iv);
+    AES128_CBC_decrypt_buffer(tmp_out, tmp_in, 16, 0, 0);
     memcpy(&buffer[48],tmp_out,sizeof tmp_out);
 
     for (size_t i=0;i< sizeof buffer;i++){
@@ -177,7 +172,7 @@ void TestQString::testAESDecrypt_raw_from_orig()
 
 void TestQString::testAESDecrypt()
 {
-#if 0
+#if 1
     QByteArray key         (QByteArray::fromHex("56e47a38c5598974bc46903dba290349"));
     QByteArray iv          (QByteArray::fromHex("8ce82eefbea0da3c44699ed7db51b7d9"));
 
