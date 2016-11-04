@@ -3,12 +3,12 @@
 
 #include <QObject>
 
-class CrystalSettings
+class CrystalBootSettings
 {
 
 public:
-    explicit CrystalSettings(QObject *parent);
-    ~CrystalSettings();
+    explicit CrystalBootSettings(QObject *parent);
+    ~CrystalBootSettings();
 
     void load(QString filename);
     void save();

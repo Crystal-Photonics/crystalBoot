@@ -1,7 +1,7 @@
 #include "options.h"
 #include "ui_optionsdiag.h"
 
-OptionsDiag::OptionsDiag(CrystalSettings *settings, QWidget *parent) :
+OptionsDiag::OptionsDiag(CrystalBootSettings *settings, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OptionsDiag)
 {

@@ -3,7 +3,7 @@
 #include <QSettings>
 #include <QDir>
 
-CrystalSettings::~CrystalSettings()
+CrystalBootSettings::~CrystalBootSettings()
 {
 
 }
@@ -19,19 +19,19 @@ bool fileExists(QString path) {
     }
 }
 
-CrystalSettings::CrystalSettings(QObject *parent)
+CrystalBootSettings::CrystalBootSettings(QObject *parent)
 {
     this->parent = parent;
     isExistingFileName = false;
 }
 
-QString CrystalSettings::getFileName()
+QString CrystalBootSettings::getFileName()
 {
     return settingsFileName;
 }
 
 
-void CrystalSettings::load(QString filename)
+void CrystalBootSettings::load(QString filename)
 {
     settingsFileName = filename;
     QFileInfo fi(settingsFileName);
@@ -55,7 +55,7 @@ void CrystalSettings::load(QString filename)
 
 
 
-void CrystalSettings::save()
+void CrystalBootSettings::save()
 {
     QSettings settings(settingsFileName, QSettings::IniFormat, parent);
 

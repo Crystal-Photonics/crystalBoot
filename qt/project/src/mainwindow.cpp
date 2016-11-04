@@ -14,24 +14,7 @@
 
 channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
 
-QString arrayToHexString(uint8_t *buff, const size_t length, int insertNewLine){
-    QString result;
-    int insNewLineCounter=insertNewLine;
-    for (size_t i=0;i<length;i++){
-        result += "0x"+QString::number(buff[i],16).toUpper();
-        if (i<length-1){
-            result += ", ";
-            if (insertNewLine){
-                insNewLineCounter--;
-                if (insNewLineCounter==0){
-                    result += "\n";
-                    insNewLineCounter = insertNewLine;
-                }
-            }
-        }
-    }
-    return result;
-}
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -163,7 +146,7 @@ void MainWindow::on_tryConnect_timer()
                 uint16_t version;
                 serialThread->rpcGetRemoteHashVersion(hash, &version);
                 log("");
-                log("bootloader found but incorrect RPC hash("+arrayToHexString(hash,16,0) +", V. "+QString::number(version)+"), disconnecting..");
+                log("bootloader found but incorrect RPC hash("+ RemoteDeviceInfo::arrayToHexString(hash,16,0) +", V. "+QString::number(version)+"), disconnecting..");
                 log("");
                 serialThread->close();
                 setConnState(MainWindow::Disconnected);
@@ -204,7 +187,8 @@ void MainWindow::connectComPort(bool shallBeOpened)
 void MainWindow::sendfirmware()
 {
 #define BLOCKLENGTH 128
-
+    FlashResultDocumentation flashResultDocumentation;
+    RPC_RESULT result = RPC_SUCCESS;
     if (fwImage.isValid()){
         if (fwImage.isFileModified()){
             QMessageBox msgBox;
@@ -218,10 +202,15 @@ void MainWindow::sendfirmware()
             }
         }
     }
+    flashResultDocumentation.setNewFirmwareDescriptor(fwImage);
     if (fwImage.isValid()){
+        result = getDeviceInfo();
+        flashResultDocumentation.addActionResult("GetInfo",result);
+        flashResultDocumentation.setRemoteDeviceInfo(remoteDeviceInfo);
+
         ui->progressBar->setValue(0);
         ui->progressBar->setVisible(true);
-        RPC_RESULT result = RPC_SUCCESS;
+
         qint64 fileSize =  fwImage.binary.size();
         qint64 byteCounter = 0;
         QTime runtime;
@@ -233,6 +222,7 @@ void MainWindow::sendfirmware()
         RPC_setTimeout(20*1000);
 #if 1
         result = serialThread->rpcEraseFlash();
+        flashResultDocumentation.addActionResult("Erase",result);
         if (result != RPC_SUCCESS){
             fail = true;
            log("erasing fail");
@@ -244,6 +234,7 @@ void MainWindow::sendfirmware()
 
         if (!fail){
             result = serialThread->rpcInitFirmwareTransfer(fwImage);
+            flashResultDocumentation.addActionResult("Initialization",result);
             if (result != RPC_SUCCESS){
                 fail = true;
                 log("Transfer init fail.");
@@ -302,6 +293,7 @@ void MainWindow::sendfirmware()
 #endif
         }
 #endif
+        flashResultDocumentation.addActionResult("Transfer",result);
         if ((result != RPC_SUCCESS) || fail){
             QString resultstr;
             switch(result){
@@ -325,6 +317,7 @@ void MainWindow::sendfirmware()
 
         if (!fail){
             result = serialThread->rpcVerifyChecksum();
+            flashResultDocumentation.addActionResult("Verify",result);
             if (result != RPC_SUCCESS){
                 fail = true;
                 log("verify fail");
@@ -339,16 +332,62 @@ void MainWindow::sendfirmware()
     }else{
        log("firmware file not valid ");
     }
+    flashResultDocumentation.save(settings);
     ui->progressBar->setVisible(false);
 }
 
-void MainWindow::getDeviceInfo()
+void MainWindow::loadUIDeviceInfo(){
+    if (remoteDeviceInfo.isValid()){
+
+        ui->plainTextEdit->clear();
+        ui->plainTextEdit->appendPlainText(QString("MCU devID: ")+remoteDeviceInfo.getMCU_DeviceIDString()+" "+remoteDeviceInfo.getDeviceCategorieString());
+        ui->plainTextEdit->appendPlainText(QString("MCU revID: ")+remoteDeviceInfo.getMCU_RevString());
+        ui->plainTextEdit->appendPlainText(QString("Flashsize: ")+QString::number(remoteDeviceInfo.mcu_descriptor.flashsize/1024)+"kB ("+remoteDeviceInfo.getMCU_FlashsizeString()+")");
+        ui->plainTextEdit->appendPlainText(QString("Unique ID: ")+remoteDeviceInfo.getMCU_UniqueIDString(0));
+        ui->plainTextEdit->appendPlainText(QString(""));
+        ui->plainTextEdit->appendPlainText(QString("Available flashsize: ")+remoteDeviceInfo.getMCU_AvailFlashSizeString());
+        ui->plainTextEdit->appendPlainText(QString("Entrypoint: ")+remoteDeviceInfo.getMCU_EntryPointString());
+        ui->plainTextEdit->appendPlainText(QString("minimal entrypoint: ")+remoteDeviceInfo.getMCU_MinimalEntryPointString());
+
+
+        ui->lblMCU_devid->setText(remoteDeviceInfo.getMCU_DeviceIDString()+" "+remoteDeviceInfo.getDeviceCategorieString());
+        ui->lblMCU_avSize->setText(QString::number(remoteDeviceInfo.mcu_descriptor.availFlashSize/1024)+"kb");
+        ui->lblMCU_entryPoint->setText(remoteDeviceInfo.getMCU_EntryPointString());
+        ui->lblMCU_fsize->setText(QString::number(remoteDeviceInfo.mcu_descriptor.flashsize/1024)+"kB");
+        ui->lblMCU_guid->setText(remoteDeviceInfo.getMCU_UniqueIDString(4));
+        if (remoteDeviceInfo.mcu_descriptor.cryptoRequired){
+            ui->lblMCU_cryptoRequered->setText("yes");
+        }else{
+            ui->lblMCU_cryptoRequered->setText("no");
+        }
+
+
+        ui->lblBL_GitDate->setText( remoteDeviceInfo.getDEV_gitDate_str());
+        ui->lblBL_GitHash->setText(remoteDeviceInfo.getDEV_gitHash());
+        ui->lblBL_Name->setText(remoteDeviceInfo.getDEV_name());
+        ui->lblBL_Version->setText(remoteDeviceInfo.getDEV_version());
+        ui->lblBL_ID->setText(remoteDeviceInfo.getDEV_deviceID());
+
+
+        ui->lbl_rf_githash->setText(remoteDeviceInfo.getFW_gitHash());
+        ui->lbl_rf_gitdate->setText(remoteDeviceInfo.getFW_gitDate_str());
+        ui->lbl_rf_namehash->setText(remoteDeviceInfo.getFW_nameCRC());
+        ui->lbl_rf_name->setText(remoteDeviceInfo.getFW_name());
+        ui->lbl_rf_version->setText(remoteDeviceInfo.getFW_version());
+    }
+
+
+
+}
+
+RPC_RESULT MainWindow::getDeviceInfo()
 {
     mcu_descriptor_t descriptor;
     device_descriptor_v1_t deviceDescriptor;
     firmware_descriptor_t  firmwareDescriptor;
     bool rpcOK = true;
 
+    remoteDeviceInfo.unSet();
     RPC_RESULT result = serialThread->rpcGetMCUDescriptor(&descriptor);
     if (!result == RPC_SUCCESS){
         rpcOK = false;
@@ -363,74 +402,15 @@ void MainWindow::getDeviceInfo()
     }
 
     if (rpcOK){
-        log( "mcu info requested");
-
-        QString cat;
-        if (descriptor.devID == 0x416){
-           cat = "Cat.1 device";
-        }else if(descriptor.devID == 0x429){
-            cat = "Cat.2 device";
-        }else if(descriptor.devID == 0x427){
-            cat = "Cat.3 device";
-        }else if(descriptor.devID == 0x436){
-            cat = "Cat.4 device or Cat.3 device";
-        }else if(descriptor.devID == 0x437){
-            cat = "Cat.5 device or Cat.6 device";
-        }
-        ui->plainTextEdit->clear();
-        ui->plainTextEdit->appendPlainText(QString("MCU devID: ")+"0x"+QString::number(descriptor.devID,16).toUpper()+" "+cat);
-        ui->plainTextEdit->appendPlainText(QString("MCU revID: ")+"0x"+QString::number(descriptor.revision,16).toUpper());
-        ui->plainTextEdit->appendPlainText(QString("Flashsize: ")+QString::number(descriptor.flashsize/1024)+"kB (0x"+QString::number(descriptor.flashsize,16).toUpper()+")");
-        ui->plainTextEdit->appendPlainText(QString("Unique ID: ")+arrayToHexString(descriptor.guid,12,0));
-        ui->plainTextEdit->appendPlainText(QString(""));
-        ui->plainTextEdit->appendPlainText(QString("Available flashsize: ")+"0x"+QString::number(descriptor.availFlashSize,16).toUpper());
-        ui->plainTextEdit->appendPlainText(QString("Entrypoint: ")+"0x"+QString::number(descriptor.firmwareEntryPoint,16).toUpper());
-        ui->plainTextEdit->appendPlainText(QString("minimal entrypoint: ")+"0x"+QString::number(descriptor.minimalFirmwareEntryPoint,16).toUpper());
-
-
-        ui->lblMCU_devid->setText("0x"+QString::number(descriptor.devID,16).toUpper()+" "+cat);
-        ui->lblMCU_avSize->setText(QString::number(descriptor.availFlashSize/1024)+"kb");
-        ui->lblMCU_entryPoint->setText("0x"+QString::number(descriptor.firmwareEntryPoint,16).toUpper());
-        ui->lblMCU_fsize->setText(QString::number(descriptor.flashsize/1024)+"kB");
-        ui->lblMCU_guid->setText(arrayToHexString(descriptor.guid,12,4));
-        if (descriptor.cryptoRequired){
-            ui->lblMCU_cryptoRequered->setText("yes");
-        }else{
-            ui->lblMCU_cryptoRequered->setText("no");
-        }
-        char blName[12];
-        char blVersion[9];
-        blName[12] = 0;
-        blVersion[8] = 0;
-        memcpy(blName,deviceDescriptor.name,sizeof(blName)-1 );
-        memcpy(blVersion,deviceDescriptor.version,sizeof(blVersion)-1 );
-        ui->lblBL_GitDate->setText( QDateTime::fromTime_t(deviceDescriptor.gitDate_unix).toString("yyyy.MM.dd"));
-        ui->lblBL_GitHash->setText("0x"+QString::number(deviceDescriptor.githash,16).toUpper());
-        ui->lblBL_Name->setText(blName);
-        ui->lblBL_Version->setText(blVersion);
-        ui->lblBL_ID->setText(QString::number(deviceDescriptor.deviceID));
-
-
-        char rfName[12];
-        char rfVersion[9];
-        rfName[12] = 0;
-        rfVersion[8] = 0;
-        memcpy(rfName,firmwareDescriptor.name,sizeof(rfName)-1 );
-        memcpy(rfVersion,firmwareDescriptor.version,sizeof(rfVersion)-1 );
-
-        ui->lbl_rf_githash->setText("0x"+QString::number(firmwareDescriptor.githash,16).toUpper());
-        ui->lbl_rf_gitdate->setText(QDateTime::fromTime_t(firmwareDescriptor.gitDate_unix).toString("yyyy.MM.dd HH:mm"));
-        ui->lbl_rf_namehash->setText("0x"+QString::number(firmwareDescriptor.nameCRC16,16).toUpper());
-        ui->lbl_rf_name->setText(rfName);
-        ui->lbl_rf_version->setText(rfVersion);
-
-
-
-
+        log( "mcu info request ok");
+        remoteDeviceInfo.setDeviceDescriptor(&deviceDescriptor);
+        remoteDeviceInfo.setMCUDescriptor(&descriptor);
+        remoteDeviceInfo.setOldFirmwareDescriptor(&firmwareDescriptor);
     }else{
        log("mcu info request error ("+QString::number(result)+")");
     }
-
+    loadUIDeviceInfo();
+    return result;
 }
 
 void MainWindow::runApplication()

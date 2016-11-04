@@ -13,14 +13,14 @@ class OptionsDiag : public QDialog
     Q_OBJECT
 
 public:
-    explicit OptionsDiag(CrystalSettings *settings, QWidget *parent = 0);
+    explicit OptionsDiag(CrystalBootSettings *settings, QWidget *parent = 0);
     ~OptionsDiag();
 private slots:
     void on_buttonBox_accepted();
 
 private:
     Ui::OptionsDiag *ui;
-    CrystalSettings *settings;
+    CrystalBootSettings *settings;
     void loadUIFromSettings();
 };
 

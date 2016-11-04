@@ -12,6 +12,7 @@
 
 #include "rpc_transmission/server/app/mcu2qt.h"
 #include "firmwareimage.h"
+#include "flashresultdocumentation.h"
 
 extern channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
 
@@ -41,6 +42,7 @@ public:
     void paintEvent(QPaintEvent *event);
     void loadUIFromSettigns();
 
+    void loadUIDeviceInfo();
 private slots:
     void on_tryConnect_timer();
     void on_actionOpen_triggered();
@@ -64,14 +66,14 @@ private:
     Ui::MainWindow *ui;
 
     SerialThread* serialThread;
-    CrystalSettings settings;
+    CrystalBootSettings settings;
 
     QTimer *connectTimer;
     QComboBox *cmbPort;
     QString fileNameToSend;
     bool fileLoaded;
     void sendfirmware();
-    void getDeviceInfo();
+    RPC_RESULT getDeviceInfo();
     void runApplication();
     void connectComPort(bool shallBeOpened);
     void refreshComPortList();
@@ -87,6 +89,8 @@ private:
     void loadUIFromFile();
     void loadFirmwarePathUIFromFile();
     uint16_t getNameHash(QString name);
+
+    RemoteDeviceInfo remoteDeviceInfo;
 };
 
 #endif // MAINWINDOW_H
