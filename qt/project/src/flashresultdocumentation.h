@@ -74,6 +74,7 @@ public:
 
 private:
     RemoteDeviceInfo remoteDeviceInfo;
+    bool getOverAllResult();
 
     QMap<QString,RPC_RESULT> actionResults;
     FirmwareImage  firmwareImage;

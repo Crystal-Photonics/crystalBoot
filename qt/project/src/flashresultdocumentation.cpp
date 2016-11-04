@@ -1,7 +1,11 @@
 #include "flashresultdocumentation.h"
+#include "namedplacemarker.h"
 #include <QXmlStreamWriter>
 #include <QFile>
 #include <QDebug>
+#include <QFileInfo>
+#include <QDir>
+#include <QProcess>
 
 QString RemoteDeviceInfo::arrayToHexString(uint8_t *buff, const size_t length, int insertNewLine){
     QString result;
@@ -30,10 +34,32 @@ FlashResultDocumentation::FlashResultDocumentation()
 void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
 {
     QXmlStreamWriter xml;
-    QFile file(crystalBootSettings.flashResultDocumentationPath);
+
+    NamedPlaceMarker npm;
+
+    QString fileName=crystalBootSettings.flashResultDocumentationPath;
+
+    npm.addVariable("%IMAGE_FILE_PATH%",QFileInfo(firmwareImage.fileName).absoluteDir().absolutePath());
+    npm.addVariable("%FIRMWARE_GIT_HASH%",firmwareImage.getGitHash_str());
+    npm.addVariable("%FIRMWARE_NAME%",firmwareImage.firmware_name);
+    npm.addVariable("%FIRMWARE_VERSION%",firmwareImage.firmware_version);
+    npm.addVariable("%OK_OR_FAIL%",getOverAllResult() ? "OK" : "FAIL");
+    npm.addVariable("%DATE_TIME%",QDateTime::currentDateTime().toString("yyyy_MM_dd__HH_mm"));
+    npm.addVariable("%MCU_GUID%",remoteDeviceInfo.getMCU_UniqueIDString());
+
+    if (fileName == ""){
+        return;
+    }
+    fileName = npm.replace(fileName);
+
+    QDir(QDir::currentPath()).mkpath(QFileInfo(fileName).absoluteDir().absolutePath());
+
+    QFile file(fileName);
+
+
 
     if(!file.open(QIODevice::WriteOnly)){
-        qDebug() << "cant open file"<< crystalBootSettings.flashResultDocumentationPath;
+        qDebug() << "cant open file"<< fileName;
         return ;
     }
     xml.setDevice(&file);
@@ -77,7 +103,7 @@ void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
     xml.writeStartElement("newFirmware");
     xml.writeAttribute("isValid", firmwareImage.isValid() ? "true" : "false");
     xml.writeAttribute("sha256", firmwareImage.sha256.toHex());
-    xml.writeAttribute("githash", "0x"+QString::number(firmwareImage.firmware_githash,16).toUpper());
+    xml.writeAttribute("githash", firmwareImage.getGitHash_str());
     xml.writeAttribute("gitdate", firmwareImage.firmware_gitdate_dt.toString("yyyy.MM.dd HH:mm"));
     xml.writeAttribute("gitdate_unix", QString::number(firmwareImage.firmware_githash));
     xml.writeAttribute("version",  firmwareImage.firmware_version);
@@ -98,7 +124,7 @@ void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
     xml.writeAttribute("date_unix",QString::number(QDateTime::currentDateTime().toTime_t()));
     xml.writeAttribute("date",QDateTime::currentDateTime().toString("yyyy.MM.dd HH:mm"));
     QMap<QString,RPC_RESULT> ::iterator i;
-    bool overAllResult = true;
+
     for (i = actionResults.begin(); i != actionResults.end(); ++i){
         QString valStr;
         RPC_RESULT rpcResult = i.value();
@@ -108,25 +134,38 @@ void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
             break;
         case RPC_FAILURE:
             valStr = "RPC_FAILURE";
-            overAllResult = false;
+
             break;
         case RPC_COMMAND_UNKNOWN:
             valStr = "RPC_COMMAND_UNKNOWN";
-            overAllResult = false;
+
             break;
         case RPC_COMMAND_INCOMPLETE:
             valStr = "RPC_COMMAND_INCOMPLETE";
-            overAllResult = false;
+
             break;
         }
 
         xml.writeAttribute(i.key(),valStr);
     }
-    xml.writeAttribute("overAllResult",overAllResult ? "true" : "false");
+    xml.writeAttribute("overAllResult",getOverAllResult() ? "true" : "false");
     xml.writeEndElement();
     xml.writeEndElement();
     xml.writeEndDocument();
     file.close();
+
+    npm.clear();
+    QDir dir(QDir::currentPath());
+    npm.addVariable("%PATH_TO_XML_REPORT%",dir.absoluteFilePath(fileName));
+    if (crystalBootSettings.callProcessAfterProgrammuing){
+        QStringList arguments;
+        arguments.append(npm.replace(crystalBootSettings.callProcessArguments));
+        QString proFileName = crystalBootSettings.callProcessPath;
+        QProcess proc;
+        proc.execute(proFileName,arguments);
+        proc.waitForStarted();
+        proc.waitForFinished();
+    }
     return ;
 }
 
@@ -145,11 +184,23 @@ void FlashResultDocumentation::setRemoteDeviceInfo(RemoteDeviceInfo remoteDevice
     this->remoteDeviceInfo = remoteDeviceInfo;
 }
 
+bool FlashResultDocumentation::getOverAllResult()
+{
+    bool result = true;
+    QMap<QString,RPC_RESULT> ::iterator i;
+    for (i = actionResults.begin(); i != actionResults.end(); ++i){
+        if (i.value() != RPC_SUCCESS){
+            result = false;
+        }
+    }
+    return result;
+}
+
 
 
 RemoteDeviceInfo::RemoteDeviceInfo()
 {
-   #if 1
+#if 1
     memset(&mcu_descriptor,0,sizeof  mcu_descriptor);
     memset(&deviceDescriptor,0,sizeof  deviceDescriptor);
     memset(&firmwareDescriptor,0,sizeof  firmwareDescriptor);

@@ -77,6 +77,11 @@ bool FirmwareImage::isFileModified()
     return lastModified != QFileInfo(fileName).lastModified();
 }
 
+QString FirmwareImage::getGitHash_str()
+{
+    return "0x"+QString::number(firmware_githash,16).toUpper();
+}
+
 bool FirmwareImage::save(QString targetFile){
     QXmlStreamWriter xml;
     QFile file(targetFile);

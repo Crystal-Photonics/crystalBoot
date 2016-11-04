@@ -66,7 +66,7 @@
       <item row="18" column="0" colspan="3">
        <widget class="QLineEdit" name="edtArguments">
         <property name="text">
-         <string>%PATH_TO_JSON_REPORT%</string>
+         <string>%PATH_TO_XML_REPORT%</string>
         </property>
        </widget>
       </item>
@@ -100,7 +100,7 @@
       <item row="19" column="1">
        <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>%PATH_TO_JSON_REPORT%</string>
+         <string>%PATH_TO_XML_REPORT%</string>
         </property>
        </widget>
       </item>

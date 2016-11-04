@@ -14,6 +14,7 @@ public:
     bool isValid();
     bool isFileModified();
 
+    QString getGitHash_str();
     QString getNameShort(int len);
     QString fileName;
     uint16_t getNameCRC16();
