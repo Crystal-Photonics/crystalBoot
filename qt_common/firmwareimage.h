@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QDateTime>
+#include <QBuffer>
 
 class FirmwareImage{
 public:
@@ -24,6 +25,8 @@ public:
     QDateTime firmware_gitdate_dt;
     QString firmware_version;
     QString firmware_name;
+    QDateTime imageCreationDate;
+
 
     uint32_t firmware_entryPoint;
     uint32_t firmware_size;
@@ -33,8 +36,12 @@ public:
     QByteArray sha256;
     QByteArray aes128_iv;
 
+    bool firmwareLoadConsistency;
+
 private:
     QDateTime lastModified;
+    void createXML_for_checksum(QBuffer &buf);
+    QString getBase64CheckSum(QBuffer &bufferForCheckSum);
 
 };
 #endif // FIRMWAREIMAGE_H

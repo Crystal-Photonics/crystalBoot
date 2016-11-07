@@ -100,6 +100,12 @@ void MainWindow::loadUIFromFile(){
     ui->lbl_nf_size->setText( QString::number( fwImage.firmware_size/1024,10) +"kB ("+  QString::number( fwImage.firmware_size,10)+" Bytes)");
     ui->lbl_nf_entrypoint->setText("0x"+QString::number( fwImage.firmware_entryPoint,16).toUpper());
     loadFirmwarePathUIFromFile();
+    if (fwImage.firmwareLoadConsistency){
+        ui->lbl_nf_consistency->setText("OK");
+    }else{
+        ui->lbl_nf_consistency->setText("failed");
+    }
+
 }
 
 void MainWindow::loadFirmwarePathUIFromFile()

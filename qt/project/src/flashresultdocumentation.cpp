@@ -102,7 +102,7 @@ void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
 
     xml.writeStartElement("newFirmware");
     xml.writeAttribute("isValid", firmwareImage.isValid() ? "true" : "false");
-    xml.writeAttribute("sha256", firmwareImage.sha256.toHex());
+    xml.writeAttribute("sha256_for_verify", firmwareImage.sha256.toHex());
     xml.writeAttribute("githash", firmwareImage.getGitHash_str());
     xml.writeAttribute("gitdate", firmwareImage.firmware_gitdate_dt.toString("yyyy.MM.dd HH:mm"));
     xml.writeAttribute("gitdate_unix", QString::number(firmwareImage.firmware_githash));
