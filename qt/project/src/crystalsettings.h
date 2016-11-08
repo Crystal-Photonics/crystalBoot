@@ -16,7 +16,6 @@ public:
 
 
     QString COMPortName;
-    QString imageFile;
     bool callProcessAfterProgrammuing;
     QString callProcessPath;
     QString callProcessArguments;

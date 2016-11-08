@@ -370,6 +370,10 @@ void RemoteDeviceInfo::unSet()
     mcu_set = false;
     device_set = false;
     firmware_set = false;
+
+    memset(&mcu_descriptor,0, sizeof mcu_descriptor);
+    memset(&deviceDescriptor,0, sizeof deviceDescriptor);
+    memset(&firmwareDescriptor,0, sizeof firmwareDescriptor);
 }
 
 bool RemoteDeviceInfo::isValid()

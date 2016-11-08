@@ -17,7 +17,8 @@ SOURCES += main.cpp \
     options.cpp \
     crystalsettings.cpp \
     flashresultdocumentation.cpp \
-    namedplacemarker.cpp
+    namedplacemarker.cpp \
+    bootloader.cpp
 SOURCES += infodialog.cpp
 SOURCES += serialworker.cpp
 SOURCES += mainwindow.cpp
@@ -31,7 +32,8 @@ HEADERS += $$PWD/../../../qt_common/firmwareimage.h \
     options.h \
     crystalsettings.h \
     flashresultdocumentation.h \
-    namedplacemarker.h
+    namedplacemarker.h \
+    bootloader.h
 
 HEADERS += mainwindow.h
 HEADERS += infodialog.h

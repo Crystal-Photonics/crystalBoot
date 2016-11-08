@@ -8,23 +8,21 @@
 #include <QTimer>
 #include "serialworker.h"
 #include "crystalsettings.h"
-#include "channel_codec/channel_codec_types.h"
 
-#include "rpc_transmission/server/app/mcu2qt.h"
 #include "firmwareimage.h"
 #include "flashresultdocumentation.h"
+#include "bootloader.h"
 
-extern channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
 
-void RPC_setTimeout(uint32_t timeout_ms);
-uint32_t RPC_getTimeout(void);
 
+
+#if 0
 class TargetInfo{
     mcu_descriptor_t mcu_descriptor;
     device_descriptor_v1_t device_descriptor;
     firmware_descriptor_t remoteFirmwareDescriptor;
 };
-
+#endif
 namespace Ui {
 class MainWindow;
 }
@@ -33,7 +31,7 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    enum ConnectionState {none,Connecting, Connected, Disconnected};
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -42,9 +40,9 @@ public:
     void paintEvent(QPaintEvent *event);
     void loadUIFromSettigns();
 
+
     void loadUIDeviceInfo();
 private slots:
-    void on_tryConnect_timer();
     void on_actionOpen_triggered();
     void on_actionConnect_triggered();
     void on_actionGet_Info_triggered();
@@ -61,36 +59,39 @@ private slots:
 
     void on_actionOptions_triggered();
 
+    void onConnStateChanged(ConnectionState connState);
+    void onProgress(int progress);
+    void onFinished();
+    void onLog(QString text);
+    void onMCUGotDeviceInfo();
+
 private:
 
     Ui::MainWindow *ui;
 
-    SerialThread* serialThread;
-    CrystalBootSettings settings;
 
-    QTimer *connectTimer;
     QComboBox *cmbPort;
-    QString fileNameToSend;
-    bool fileLoaded;
+
+    Bootloader bootloader;
+
+    ConnectionState connState;
     void sendfirmware();
     RPC_RESULT getDeviceInfo();
     void runApplication();
     void connectComPort(bool shallBeOpened);
     void refreshComPortList();
-    void log(QString str);
     void loadFile(QString fileName);
     void recalcUIState();
     void setConnState(ConnectionState connState);
-    ConnectionState connState;
 
-    FirmwareImage fwImage;
 
 
     void loadUIFromFile();
     void loadFirmwarePathUIFromFile();
     uint16_t getNameHash(QString name);
+    void log(QString str);
 
-    RemoteDeviceInfo remoteDeviceInfo;
+
 };
 
 #endif // MAINWINDOW_H

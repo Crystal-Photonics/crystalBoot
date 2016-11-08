@@ -44,7 +44,7 @@ void CrystalBootSettings::load(QString filename)
 
 
     COMPortName = settings.value("COMPortName","").toString();
-    imageFile = settings.value("imageFile","").toString();
+    //imageFile = settings.value("imageFile","").toString();
     callProcessAfterProgrammuing = settings.value("callProcessAfterProgrammuing",false).toBool();
     callProcessArguments = settings.value("callProcessArguments","%PATH_TO_XML_REPORT%").toString();
     callProcessPath = settings.value("callProcessPath","").toString();
@@ -60,7 +60,7 @@ void CrystalBootSettings::save()
     QSettings settings(settingsFileName, QSettings::IniFormat, parent);
 
     settings.setValue("COMPortName",COMPortName);
-    settings.setValue("imageFile",imageFile);
+   // settings.setValue("imageFile",imageFile);
     settings.setValue("callProcessAfterProgrammuing",callProcessAfterProgrammuing);
     settings.setValue("callProcessArguments",callProcessArguments);
     settings.setValue("callProcessPath",callProcessPath);

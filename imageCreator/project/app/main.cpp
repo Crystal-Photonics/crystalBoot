@@ -14,8 +14,8 @@ int main(int argc, char *argv[])
     case 1:
 
         w.show();
-        a.exec();
-        break;
+       return a.exec();
+
     case 2:
     {
         QString creationSettings(argv[1]);
