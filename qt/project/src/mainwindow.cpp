@@ -24,12 +24,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->progressBar->setVisible(false);
 
+    reconnectTimer = new QTimer(this);
+
     QSettings lastSettings("crystalBoot.ini", QSettings::IniFormat, parent);
     connect(&bootloader, SIGNAL(onConnStateChanged(ConnectionState)), this, SLOT(onConnStateChanged(ConnectionState)));
     connect(&bootloader, SIGNAL(onProgress(int)), this, SLOT(onProgress(int)));
     connect(&bootloader, SIGNAL(onFinished(void)), this, SLOT(onFinished(void)));
     connect(&bootloader, SIGNAL(onLog(QString)), this, SLOT(onLog(QString)));
     connect(&bootloader, SIGNAL(onMCUGotDeviceInfo()), this, SLOT(onMCUGotDeviceInfo()));
+    connect(reconnectTimer, SIGNAL(timeout()), this, SLOT(onReconnectTimer()));
+
 
 
 
@@ -222,6 +226,11 @@ void MainWindow::loadFile(QString fileName)
 void MainWindow::setConnState(ConnectionState connState)
 {
     this->connState = connState;
+    if (connState == ConnectionState::Connecting){
+        reconnectTimer->start(20);
+    }else{
+        reconnectTimer->stop();
+    }
     recalcUIState();
 }
 
@@ -393,6 +402,11 @@ void MainWindow::onConnStateChanged(ConnectionState connState)
 void MainWindow::on_actionClose_triggered()
 {
     close();
+}
+
+void MainWindow::onReconnectTimer()
+{
+    bootloader.tryConnect();
 }
 
 

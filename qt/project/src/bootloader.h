@@ -23,6 +23,8 @@ public:
     ~Bootloader();
 
     void connectComPort(QString serialPortName);
+    void connectComPort();
+
     void disconnectComPort();
     void sendfirmware();
     RPC_RESULT getDeviceInfo();
@@ -35,6 +37,9 @@ public:
     RemoteDeviceInfo remoteDeviceInfo;
     bool fileLoaded;
     CrystalBootSettings settings;
+    void tryConnect();
+    ConnectionState getConnectionState();
+
 signals:
     void onConnStateChanged(ConnectionState connState);
     void onProgress(int progress);
@@ -42,22 +47,11 @@ signals:
     void onLog(QString text);
     void onMCUGotDeviceInfo();
 
-public slots:
 
-private slots:
-    void on_tryConnect_timer();
 private:
     ConnectionState connState;
-
-
-
     SerialThread* serialThread;
-
-
-    QTimer *connectTimer;
-
-
-
+    //QTimer *connectTimer;
     void log(QString str);
     void setConnState(ConnectionState connState);
 };

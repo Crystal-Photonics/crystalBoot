@@ -71,6 +71,7 @@ public:
     void addActionResult(QString action, RPC_RESULT RPC_result);
     void setNewFirmwareDescriptor(FirmwareImage firmwareImage);
     void setRemoteDeviceInfo(RemoteDeviceInfo remoteDeviceInfo);
+    void print();
 
 private:
     RemoteDeviceInfo remoteDeviceInfo;

@@ -10,8 +10,8 @@ uint32_t RPC_getTimeout(void);
 Bootloader::Bootloader(QString settingsFileName, QObject *parent) : QObject(parent), settings(parent)
 {
     settings.load(settingsFileName);
-    connectTimer = new QTimer(this);
-    connect(connectTimer, SIGNAL(timeout()), this, SLOT(on_tryConnect_timer()));
+   // connectTimer = new QTimer(this);
+   // connect(connectTimer, SIGNAL(timeout()), this, SLOT(on_tryConnect_timer()));
     serialThread = new SerialThread(this);
     fileLoaded =false;
 }
@@ -23,7 +23,7 @@ Bootloader::~Bootloader()
 
 
 
-void Bootloader::on_tryConnect_timer()
+void Bootloader::tryConnect()
 {
     if (serialThread->isOpen()){
 
@@ -31,7 +31,7 @@ void Bootloader::on_tryConnect_timer()
         uint32_t timeout = RPC_getTimeout();
         RPC_setTimeout(50);
         if (serialThread->rpcEnterProgrammingMode() == RPC_SUCCESS){
-            connectTimer->stop();
+//            connectTimer->stop();
             bool corr_hash = serialThread->rpcIsCorrectHash();
             if (corr_hash){
                 log("bootloader found.");
@@ -52,29 +52,37 @@ void Bootloader::on_tryConnect_timer()
     }
 }
 
+ConnectionState Bootloader::getConnectionState()
+{
+    return connState;
+}
+
 void Bootloader::connectComPort(QString serialPortName)
 {
-    //QString serialPortName = cmbPort->currentText();
     settings.COMPortName = serialPortName;
-    int baudrate = 115200;//ui->cmbBaud->currentText().toInt();
-    qDebug() << "open" << serialPortName << baudrate;
-    serialThread->open(serialPortName,baudrate);
+    connectComPort();
+}
+
+void Bootloader::connectComPort()
+{
+    int baudrate = 115200;
+    qDebug() << "open" << settings.COMPortName << baudrate;
+    serialThread->open(settings.COMPortName,baudrate);
 
     if (serialThread->isOpen()){
         setConnState(ConnectionState::Connecting);
-        connectTimer->start(10);
+        //connectTimer->start(10);
 
     }else{
         log("still closed");
     }
-
 }
 
 
 void Bootloader::disconnectComPort()
 {
     serialThread->close();
-    connectTimer->stop();
+    //connectTimer->stop();
     if (serialThread->isOpen()){
         log("still opened");
 
@@ -286,8 +294,6 @@ void Bootloader::log(QString str)
 {
     qDebug() << str;
     emit onLog(str);
-    //ui->plainTextEdit->appendPlainText(str);
-    //QApplication::processEvents();
 }
 
 void Bootloader::setConnState(ConnectionState connState)
@@ -296,6 +302,7 @@ void Bootloader::setConnState(ConnectionState connState)
         remoteDeviceInfo.unSet();
         emit onMCUGotDeviceInfo();
     }
+    this->connState = connState;
     emit onConnStateChanged(connState);
 }
 

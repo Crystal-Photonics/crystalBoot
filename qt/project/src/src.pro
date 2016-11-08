@@ -13,12 +13,13 @@ TEMPLATE = lib
 
 DEFINES += EXPORT_LIBRARY
 
-SOURCES += main.cpp \
-    options.cpp \
-    crystalsettings.cpp \
-    flashresultdocumentation.cpp \
-    namedplacemarker.cpp \
-    bootloader.cpp
+SOURCES += main.cpp
+SOURCES += options.cpp
+SOURCES += crystalsettings.cpp
+SOURCES += flashresultdocumentation.cpp
+SOURCES += namedplacemarker.cpp
+SOURCES +=  bootloader.cpp
+
 SOURCES += infodialog.cpp
 SOURCES += serialworker.cpp
 SOURCES += mainwindow.cpp
@@ -28,16 +29,17 @@ SOURCES += ../libs/rpc/src/server/app/rpc_func_qt.cpp
 SOURCES += ../libs/rpc/src/server/app/rpc_service_qt.cpp
 
 SOURCES += $$PWD/../../../qt_common/firmwareimage.cpp
-HEADERS += $$PWD/../../../qt_common/firmwareimage.h \
-    options.h \
-    crystalsettings.h \
-    flashresultdocumentation.h \
-    namedplacemarker.h \
-    bootloader.h
+HEADERS += $$PWD/../../../qt_common/firmwareimage.h
+
 
 HEADERS += mainwindow.h
 HEADERS += infodialog.h
 HEADERS += serialworker.h
+HEADERS += options.h
+HEADERS += crystalsettings.h
+HEADERS += flashresultdocumentation.h
+HEADERS += namedplacemarker.h
+HEADERS += bootloader.h
 
 SOURCES += ../libs/rpc/src/client/generated_app/RPC_TRANSMISSION_qt2mcu.c
 SOURCES += ../libs/rpc/src/server/generated_app/RPC_TRANSMISSION_parser.c

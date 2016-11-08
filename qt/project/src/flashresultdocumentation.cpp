@@ -184,6 +184,41 @@ void FlashResultDocumentation::setRemoteDeviceInfo(RemoteDeviceInfo remoteDevice
     this->remoteDeviceInfo = remoteDeviceInfo;
 }
 
+void FlashResultDocumentation::print()
+{
+    qDebug() << "mcu data:";
+    qDebug() << "devID"<< remoteDeviceInfo.getMCU_DeviceIDString();
+    qDebug() << "revision"<<  remoteDeviceInfo.getMCU_RevString();
+    qDebug() << "flashSize"<<  remoteDeviceInfo.getMCU_FlashsizeString();
+    qDebug() << "uniqueID"<<  remoteDeviceInfo.getMCU_UniqueIDString();
+    qDebug() << "availableFlashSize"<<  remoteDeviceInfo.getMCU_AvailFlashSizeString();
+    qDebug() << "entryPoint"<<  remoteDeviceInfo.getMCU_EntryPointString();
+    qDebug() << "MinimalEntryPoint"<<  remoteDeviceInfo.getMCU_MinimalEntryPointString();
+    qDebug() << "CryptoRequired"<<  remoteDeviceInfo.getMCU_cryptoRequired();
+    qDebug() << "";
+
+    qDebug() << "bootloader info:";
+    qDebug() << "githash"<<  remoteDeviceInfo.getDEV_gitHash();
+    qDebug() << "gitdate"<<  remoteDeviceInfo.getDEV_gitDate_str();
+    qDebug() << "gitdate_unix"<<  remoteDeviceInfo.getDEV_gitDate_unix();
+    qDebug() << "version"<<   remoteDeviceInfo.getDEV_version();
+    qDebug() << "name"<<   remoteDeviceInfo.getDEV_name();
+    qDebug() << "";
+
+    qDebug() << "remote firmware:";
+    qDebug() << "githash"<<  remoteDeviceInfo.getFW_gitHash();
+    qDebug() << "gitdate"<<  remoteDeviceInfo.getFW_gitDate_str();
+    qDebug() << "gitdate_unix"<<  remoteDeviceInfo.getFW_gitDate_unix();
+    qDebug() << "version"<<   remoteDeviceInfo.getFW_version();
+    qDebug() << "name"<<   remoteDeviceInfo.getFW_name();
+    qDebug() << "name_crc"<<   remoteDeviceInfo.getFW_nameCRC();
+    qDebug() << "entryPoint"<<  remoteDeviceInfo.getFW_entryPoint();
+    qDebug() << "size_hex"<<  remoteDeviceInfo.getFW_size();
+    qDebug() << "size_dec"<<  QString::number(remoteDeviceInfo.firmwareDescriptor.size);
+
+    qDebug() << "";
+}
+
 bool FlashResultDocumentation::getOverAllResult()
 {
     bool result = true;

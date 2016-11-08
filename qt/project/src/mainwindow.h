@@ -57,6 +57,8 @@ private slots:
     void on_actionOpen_Firmware_Image_triggered();
     void on_actionClose_triggered();
 
+    void onReconnectTimer();
+
     void on_actionOptions_triggered();
 
     void onConnStateChanged(ConnectionState connState);
@@ -71,6 +73,7 @@ private:
 
 
     QComboBox *cmbPort;
+    QTimer *reconnectTimer;
 
     Bootloader bootloader;
 
