@@ -38,9 +38,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     cmbPort = new QComboBox (this);
+    connect(cmbPort, SIGNAL(currentIndexChanged(QString)), this, SLOT(onCmbCurrentIndexChanged(QString)));
+
     ui->mainToolBar->addAction(ui->actionOpen);
     ui->mainToolBar->addWidget(cmbPort);
-    ui->mainToolBar->addAction(ui->actionRefresh);
     ui->mainToolBar->addAction(ui->actionConnect);
     ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction(ui->actionTransfer);
@@ -63,7 +64,13 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::loadUIFromSettigns(){
-    cmbPort->setCurrentIndex( cmbPort->findText(bootloader.getComPortName()));
+    if (bootloader.getComPortName() == "refresh"){
+       cmbPort->setCurrentIndex(0);
+    }else if (bootloader.getComPortName() == ""){
+       cmbPort->setCurrentIndex(0);
+    }else{
+        cmbPort->setCurrentIndex( cmbPort->findText(bootloader.getComPortName()));
+    }
 }
 
 
@@ -203,12 +210,20 @@ void MainWindow::loadUIDeviceInfo(){
 void MainWindow::refreshComPortList()
 {
     cmbPort->clear();
+    cmbPort->addItem("");
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
         cmbPort->addItem(info.portName());
     }
-    //  cmbPort->setCurrentIndex(settings.value("lastComPort",0).toInt());
+    cmbPort->addItem("");
+    cmbPort->addItem("refresh");
     loadUIFromSettigns();
+}
 
+void MainWindow::onCmbCurrentIndexChanged(const QString &text)
+{
+     if (text == "refresh"){
+         refreshComPortList();
+     }
 }
 
 void MainWindow::loadFile(QString fileName)
@@ -217,11 +232,6 @@ void MainWindow::loadFile(QString fileName)
     recalcUIState();
     loadUIFromFile();
 }
-
-
-
-
-
 
 void MainWindow::setConnState(ConnectionState connState)
 {
@@ -393,6 +403,8 @@ void MainWindow::onMCUGotDeviceInfo()
 {
     loadUIDeviceInfo();
 }
+
+
 
 void MainWindow::onConnStateChanged(ConnectionState connState)
 {

@@ -67,6 +67,8 @@ private slots:
     void onLog(QString text);
     void onMCUGotDeviceInfo();
 
+    void onCmbCurrentIndexChanged(const QString &text);
+
 private:
 
     Ui::MainWindow *ui;
