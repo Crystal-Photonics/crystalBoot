@@ -10,7 +10,7 @@
 #include "port_flash.h"
 #include "port_board.h"
 #include "port_chip.h"
-
+#include "programmer.h"
 
 
 typedef  void (*pFunction)(void);
@@ -541,10 +541,11 @@ void portFlashRunApplication(){
 	 *
 	 * Test if user code is programmed starting from address "ApplicationAddress"
 	 * magic number 0x2FFE0000 results from ram size aka stack pointer				*/
-	stackAddressOfApplication = *(__IO uint32_t*)MINIMAL_APPLICATION_ADDRESS;
+	stackAddressOfApplication = *(__IO uint32_t*)programmerGetApplicationEntryPoint();
 	if ((stackAddressOfApplication & 0x2FFE0000 ) == 0x20000000)
 	{
-		static const uint32_t applicationResetVector = MINIMAL_APPLICATION_ADDRESS + 4;
+		static uint32_t applicationResetVector = 0;
+		applicationResetVector = programmerGetApplicationEntryPoint() + 4;
 		JumpAddress = *(__IO uint32_t*) (applicationResetVector);
 
 		__disable_irq();

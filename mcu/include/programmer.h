@@ -36,6 +36,8 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size);
 crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size);
 
+uint32_t programmerGetApplicationEntryPoint();
+
 void programmerRunApplication(void);
 
 

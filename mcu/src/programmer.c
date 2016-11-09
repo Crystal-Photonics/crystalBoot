@@ -18,8 +18,8 @@
 SHA256_CTX sha56_ctx;
 #define AES_128_IV_LENGTH 16
 
-static uint32_t programmWritePointerAddress = APPLICATION_ADDRESS;
-static uint32_t programmReadPointerAddress = APPLICATION_ADDRESS;
+static uint32_t programmWritePointerAddress = 0;
+static uint32_t programmReadPointerAddress = 0;
 
 static uint8_t aes128_iv_buf[AES_128_IV_LENGTH];
 static uint8_t aes128_key_local[AES_128_IV_LENGTH];
@@ -35,6 +35,10 @@ static bool firmware_meta_is_valid = false;
 #ifndef  BOOTLOADER_BOOT_APP_USING_RESET
 #error "please define BOOTLOADER_BOOT_APP_USING_RESET"
 #endif
+
+uint32_t programmerGetApplicationEntryPoint(){
+	return firmwareMetaData.d.firmwareDescriptor.entryPoint;
+}
 
 
 static void programmer_destroyMetaData(){
@@ -109,7 +113,7 @@ crystalBoolResult_t programmerVerify(void){
 		if (pos+size > firmwareMetaData.d.firmwareDescriptor.size){
 			size = firmwareMetaData.d.firmwareDescriptor.size - pos;
 		}
-		portFlashRead(APPLICATION_ADDRESS+pos, flash_bloc_buffer, size);
+		portFlashRead(programmerGetApplicationEntryPoint()+pos, flash_bloc_buffer, size);
 		sha256_update(&sha56_ctx,flash_bloc_buffer,size);
 		pos += size;
 	}
@@ -157,9 +161,11 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 		return crystalBool_Fail;
 	}
 
+#if 0
 	if (firmwareDescriptor->entryPoint  != APPLICATION_ADDRESS){
 		return crystalBool_Fail;
 	}
+#endif
 
 	if ((BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION==0) && (crypto == crystalBoolCrypto_Plain)){
 		return crystalBool_Fail;
@@ -171,8 +177,8 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 
 	memcpy(&firmwareMetaData.d.firmwareDescriptor,firmwareDescriptor,sizeof(firmware_descriptor_t));
 
-	programmWritePointerAddress = APPLICATION_ADDRESS;
-	programmReadPointerAddress  = APPLICATION_ADDRESS;
+	programmWritePointerAddress = programmerGetApplicationEntryPoint();
+	programmReadPointerAddress  = programmerGetApplicationEntryPoint();
 	cryptoUsed = crypto;
 	firmwareMetaData.d.checksumVerified = 0;
 	memcpy(firmwareMetaData.d.sha256,sha256,sizeof(firmwareMetaData.d.sha256));
@@ -272,9 +278,9 @@ mcu_descriptor_t programmerGetMCUDescriptor( ){
 	result.devID = 						portFlashGetDeviceID();
 	result.revision = 					portFlashGetRevisionID();
 	result.flashsize = 					portFlashGetFlashSize();
-	result.firmwareEntryPoint = 		APPLICATION_ADDRESS;
+	result.firmwareEntryPoint = 		0xFFFFFFFF;
 	result.minimalFirmwareEntryPoint = 	MINIMAL_APPLICATION_ADDRESS;
-	result.availFlashSize = 			FLASH_ADDRESS+result.flashsize - APPLICATION_ADDRESS;
+	result.availFlashSize = 			FLASH_ADDRESS+result.flashsize - MINIMAL_APPLICATION_ADDRESS;
 	result.cryptoRequired = 			BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION==0;
 	return result;
 }

@@ -238,6 +238,7 @@ bool port_checkFlashConfiguration(bool usePrintf){
 	}
 
 	uint32_t lastUsedAddressInFlash = (uint32_t)&__firmware_descriptor_buffer_end;
+
 	if (MINIMAL_APPLICATION_ADDRESS < lastUsedAddressInFlash){
 		if(usePrintf){
 			printf("Bootloader flash region overlaps with application memory");

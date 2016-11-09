@@ -470,7 +470,7 @@ void FirmwareUpdatePlausibilityCheck::checkPlausibiltity(RemoteDeviceInfo remote
         plausibilityResults.insert(PlausibilityResult::error_firmwareimage_too_big);
     }
 
-    if (firmwareImage.firmware_entryPoint != remoteDevInfo.mcu_descriptor.firmwareEntryPoint){
+    if ((firmwareImage.firmware_entryPoint != remoteDevInfo.mcu_descriptor.firmwareEntryPoint) && (remoteDevInfo.mcu_descriptor.firmwareEntryPoint != 0xFFFFFFFF) ){
         plausibilityResults.insert(PlausibilityResult::error_wrong_entrypoint);
     }
 
