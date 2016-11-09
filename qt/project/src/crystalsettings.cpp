@@ -55,9 +55,9 @@ void CrystalBootSettings::load(QString filename)
 
 
 
-void CrystalBootSettings::save()
+void CrystalBootSettings::saveAs(QString filename)
 {
-    QSettings settings(settingsFileName, QSettings::IniFormat, parent);
+    QSettings settings(filename, QSettings::IniFormat, parent);
 
     settings.setValue("COMPortName",COMPortName);
    // settings.setValue("imageFile",imageFile);
@@ -67,6 +67,12 @@ void CrystalBootSettings::save()
     settings.setValue("flashResultDocumentationPath",flashResultDocumentationPath);
     settings.sync();
 
+
+}
+
+void CrystalBootSettings::save()
+{
+    saveAs(settingsFileName);
     isExistingFileName = true;
 }
 

@@ -51,7 +51,6 @@ void MainWindow::loadUIFromSettings()
 
     ui->edt_encryptionKey->setText(imageCreatorSettings.encryptKeyFileName);
     ui->edt_hexFile->setText(imageCreatorSettings.hexFileName);
-    ui->edt_signPrivateKey->setText(imageCreatorSettings.signKeyFileName);
     ui->edt_targetFile->setText(imageCreatorSettings.targetFileName);
 
     ui->edt_githash->setText(imageCreatorSettings.keyWord_githash);
@@ -88,7 +87,6 @@ void MainWindow::saveUIToSettings()
 {
     imageCreatorSettings.encryptKeyFileName = ui->edt_encryptionKey->text();
     imageCreatorSettings.hexFileName = ui->edt_hexFile->text();
-    imageCreatorSettings.signKeyFileName = ui->edt_signPrivateKey->text();
     imageCreatorSettings.targetFileName = ui->edt_targetFile->text();
 
     imageCreatorSettings.keyWord_githash = ui->edt_githash->text();
@@ -165,6 +163,7 @@ void MainWindow::loadUIFromFirmwaredata(FirmwareImage fwImage)
 void MainWindow::on_btnPreview_clicked()
 {
     bool result = false;
+    saveUIToSettings();
     FirmwareEncoder fwImageEncode(imageCreatorSettings);
     result = fwImageEncode.loadFirmwareData();
     if (!result){
@@ -178,6 +177,7 @@ void MainWindow::on_btnPreview_clicked()
 
 void MainWindow::on_btnCreateImage_clicked()
 {
+    saveUIToSettings();
     FirmwareEncoder fwImageEncode(imageCreatorSettings);
     bool result1,result2;
     result1 = fwImageEncode.loadFirmwareData();

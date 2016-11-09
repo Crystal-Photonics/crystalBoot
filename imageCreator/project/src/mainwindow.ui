@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>597</width>
-    <height>476</height>
+    <height>501</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>crystalBoot Image creator</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -90,20 +90,6 @@
         <string>File paths</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Signing private key:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_17">
-          <property name="text">
-           <string>relative To:</string>
-          </property>
-         </widget>
-        </item>
         <item row="4" column="0">
          <widget class="QLabel" name="label_3">
           <property name="text">
@@ -111,7 +97,7 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="0">
+        <item row="5" column="0">
          <widget class="QLabel" name="label_5">
           <property name="text">
            <string>Target file:</string>
@@ -150,9 +136,6 @@
          <widget class="QLineEdit" name="edt_encryptionKey"/>
         </item>
         <item row="5" column="1" colspan="2">
-         <widget class="QLineEdit" name="edt_signPrivateKey"/>
-        </item>
-        <item row="6" column="1" colspan="2">
          <widget class="QLineEdit" name="edt_targetFile"/>
         </item>
         <item row="2" column="1" colspan="2">
@@ -168,6 +151,13 @@
           </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_17">
+          <property name="text">
+           <string>relative To:</string>
           </property>
          </widget>
         </item>

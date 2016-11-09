@@ -3,8 +3,23 @@
 #include "rpc_transmission/client/generated_app/RPC_TRANSMISSION_qt2mcu.h"
 #include <QMap>
 #include <QString>
+#include <set>
 #include "firmwareimage.h"
 #include "crystalsettings.h"
+
+enum class PlausibilityResult{
+    error_firmwareimage_too_big,
+    error_wrong_entrypoint,
+    error_inconsistency,
+    error_crypto_required,
+    warning_different_name_hash,
+    warning_downgrade_date,
+
+    warning_equal_gitHash,
+    warning_equal_gitHash_but_different_wersion,
+    warning_equal_version_but_different_gitHash
+};
+
 
 class RemoteDeviceInfo{
 public:
@@ -13,11 +28,9 @@ public:
     void setDeviceDescriptor(device_descriptor_v1_t *deviceDescriptor);
     void setOldFirmwareDescriptor(firmware_descriptor_t  *firmwareDescriptor);
 
-
-
-
-
     QString getDeviceCategorieString();
+
+
 
     void unSet();
     bool isValid();
@@ -62,6 +75,24 @@ private:
     bool firmware_set;
 };
 
+class FirmwareUpdatePlausibilityCheck{
+public:
+    FirmwareUpdatePlausibilityCheck();
+
+    void checkPlausibiltity(RemoteDeviceInfo remoteDevInfo, FirmwareImage firmwareImage);
+    void clear();
+    std::set<PlausibilityResult> getPlausibilityResult();
+
+    bool plausibilityResultIsError(PlausibilityResult plauRes);
+    QString plausibilityResultToStrShort(PlausibilityResult plauRes);
+    QString plausibilityResultToStrReadable(PlausibilityResult plauRes);
+
+    bool showWarngingMessage(); //cancel if false
+private:
+    std::set<PlausibilityResult> plausibilityResults;
+};
+
+
 class FlashResultDocumentation
 {
 public:
@@ -72,8 +103,12 @@ public:
     void setNewFirmwareDescriptor(FirmwareImage firmwareImage);
     void setRemoteDeviceInfo(RemoteDeviceInfo remoteDeviceInfo);
     void print();
+    void checkPlausibility();
+    bool showWarngingMessage();
+
 
 private:
+    FirmwareUpdatePlausibilityCheck plausibilityResult;
     RemoteDeviceInfo remoteDeviceInfo;
     bool getOverAllResult();
 

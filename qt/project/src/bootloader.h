@@ -36,9 +36,13 @@ public:
     FirmwareImage fwImage;
     RemoteDeviceInfo remoteDeviceInfo;
     bool fileLoaded;
+    FirmwareUpdatePlausibilityCheck plausibilityCheck;
+
     CrystalBootSettings settings;
     void tryConnect();
     ConnectionState getConnectionState();
+
+
 
 signals:
     void onConnStateChanged(ConnectionState connState);
@@ -51,7 +55,6 @@ signals:
 private:
     ConnectionState connState;
     SerialThread* serialThread;
-    //QTimer *connectTimer;
     void log(QString str);
     void setConnState(ConnectionState connState);
 };

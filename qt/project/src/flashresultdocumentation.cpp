@@ -6,6 +6,8 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QProcess>
+#include <QMessageBox>
+#include <QApplication>
 
 QString RemoteDeviceInfo::arrayToHexString(uint8_t *buff, const size_t length, int insertNewLine){
     QString result;
@@ -31,6 +33,17 @@ FlashResultDocumentation::FlashResultDocumentation()
 
 }
 
+void FlashResultDocumentation::checkPlausibility()
+{
+    plausibilityResult.checkPlausibiltity(remoteDeviceInfo,firmwareImage);
+}
+
+bool FlashResultDocumentation::showWarngingMessage()
+{
+    return plausibilityResult.showWarngingMessage();
+}
+
+
 void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
 {
     QXmlStreamWriter xml;
@@ -55,6 +68,7 @@ void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
     QDir(QDir::currentPath()).mkpath(QFileInfo(fileName).absoluteDir().absolutePath());
 
     QFile file(fileName);
+
 
 
 
@@ -120,6 +134,27 @@ void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
     }
     xml.writeEndElement();
 
+    checkPlausibility();
+    std::set<PlausibilityResult> plauResult = plausibilityResult.getPlausibilityResult();
+    xml.writeStartElement("plausibility");
+    std::set<PlausibilityResult>::iterator it;
+    for (it = plauResult.begin(); it != plauResult.end(); ++it)
+    {
+        PlausibilityResult res = *it; // Note the "*" here
+        xml.writeStartElement(plausibilityResult.plausibilityResultToStrShort(res));
+
+        if (plausibilityResult.plausibilityResultIsError(res)){
+            xml.writeAttribute("error",  "true");
+            xml.writeAttribute("warning",  "false");
+        }else{
+            xml.writeAttribute("error",  "false");
+            xml.writeAttribute("warning",  "true");
+        }
+        xml.writeAttribute("description",plausibilityResult.plausibilityResultToStrReadable(res));
+    }
+    xml.writeEndElement();
+
+
     xml.writeStartElement("flashResult");
     xml.writeAttribute("date_unix",QString::number(QDateTime::currentDateTime().toTime_t()));
     xml.writeAttribute("date",QDateTime::currentDateTime().toString("yyyy.MM.dd HH:mm"));
@@ -150,6 +185,8 @@ void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
     }
     xml.writeAttribute("overAllResult",getOverAllResult() ? "true" : "false");
     xml.writeEndElement();
+
+
     xml.writeEndElement();
     xml.writeEndDocument();
     file.close();
@@ -218,6 +255,7 @@ void FlashResultDocumentation::print()
 
     qDebug() << "";
 }
+
 
 bool FlashResultDocumentation::getOverAllResult()
 {
@@ -415,4 +453,240 @@ bool RemoteDeviceInfo::isValid()
 {
     return mcu_set && device_set && firmware_set;
 }
+
+
+
+FirmwareUpdatePlausibilityCheck::FirmwareUpdatePlausibilityCheck()
+{
+
+}
+
+void FirmwareUpdatePlausibilityCheck::checkPlausibiltity(RemoteDeviceInfo remoteDevInfo, FirmwareImage firmwareImage)
+{
+    plausibilityResults.clear();
+    uint32_t fw_lastAddress = firmwareImage.firmware_entryPoint+firmwareImage.firmware_size;
+    uint32_t mcu_lastAddress = remoteDevInfo.mcu_descriptor.minimalFirmwareEntryPoint +  remoteDevInfo.mcu_descriptor.availFlashSize;
+    if (fw_lastAddress > mcu_lastAddress){
+        plausibilityResults.insert(PlausibilityResult::error_firmwareimage_too_big);
+    }
+
+    if (firmwareImage.firmware_entryPoint != remoteDevInfo.mcu_descriptor.firmwareEntryPoint){
+        plausibilityResults.insert(PlausibilityResult::error_wrong_entrypoint);
+    }
+
+    if (firmwareImage.firmware_entryPoint < remoteDevInfo.mcu_descriptor.minimalFirmwareEntryPoint){
+        plausibilityResults.insert(PlausibilityResult::error_wrong_entrypoint);
+    }
+
+    if ((firmwareImage.crypto == FirmwareImage::Crypto::Plain) && (remoteDevInfo.mcu_descriptor.cryptoRequired)){
+        plausibilityResults.insert(PlausibilityResult::error_crypto_required);
+    }
+    if (firmwareImage.firmwareLoadConsistency == false){
+         plausibilityResults.insert(PlausibilityResult::error_inconsistency);
+    }
+    if (firmwareImage.getNameCRC16() != remoteDevInfo.firmwareDescriptor.nameCRC16){
+         plausibilityResults.insert(PlausibilityResult::warning_different_name_hash);
+    }
+
+    if (firmwareImage.firmware_gitdate_unix < remoteDevInfo.firmwareDescriptor.gitDate_unix){
+         plausibilityResults.insert(PlausibilityResult::warning_downgrade_date);
+    }
+
+    if (firmwareImage.firmware_githash == remoteDevInfo.firmwareDescriptor.githash){
+         plausibilityResults.insert(PlausibilityResult::warning_equal_gitHash);
+    }
+
+    if ((firmwareImage.firmware_githash == remoteDevInfo.firmwareDescriptor.githash) && (firmwareImage.firmware_version != remoteDevInfo.getFW_version())){
+         plausibilityResults.insert(PlausibilityResult::warning_equal_gitHash_but_different_wersion);
+    }
+
+    if ((firmwareImage.firmware_githash != remoteDevInfo.firmwareDescriptor.githash) && (firmwareImage.firmware_version == remoteDevInfo.getFW_version())){
+         plausibilityResults.insert(PlausibilityResult::warning_equal_version_but_different_gitHash);
+    }
+}
+
+void FirmwareUpdatePlausibilityCheck::clear()
+{
+    plausibilityResults.clear();
+}
+
+std::set<PlausibilityResult> FirmwareUpdatePlausibilityCheck::getPlausibilityResult()
+{
+    return plausibilityResults;
+}
+
+QString FirmwareUpdatePlausibilityCheck::plausibilityResultToStrReadable(PlausibilityResult plauRes)
+{
+    switch (plauRes){
+    case PlausibilityResult::error_firmwareimage_too_big:
+        return QString("error: firmwareimage too big.");
+        break;
+    case PlausibilityResult::error_wrong_entrypoint:
+        return QString("error: wrong entrypoint.");
+        break;
+    case PlausibilityResult::error_inconsistency:
+        return QString("error: firmwareimage inconsistent.");
+        break;
+    case PlausibilityResult::error_crypto_required:
+        return QString("error: crypto required.");
+        break;
+    case PlausibilityResult::warning_different_name_hash:
+        return QString("warning: different name hashes. Installed Firmware has different name than this one. You are installing a different software.");
+        break;
+    case PlausibilityResult::warning_downgrade_date:
+        return QString("warning: downgrading firmware. Installed Firmware newer than this one.");
+        break;
+
+    case PlausibilityResult::warning_equal_gitHash:
+        return QString("warning: equal githash, you are installing the same version.");
+        break;
+    case PlausibilityResult::warning_equal_gitHash_but_different_wersion:
+        return QString("warning: equal githash, but different version. Shouldnt happen.");
+        break;
+    case PlausibilityResult::warning_equal_version_but_different_gitHash:
+        return QString("warning: equal version, but different githash. Shouldnt happen.");
+        break;
+    }
+    return "";
+}
+
+bool FirmwareUpdatePlausibilityCheck::showWarngingMessage()//cancel if false
+{
+
+    QString warnings;
+    std::set<PlausibilityResult>::iterator it;
+    bool hasError = false;
+    for (it = plausibilityResults.begin(); it != plausibilityResults.end(); ++it)
+    {
+        PlausibilityResult res = *it; // Note the "*" here
+        warnings += plausibilityResultToStrReadable(res)+"\n";
+        if (plausibilityResultIsError(res)){
+            hasError = true;
+        }
+    }
+    if (QApplication::activeWindow()){
+        QMessageBox msgBox;
+        if (hasError){
+            msgBox.setText("There are plausibility errors:");
+            msgBox.setInformativeText(warnings);
+            msgBox.setStandardButtons(QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Cancel);
+            msgBox.setIcon(QMessageBox::Critical);
+        }else{
+            msgBox.setText("There are plausibility warnings, continue?");
+            msgBox.setInformativeText(warnings);
+            msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Ok);
+            msgBox.setIcon(QMessageBox::Warning);
+        }
+        int ret = msgBox.exec();
+        if (ret == QMessageBox::Ok){
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        if (warnings.length()){
+            qDebug() << warnings;
+        }
+        return !hasError;
+    }
+
+}
+
+QString FirmwareUpdatePlausibilityCheck::plausibilityResultToStrShort(PlausibilityResult plauRes)
+{
+    switch (plauRes){
+    case PlausibilityResult::error_firmwareimage_too_big:
+        return QString("error_firmwareimage_too_big");
+        break;
+    case PlausibilityResult::error_wrong_entrypoint:
+        return QString("error_wrong_entrypoint");
+        break;
+    case PlausibilityResult::error_inconsistency:
+        return QString("error_inconsistency");
+        break;
+    case PlausibilityResult::error_crypto_required:
+        return QString("error_crypto_required");
+        break;
+    case PlausibilityResult::warning_different_name_hash:
+        return QString("warning_different_name_hash");
+        break;
+    case PlausibilityResult::warning_downgrade_date:
+        return QString("warning_downgrade_date");
+        break;
+
+    case PlausibilityResult::warning_equal_gitHash:
+        return QString("warning_equal_gitHash");
+        break;
+    case PlausibilityResult::warning_equal_gitHash_but_different_wersion:
+        return QString("warning_equal_gitHash_but_different_wersion");
+        break;
+    case PlausibilityResult::warning_equal_version_but_different_gitHash:
+        return QString("warning_equal_gitHash_but_different_wersion");
+        break;
+    }
+    return "";
+}
+
+bool FirmwareUpdatePlausibilityCheck::plausibilityResultIsError(PlausibilityResult plauRes)
+{
+    switch (plauRes){
+    case PlausibilityResult::error_firmwareimage_too_big:
+        return true;
+        break;
+    case PlausibilityResult::error_wrong_entrypoint:
+        return true;
+        break;
+    case PlausibilityResult::error_inconsistency:
+        return true;
+        break;
+    case PlausibilityResult::error_crypto_required:
+        return true;
+        break;
+    case PlausibilityResult::warning_different_name_hash:
+        return false;
+        break;
+    case PlausibilityResult::warning_downgrade_date:
+        return false;
+        break;
+
+    case PlausibilityResult::warning_equal_gitHash:
+        return false;
+        break;
+    case PlausibilityResult::warning_equal_gitHash_but_different_wersion:
+        return false;
+        break;
+    case PlausibilityResult::warning_equal_version_but_different_gitHash:
+        return false;
+        break;
+    }
+    return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

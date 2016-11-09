@@ -7,13 +7,11 @@ channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
 void RPC_setTimeout(uint32_t timeout_ms);
 uint32_t RPC_getTimeout(void);
 
-Bootloader::Bootloader(QString settingsFileName, QObject *parent) : QObject(parent), settings(parent)
+Bootloader::Bootloader(QString settingsFileName, QObject *parent) : QObject(parent),  settings(parent)
 {
     settings.load(settingsFileName);
-   // connectTimer = new QTimer(this);
-   // connect(connectTimer, SIGNAL(timeout()), this, SLOT(on_tryConnect_timer()));
     serialThread = new SerialThread(this);
-    fileLoaded =false;
+    fileLoaded = false;
 }
 
 Bootloader::~Bootloader()
@@ -31,7 +29,6 @@ void Bootloader::tryConnect()
         uint32_t timeout = RPC_getTimeout();
         RPC_setTimeout(50);
         if (serialThread->rpcEnterProgrammingMode() == RPC_SUCCESS){
-//            connectTimer->stop();
             bool corr_hash = serialThread->rpcIsCorrectHash();
             if (corr_hash){
                 log("bootloader found.");
@@ -71,7 +68,6 @@ void Bootloader::connectComPort()
 
     if (serialThread->isOpen()){
         setConnState(ConnectionState::Connecting);
-        //connectTimer->start(10);
 
     }else{
         log("still closed");
@@ -82,7 +78,6 @@ void Bootloader::connectComPort()
 void Bootloader::disconnectComPort()
 {
     serialThread->close();
-    //connectTimer->stop();
     if (serialThread->isOpen()){
         log("still opened");
 
@@ -114,6 +109,8 @@ void Bootloader::sendfirmware()
         result = getDeviceInfo();
         flashResultDocumentation.addActionResult("GetInfo",result);
         flashResultDocumentation.setRemoteDeviceInfo(remoteDeviceInfo);
+        flashResultDocumentation.checkPlausibility();
+
 
         emit onProgress(0);
 
@@ -122,23 +119,40 @@ void Bootloader::sendfirmware()
         QTime runtime;
         QTime totalRuntime;
         bool fail = false;
+
+        if (!flashResultDocumentation.showWarngingMessage()){
+            fail = true;
+            log("cancelled due to plausibility issues.");
+            flashResultDocumentation.addActionResult("Plausibility",RPC_FAILURE);
+            result = RPC_FAILURE;
+        }else{
+            flashResultDocumentation.addActionResult("Plausibility",RPC_SUCCESS);
+            result = RPC_SUCCESS;
+        }
+
         runtime.start();
         totalRuntime.start();
-        log("erasing..");
-        RPC_setTimeout(20*1000);
+
 #if 1
-        result = serialThread->rpcEraseFlash();
-        flashResultDocumentation.addActionResult("Erase",result);
-        if (result != RPC_SUCCESS){
-            fail = true;
-           log("erasing fail");
-        }else{
-            log("erase ok. " + QString::number(runtime.elapsed()/1000.0)+" seconds needed");
+        if (!fail){
+            log("erasing..");
+            RPC_setTimeout(20*1000);
+            result = serialThread->rpcEraseFlash();
+            flashResultDocumentation.addActionResult("Erase",result);
+            if (result != RPC_SUCCESS){
+                fail = true;
+                log("erasing fail");
+            }else{
+                log("erase ok. " + QString::number(runtime.elapsed()/1000.0)+" seconds needed");
+            }
         }
+
+
 #endif
-        log("Initializing transfer..");
+
 
         if (!fail){
+            log("Initializing transfer..");
             result = serialThread->rpcInitFirmwareTransfer(fwImage);
             flashResultDocumentation.addActionResult("Initialization",result);
             if (result != RPC_SUCCESS){
@@ -270,6 +284,7 @@ RPC_RESULT Bootloader::getDeviceInfo()
         remoteDeviceInfo.setDeviceDescriptor(&deviceDescriptor);
         remoteDeviceInfo.setMCUDescriptor(&descriptor);
         remoteDeviceInfo.setOldFirmwareDescriptor(&firmwareDescriptor);
+        plausibilityCheck.checkPlausibiltity(remoteDeviceInfo,fwImage);
     }else{
        log("mcu info request error ("+QString::number(result)+")");
     }
@@ -311,15 +326,15 @@ void Bootloader::setConnState(ConnectionState connState)
 void Bootloader::loadFile(QString fileName)
 {
     if (fwImage.open(fileName)){
-
-        //
         fileLoaded = true;
+
     }else{
         fileLoaded = false;
+        fwImage.clear();
         log("couldnt load file "+fileName);
     }
+    plausibilityCheck.checkPlausibiltity(remoteDeviceInfo,fwImage);
     fileNameToSend = fileName;
-    //
 }
 
 void Bootloader::saveSettings()

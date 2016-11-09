@@ -11,6 +11,7 @@
 #include <QPainter>
 #include <QBuffer>
 #include <QMessageBox>
+#include <set>
 
 
 
@@ -202,8 +203,129 @@ void MainWindow::loadUIDeviceInfo(){
         ui->lbl_rf_version->setText("");
     }
 
+   loadUIPlausibility();
+}
+
+void MainWindow::loadUIPlausibility()
+{
+    if (bootloader.remoteDeviceInfo.isValid() && bootloader.fwImage.isValid()){
+        bootloader.plausibilityCheck.checkPlausibiltity(bootloader.remoteDeviceInfo,bootloader.fwImage);
+        std::set<PlausibilityResult> plauResult = bootloader.plausibilityCheck.getPlausibilityResult();
+
+        {
+            QPalette palette_ok;
+            QPalette palette_ok_green;
+            QPalette palette_warning;
+            QPalette palette_error;
+
+            palette_ok.setColor(QPalette::WindowText, ui->centralWidget->palette().windowText().color());
+            palette_warning.setColor(QPalette::WindowText, QColor(255, 153, 0));//orange
+            palette_ok_green.setColor(QPalette::WindowText, Qt::darkGreen);
+            palette_error.setColor(QPalette::WindowText, Qt::red);
 
 
+            if (plauResult.count(PlausibilityResult::error_firmwareimage_too_big)){
+                ui->lbl_nf_size->setPalette(palette_error);
+            }else{
+                ui->lbl_nf_size->setPalette(palette_ok);
+            }
+
+            if (plauResult.count(PlausibilityResult::error_wrong_entrypoint)){
+                ui->lbl_nf_entrypoint->setPalette(palette_error);
+            }else{
+                ui->lbl_nf_entrypoint->setPalette(palette_ok);
+            }
+
+            if (plauResult.count(PlausibilityResult::error_inconsistency)){
+                ui->lbl_nf_consistency->setPalette(palette_error);
+            }else{
+                ui->lbl_nf_consistency->setPalette(palette_ok_green);
+            }
+
+            if (plauResult.count(PlausibilityResult::error_crypto_required)){
+                ui->lbl_nf_crypto->setPalette(palette_error);
+            }else{
+                ui->lbl_nf_crypto->setPalette(palette_ok);
+            }
+
+            if (plauResult.count(PlausibilityResult::warning_different_name_hash)){
+                ui->lbl_nf_namehash->setPalette(palette_warning);
+                ui->lbl_nf_name->setPalette(palette_warning);
+            }else{
+                ui->lbl_nf_namehash->setPalette(palette_ok);
+                ui->lbl_nf_name->setPalette(palette_ok);
+            }
+
+            if (plauResult.count(PlausibilityResult::warning_downgrade_date)){
+                ui->lbl_nf_version->setPalette(palette_warning);
+                ui->lbl_nf_gitdate->setPalette(palette_warning);
+            }else{
+                ui->lbl_nf_version->setPalette(palette_ok);
+                ui->lbl_nf_gitdate->setPalette(palette_ok);
+            }
+
+            if (plauResult.count(PlausibilityResult::warning_equal_gitHash)){
+                ui->lbl_nf_githash->setPalette(palette_warning);
+                ui->lbl_rf_githash->setPalette(palette_warning);
+            }else{
+                ui->lbl_nf_githash->setPalette(palette_ok);
+                ui->lbl_rf_githash->setPalette(palette_ok);
+            }
+
+            if (plauResult.count(PlausibilityResult::warning_equal_gitHash_but_different_wersion)){
+                ui->lbl_nf_githash->setPalette(palette_warning);
+                ui->lbl_rf_githash->setPalette(palette_warning);
+                if (plauResult.count(PlausibilityResult::warning_downgrade_date) == 0){
+                    ui->lbl_nf_version->setPalette(palette_warning);
+               }
+            }else{
+                if (plauResult.count(PlausibilityResult::warning_equal_gitHash) == 0){
+                    ui->lbl_nf_githash->setPalette(palette_ok);
+                    ui->lbl_rf_githash->setPalette(palette_ok);
+                }
+                if (plauResult.count(PlausibilityResult::warning_downgrade_date) == 0){
+                    ui->lbl_nf_version->setPalette(palette_ok);
+                }
+            }
+            if (plauResult.count(PlausibilityResult::warning_equal_version_but_different_gitHash)){
+                ui->lbl_nf_githash->setPalette(palette_warning);
+                ui->lbl_rf_githash->setPalette(palette_warning);
+                ui->lbl_nf_version->setPalette(palette_warning);
+
+            }else{
+                if ((plauResult.count(PlausibilityResult::warning_equal_gitHash) == 0) && (plauResult.count(PlausibilityResult::warning_equal_version_but_different_gitHash) == 0)){
+                    ui->lbl_nf_githash->setPalette(palette_ok);
+                    ui->lbl_rf_githash->setPalette(palette_ok);
+                }
+                if ((plauResult.count(PlausibilityResult::warning_downgrade_date) == 0) && (plauResult.count(PlausibilityResult::warning_equal_gitHash_but_different_wersion) == 0)){
+                    ui->lbl_nf_version->setPalette(palette_ok);
+                }
+
+            }
+        }
+        std::set<PlausibilityResult>::iterator it;
+        for (it = plauResult.begin(); it != plauResult.end(); ++it)
+        {
+            PlausibilityResult res = *it; // Note the "*" here
+
+            log(bootloader.plausibilityCheck.plausibilityResultToStrReadable(res));
+
+        }
+    }else{
+        QPalette palette_ok;
+        palette_ok.setColor(QPalette::WindowText, ui->centralWidget->palette().windowText().color());
+        ui->lbl_nf_version->setPalette(palette_ok);
+        ui->lbl_nf_githash->setPalette(palette_ok);
+        ui->lbl_rf_githash->setPalette(palette_ok);
+        ui->lbl_nf_namehash->setPalette(palette_ok);
+        ui->lbl_nf_name->setPalette(palette_ok);
+        ui->lbl_nf_gitdate->setPalette(palette_ok);
+        ui->lbl_nf_crypto->setPalette(palette_ok);
+        ui->lbl_nf_consistency->setPalette(palette_ok);
+        ui->lbl_nf_entrypoint->setPalette(palette_ok);
+        ui->lbl_nf_size->setPalette(palette_ok);
+
+    }
 }
 
 
@@ -231,6 +353,7 @@ void MainWindow::loadFile(QString fileName)
     bootloader.loadFile(fileName);
     recalcUIState();
     loadUIFromFile();
+    loadUIPlausibility();
 }
 
 void MainWindow::setConnState(ConnectionState connState)
@@ -363,10 +486,20 @@ void MainWindow::on_actionOpen_triggered()
     dialog.setNameFilter(tr("Firmware Image (*.cfw)"));
     if (dialog.exec()){
         loadFile(dialog.selectedFiles()[0]);
-        //loadUIFromSettings();
     }
 }
 
+void MainWindow::on_actionSave_settings_as_triggered()
+{
+    //QString fn = "";
+    QFileDialog dialog(this);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setNameFilter(tr("Bootloader Settings (*.ini)"));
+    if (dialog.exec()){
+        QString filename = dialog.selectedFiles()[0];
+        bootloader.settings.saveAs(filename);
+    }
+}
 
 
 void MainWindow::on_actionInfo_triggered()
@@ -420,5 +553,7 @@ void MainWindow::onReconnectTimer()
 {
     bootloader.tryConnect();
 }
+
+
 
 

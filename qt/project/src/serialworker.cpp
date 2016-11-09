@@ -235,7 +235,7 @@ RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
         break;
     }
     firmwareDescriptor.entryPoint = fwImage.firmware_entryPoint;
-    firmwareDescriptor.gitDate_unix = fwImage.firmware_gitdate;
+    firmwareDescriptor.gitDate_unix = fwImage.firmware_gitdate_unix;
     firmwareDescriptor.githash = fwImage.firmware_githash;
     QString nameShort =  fwImage.getNameShort(sizeof(firmwareDescriptor.name));
     int len = sizeof(firmwareDescriptor.name);
@@ -504,7 +504,7 @@ void SerialWorker::sendData(QByteArray data)
 
 void SerialWorker::process()
 {
-    qDebug()<<"process "<<QThread::currentThreadId();
+    //qDebug()<<"process "<<QThread::currentThreadId();
 }
 
 void SerialWorker::on_readyRead()
@@ -515,7 +515,7 @@ void SerialWorker::on_readyRead()
     QByteArray inbuffer = serialport->readAll();
 
     if (!inbuffer.isEmpty()){
-        qDebug() << "<<<" << inbuffer;
+        //qDebug() << "<<<" << inbuffer;
 	}
     if (inbuffer.count() == 512){
         qDebug() << "Rechner langsam";

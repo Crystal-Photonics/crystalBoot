@@ -42,6 +42,7 @@ public:
 
 
     void loadUIDeviceInfo();
+    void loadUIPlausibility();
 private slots:
     void on_actionOpen_triggered();
     void on_actionConnect_triggered();
@@ -68,6 +69,8 @@ private slots:
     void onMCUGotDeviceInfo();
 
     void onCmbCurrentIndexChanged(const QString &text);
+
+    void on_actionSave_settings_as_triggered();
 
 private:
 

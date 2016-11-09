@@ -21,7 +21,7 @@ public:
     uint16_t getNameCRC16();
 
     uint32_t firmware_githash;
-    uint32_t firmware_gitdate;
+    uint32_t firmware_gitdate_unix;
     QDateTime firmware_gitdate_dt;
     QString firmware_version;
     QString firmware_name;

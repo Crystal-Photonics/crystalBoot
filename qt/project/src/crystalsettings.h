@@ -12,6 +12,8 @@ public:
 
     void load(QString filename);
     void save();
+    void saveAs(QString filename);
+
     QString getFileName();
 
 
@@ -21,6 +23,7 @@ public:
     QString callProcessArguments;
 
     QString flashResultDocumentationPath;
+
 
 private:
     QObject *parent;

@@ -47,7 +47,7 @@ void call_from_thread(int argc, char *argv[]) {
         argslist.append(QString(argv[i]));
     }
 
-    qDebug() <<"arglist"<< argslist;
+  //  qDebug() <<"arglist"<< argslist;
     parser.process(argslist);
 
     if (parser.isSet(cmdInfo)){

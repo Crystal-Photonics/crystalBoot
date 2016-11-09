@@ -215,9 +215,9 @@ bool FirmwareEncoder::loadFirmwareData()
             QString value;
             if (parseTheDefine(imageCreatorSettings.keyWord_gitdate,DefineType::Number, line, value)){
                 int v = value.toInt();
-                fwImage.firmware_gitdate = v;
+                fwImage.firmware_gitdate_unix = v;
                 fwImage.firmware_gitdate_dt = QDateTime::fromTime_t(v);
-                qDebug() << "found firmware_gitdate";
+                //qDebug() << "found firmware_gitdate";
                 if (firmware_gitdate_found){
                     qDebug() << "gitdate found more than once.";
                     exit_loop_due_error = true;
@@ -227,7 +227,7 @@ bool FirmwareEncoder::loadFirmwareData()
 
             }else if (parseTheDefine(imageCreatorSettings.keyWord_githash, DefineType::Number, line, value)){
                 fwImage.firmware_githash = value.toInt();
-                qDebug() << "found firmware_githash";
+                //qDebug() << "found firmware_githash";
                 if (firmware_githash_found){
                     qDebug() << "githash found more than once.";
                     exit_loop_due_error = true;
@@ -236,7 +236,7 @@ bool FirmwareEncoder::loadFirmwareData()
                 firmware_githash_found = true;
             }else if (parseTheDefine(imageCreatorSettings.keyWord_name,DefineType::String, line, value)){
                 fwImage.firmware_name = value;
-                qDebug() << "found firmware_name";
+                //qDebug() << "found firmware_name";
                 if (firmware_name_found){
                     qDebug() << "firmware name found more than once.";
                     exit_loop_due_error = true;
@@ -245,7 +245,7 @@ bool FirmwareEncoder::loadFirmwareData()
                 firmware_name_found = true;
             }else if (parseTheDefine(imageCreatorSettings.keyWord_version,DefineType::String,line, value) ){
                 fwImage.firmware_version = value;
-                qDebug() << "found firmware_version";
+                //qDebug() << "found firmware_version";
                 if (firmware_version_found){
                     qDebug() << "firmware version found more than once.";
                     exit_loop_due_error = true;
@@ -265,7 +265,7 @@ bool FirmwareEncoder::loadFirmwareData()
         qDebug() << "found all fields";
     }
     qDebug() << "firmware_githash" << fwImage.firmware_githash;
-    qDebug() << "firmware_gitdate" << fwImage.firmware_gitdate;
+    qDebug() << "firmware_gitdate_unix" << fwImage.firmware_gitdate_unix;
     qDebug() << "firmware_version" << fwImage.firmware_version;
     qDebug() << "firmware_name" << fwImage.firmware_name;
 
@@ -283,11 +283,12 @@ bool FirmwareEncoder::loadFirmwareData()
     sha256_check.addData(toBeChecked);
     fwImage.sha256 = sha256_check.result();
 
-    fwImage.aes128_iv.clear();
-    for (size_t i = 0; i < 16;i++){
-        uint8_t tmp = rand() & 0xFF;
-        fwImage.aes128_iv.append(tmp);
-    }
+
+
+
+
+
+
 
     AESKeyFile aeskeyfile;
     if (!aeskeyfile.open(imageCreatorSettings.encryptKeyFileName_abs)){
@@ -302,9 +303,16 @@ bool FirmwareEncoder::loadFirmwareData()
 
     if (imageCreatorSettings.crypto == ImageCreatorSettings::Crypto::AES128){
         fwImage.crypto = FirmwareImage::Crypto::AES128;
+        fwImage.aes128_iv.clear();
+        for (size_t i = 0; i < 16;i++){
+            uint8_t tmp = rand() & 0xFF;
+            fwImage.aes128_iv.append(tmp);
+        }
+
         fwImage.binary = AES_CBC_128_encrypt(aeskeyfile.key, fwImage.aes128_iv, fwImage.binary);
     }else{
         fwImage.crypto = FirmwareImage::Crypto::Plain;
+        fwImage.aes128_iv = QByteArray(16,0);
     }
     qDebug() << "entrypoint: 0x"+QString::number( fwImage.firmware_entryPoint,16);
     qDebug() << "size: "+QString::number( fwImage.firmware_size);

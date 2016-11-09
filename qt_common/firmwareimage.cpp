@@ -17,7 +17,7 @@ FirmwareImage::FirmwareImage()
 void FirmwareImage::clear()
 {
     firmware_githash = 0;
-    firmware_gitdate = 0;
+    firmware_gitdate_unix = 0;
     firmware_gitdate_dt = QDateTime();
     firmware_version = "";
     firmware_name = "";
@@ -40,8 +40,8 @@ bool FirmwareImage::isValid()
         return false;
     }
 
-    if(!firmware_gitdate){
-        qDebug() << "firmware_gitdate is zero";
+    if(!firmware_gitdate_unix){
+        qDebug() << "firmware_gitdate_unix is zero";
         return false;
     }
 
@@ -91,7 +91,7 @@ void FirmwareImage::createXML_for_checksum(QBuffer &buf)
 
     xml.writeStartElement("meta");
     xml.writeAttribute("githash", "0x"+QString::number(firmware_githash,16).toUpper());
-    xml.writeAttribute("gitdate", QString::number(firmware_gitdate));
+    xml.writeAttribute("gitdate", QString::number(firmware_gitdate_unix));
     xml.writeAttribute("firmware_version", firmware_version);
     xml.writeAttribute("firmware_name", firmware_name);
     xml.writeAttribute("firmware_entrypoint","0x"+QString::number(firmware_entryPoint,16).toUpper() );
@@ -244,8 +244,8 @@ bool FirmwareImage::open(QString fileName)
         qDebug() << "githash is not a number";
         return false;
     }
-    firmware_gitdate = metaNodeElement.attribute("gitdate","").toInt(&ok,0);;
-    firmware_gitdate_dt = QDateTime::fromTime_t(firmware_gitdate);
+    firmware_gitdate_unix = metaNodeElement.attribute("gitdate","").toInt(&ok,0);;
+    firmware_gitdate_dt = QDateTime::fromTime_t(firmware_gitdate_unix);
     if (!ok) {
         qDebug() << "gitdate is not a date/number";
         return false;
