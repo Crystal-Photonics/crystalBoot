@@ -162,7 +162,7 @@ void MainWindow::loadUIDeviceInfo(){
         }else{
             ui->lblMCU_cryptoRequered->setText("no");
         }
-
+        ui->lblMCU_protectionLevel->setText(bootloader.remoteDeviceInfo.getMCU_ProtectionLevel());
 
         ui->lblBL_GitDate->setText( bootloader.remoteDeviceInfo.getDEV_gitDate_str());
         ui->lblBL_GitHash->setText(bootloader.remoteDeviceInfo.getDEV_gitHash());

@@ -222,7 +222,7 @@ RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
 
     firmware_descriptor_t firmwareDescriptor;
 
-   crystalBoolCrypto_t crypto;
+   crystalBoolCrypto_t crypto = crystalBoolCrypto_Plain;
 
     memset(&firmwareDescriptor,0,sizeof(firmware_descriptor_t));
 

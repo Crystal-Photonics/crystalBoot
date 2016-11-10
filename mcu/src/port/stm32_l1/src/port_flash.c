@@ -7,6 +7,7 @@
 
 #include <inttypes.h>
 #include <string.h>
+#include <stdio.h>
 #include "port_flash.h"
 #include "port_board.h"
 #include "port_chip.h"
@@ -630,80 +631,30 @@ uint32_t portFlashGetFlashSize(){
 	return result;
 }
 
-/**
- * @brief  Disable the write protection of desired pages
- * @param  None
- * @retval None
- */
-void FLASH_DisableWriteProtectionPages(void)
+int portFlashGetProtectionLevel()
 {
-	uint32_t useroptionbyte = 0, WRPR = 0;
-	uint16_t var1 = OB_IWDG_SW, var2 = OB_STOP_NoRST, var3 = OB_STDBY_NoRST;
-	(void)var1;
-	(void)var2;
-	(void)var3;
-#if 0
-	FLASH_Status status = FLASH_BUSY;
-
-	// WRPR = FLASH_GetWriteProtectionOptionByte();
-
-	WRPR = FLASH_OB_GetWRP(); //could be wrong
-	/* Test if user memory is write protected */
-	if ((WRPR & UserMemoryMask) != UserMemoryMask)
-	{
-		useroptionbyte = FLASH_OB_GetBOR();//could be wrong
-		//useroptionbyte = FLASH_GetUserOptionByte();
-
-		UserMemoryMask |= WRPR;
-		//status= 0;
-		// status = FLASH_EraseOptionBytes();
-		//TODO find replacement
-
-		if (UserMemoryMask != 0xFFFFFFFF)
-		{
-
-			//status = FLASH_EnableWriteProtection((uint32_t)~UserMemoryMask);
-			//TODO find replacement
-		}
-
-		/* Test if user Option Bytes are programmed */
-		if ((useroptionbyte & 0x07) != 0x07)
-		{
-			/* Restore user Option Bytes */
-			if ((useroptionbyte & 0x01) == 0x0)
-			{
-				var1 = OB_IWDG_HW;
-			}
-			if ((useroptionbyte & 0x02) == 0x0)
-			{
-				var2 = OB_STOP_RST;
-			}
-			if ((useroptionbyte & 0x04) == 0x0)
-			{
-				var3 = OB_STDBY_RST;
-			}
-
-			//FLASH_UserOptionByteConfig(var1, var2, var3);
-			//TODO find replacement
-		}
-
-		if (status == FLASH_COMPLETE)
-		{
-			//SerialPutString("Write Protection disabled...\r\n");
-
-			//SerialPutString("...and a System Reset will be generated to re-load the new option bytes\r\n");
-
-			/* Generate System Reset to load the new option byte values */
-			NVIC_SystemReset();
-		}
-		else
-		{
-			//SerialPutString("Error: Flash write unprotection failed...\r\n");
-		}
+	if (FLASH_OB_GetRDP() == SET){
+		return 1;
+	}else{
+		return 0;
 	}
-	else
-	{
-		//SerialPutString("Flash memory not write protected\r\n");
+}
+
+void portFlashSetProtectionLevel(int protectionLevel)
+{
+
+	if (portFlashGetProtectionLevel() != protectionLevel){
+		FLASH_OB_Unlock();
+		printf("FLASH_OB_unlocked");
+		if (protectionLevel == 1){
+			FLASH_OB_RDPConfig(OB_RDP_Level_1);
+		}else if (protectionLevel == 0){
+			FLASH_OB_RDPConfig(OB_RDP_Level_0);
+		}
+		printf("FLASH_OB_Launch");
+		FLASH_OB_Launch();
+		printf("FLASH_OB_LOCK");
+		FLASH_OB_Lock();
+		printf("FLASH_OB_Rdy");
 	}
-#endif
 }

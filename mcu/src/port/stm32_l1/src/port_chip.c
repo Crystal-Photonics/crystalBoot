@@ -92,6 +92,7 @@ void port_chipInit(){
 	port_sysTickConfig();
 
 	boardInit();
+
 }
 
 

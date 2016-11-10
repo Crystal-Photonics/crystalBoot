@@ -282,6 +282,7 @@ mcu_descriptor_t programmerGetMCUDescriptor( ){
 	result.minimalFirmwareEntryPoint = 	MINIMAL_APPLICATION_ADDRESS;
 	result.availFlashSize = 			FLASH_ADDRESS+result.flashsize - MINIMAL_APPLICATION_ADDRESS;
 	result.cryptoRequired = 			BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION==0;
+	result.protectionLevel =			portFlashGetProtectionLevel();
 	return result;
 }
 //(void)programmer_destroyMetaData();

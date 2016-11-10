@@ -363,7 +363,7 @@
              </property>
             </widget>
            </item>
-           <item row="6" column="0">
+           <item row="7" column="0">
             <spacer name="verticalSpacer">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -376,7 +376,7 @@
              </property>
             </spacer>
            </item>
-           <item row="6" column="2">
+           <item row="7" column="2">
             <spacer name="horizontalSpacer">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -433,6 +433,20 @@
            </item>
            <item row="5" column="2">
             <widget class="QLabel" name="lblMCU_cryptoRequered">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_27">
+             <property name="text">
+              <string>Protection level:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="2">
+            <widget class="QLabel" name="lblMCU_protectionLevel">
              <property name="text">
               <string/>
              </property>

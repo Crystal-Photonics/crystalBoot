@@ -50,6 +50,7 @@ public:
     QString getMCU_EntryPointString();
     QString getMCU_MinimalEntryPointString();
     QString getMCU_DeviceIDString();
+    QString getMCU_ProtectionLevel();
 
     QString getDEV_deviceID();
     QString getDEV_gitHash();

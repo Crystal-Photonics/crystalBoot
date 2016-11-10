@@ -194,8 +194,12 @@ int main(void)
 	port_chipInit();
 	portSerialInit(115200);
 
+
 	while (!port_checkFlashConfiguration(true)){	}
 
+	if (portFlashGetProtectionLevel() != BOOTLOADER_PROTECTION_LEVEL){
+		portFlashSetProtectionLevel(BOOTLOADER_PROTECTION_LEVEL);
+	}
 	//printResetReason_t(mainResetReason);
 #if 1
 	printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR,hardreset);

@@ -76,8 +76,7 @@ void portFlashRunApplication();
 void portFlashVerify();
 
 
-void portFlashSetProtection();
-void portFlashGetProtection();
+
 
 void portFlashJumpToApplication();
 void portFlashRunApplicationAfterReset();
@@ -86,6 +85,9 @@ void portFlashGetGUID(uint8_t guid[12]);
 uint32_t portFlashGetFlashSize();//F_SIZE
 uint16_t portFlashGetDeviceID(); //DBGMCU_IDCODE
 uint16_t portFlashGetRevisionID(); //DBGMCU_IDCODE
+
+int portFlashGetProtectionLevel();
+void portFlashSetProtectionLevel(int protectionLevel);
 
 #if 0
 void Main_Menu(void);

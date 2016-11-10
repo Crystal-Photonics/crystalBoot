@@ -92,6 +92,7 @@ void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
     xml.writeAttribute("entryPoint", remoteDeviceInfo.getMCU_EntryPointString());
     xml.writeAttribute("MinimalEntryPoint", remoteDeviceInfo.getMCU_MinimalEntryPointString());
     xml.writeAttribute("CryptoRequired", remoteDeviceInfo.getMCU_cryptoRequired());
+    xml.writeAttribute("ProtectionLevel", remoteDeviceInfo.getMCU_ProtectionLevel());
     xml.writeEndElement();
 
     xml.writeStartElement("bootloader");
@@ -321,6 +322,11 @@ QString RemoteDeviceInfo::getDEV_version()
 
 QString RemoteDeviceInfo::getMCU_DeviceIDString(){
     return QString("0x")+QString::number(mcu_descriptor.devID,16).toUpper();
+}
+
+QString RemoteDeviceInfo::getMCU_ProtectionLevel()
+{
+    return QString::number(mcu_descriptor.protectionLevel);
 }
 
 QString RemoteDeviceInfo::getMCU_RevString(){

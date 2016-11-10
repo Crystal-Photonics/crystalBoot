@@ -38,6 +38,7 @@ typedef struct{
 	uint32_t firmwareEntryPoint;
 	uint32_t minimalFirmwareEntryPoint;
 	uint8_t cryptoRequired;
+	uint8_t protectionLevel;
 } mcu_descriptor_t;
 
 
