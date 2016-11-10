@@ -114,3 +114,4 @@ mcu/modules/rpc/include/rpc_transmission/server/generated_general/
 mcu/modules/rpc/include/rpc_transmission/client/
 STM32L1xx_StdPeriph_Lib_V1.3.1
 /mcu/bootloaderconfig/key/aes_256_key.c
+/mcu_example/RemoteSystemsTempFiles

@@ -290,18 +290,20 @@ bool FirmwareEncoder::loadFirmwareData()
 
 
 
-    AESKeyFile aeskeyfile;
-    if (!aeskeyfile.open(imageCreatorSettings.encryptKeyFileName_abs)){
-        qDebug() << "error loading key file:" << imageCreatorSettings.encryptKeyFileName_abs;
-        return false;
-    }
 
-    if (!aeskeyfile.isValid()){
-        qDebug() << "aes key file not valid";
-        return false;
-    }
 
     if (imageCreatorSettings.crypto == ImageCreatorSettings::Crypto::AES128){
+        AESKeyFile aeskeyfile;
+        if (!aeskeyfile.open(imageCreatorSettings.encryptKeyFileName_abs)){
+            qDebug() << "error loading key file:" << imageCreatorSettings.encryptKeyFileName_abs;
+            return false;
+        }
+
+        if (!aeskeyfile.isValid()){
+            qDebug() << "aes key file not valid";
+            return false;
+        }
+
         fwImage.crypto = FirmwareImage::Crypto::AES128;
         fwImage.aes128_iv.clear();
         for (size_t i = 0; i < 16;i++){
@@ -310,6 +312,8 @@ bool FirmwareEncoder::loadFirmwareData()
         }
 
         fwImage.binary = AES_CBC_128_encrypt(aeskeyfile.key, fwImage.aes128_iv, fwImage.binary);
+
+
     }else{
         fwImage.crypto = FirmwareImage::Crypto::Plain;
         fwImage.aes128_iv = QByteArray(16,0);
