@@ -5,7 +5,7 @@ parts to have a look at:
 
 STM32L151XE_FLASH_bootloader.ld :
 
-defines flash start address above bootloader.
+Defines flash start address above bootloader:
 ```
 MEMORY
 {
@@ -14,7 +14,7 @@ FLASH (rx)      : ORIGIN = 0x8005000, LENGTH = 488K
 RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 80K
 }
 ```
-in section isr_vector you should export the interrupt vector address to the variable _start_isr_vector. Then the startupcode will fetch the vectortable address automatically
+In section isr_vector you should export the interrupt vector address to the variable _start_isr_vector. Then the startupcode will fetch the vectortable address automatically.
 ```
 SECTIONS
 {
@@ -25,7 +25,7 @@ SECTIONS
     PROVIDE(_start_isr_vector = .);
 ```	
 	
-in system_stm32l1xx.c normally the vectortable position is initialized to 0. This ont work in a bootloader environment. Therefor you should better use something like this:
+In system_stm32l1xx.c normally the vectortable position is initialized to 0. This wont work in a bootloader environment. Therefore you should better use something like this:
 
 ```
   volatile uint32_t ISR_VECTOR_TABLE_OFFSET = (uint32_t)&_start_isr_vector;
@@ -43,4 +43,4 @@ The bootloader disables interrupts before starting application. Therefore you sh
 	__enable_irq();			//interrupts are disabled
 ```
 	
-in main()
+in main().
