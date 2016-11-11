@@ -390,7 +390,6 @@
      <string>Key</string>
     </property>
     <addaction name="actionCreate_AES_128_key"/>
-    <addaction name="actionCreate_RSA_key_for_signature"/>
    </widget>
    <addaction name="menuKey"/>
   </widget>
