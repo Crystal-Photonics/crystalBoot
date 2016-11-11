@@ -11,7 +11,7 @@ extern "C" {
 
 #define TRANSMISSION_BLOCK_SIZE 128
 
-#include "../../../../../_deviceIDs/include/deviceIDs.h"
+#include "..\..\..\..\..\..\bootloaderconfig\board\bootloader_config.h"
 
 typedef enum {rpcLEDStatus_none,rpcLEDStatus_off,rpcLEDStatus_on} rpcLEDStatus_t;
 
