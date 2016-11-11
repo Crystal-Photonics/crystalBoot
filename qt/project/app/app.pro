@@ -9,6 +9,8 @@ CONFIG(debug, debug|release) {
    # message(Debug)
 }
 
+TARGET = crystalBoot
+
 CONFIG( debug, debug|release ) {
     # debug
      #message(Debug)

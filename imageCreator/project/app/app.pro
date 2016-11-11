@@ -8,7 +8,7 @@ SOURCES +=  main.cpp
 CONFIG(debug, debug|release) {
    # message(Debug)
 }
-
+TARGET = crystalImageCreator
 CONFIG( debug, debug|release ) {
     # debug
      #message(Debug)
