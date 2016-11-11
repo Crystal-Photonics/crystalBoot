@@ -74,7 +74,8 @@ crystalImageCreator.exe PATH_TO_SETTINGS_FILE
 ![Image of screen_crystalboot_mcu](docs/screen_crystalboot_mcu.png)
 
 ### Flash result documentation
-After flashing a file can be created at a position in the file system define in the options window. This file looks like this:
+After flashing a file can be created at a position in the file system defined in the options window. This file looks like this:
+
 E.g crystal boot example/1.0_3234470f3138333130002000_2016_11_11__12_11_OK.xml
 
 ```
