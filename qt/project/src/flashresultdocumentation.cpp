@@ -152,6 +152,7 @@ void FlashResultDocumentation::save(CrystalBootSettings crystalBootSettings)
             xml.writeAttribute("warning",  "true");
         }
         xml.writeAttribute("description",plausibilityResult.plausibilityResultToStrReadable(res));
+        xml.writeEndElement();
     }
     xml.writeEndElement();
 
