@@ -645,16 +645,16 @@ void portFlashSetProtectionLevel(int protectionLevel)
 
 	if (portFlashGetProtectionLevel() != protectionLevel){
 		FLASH_OB_Unlock();
-		printf("FLASH_OB_unlocked");
+		//printf("FLASH_OB_unlocked");
 		if (protectionLevel == 1){
 			FLASH_OB_RDPConfig(OB_RDP_Level_1);
 		}else if (protectionLevel == 0){
 			FLASH_OB_RDPConfig(OB_RDP_Level_0);
 		}
-		printf("FLASH_OB_Launch");
+		//printf("FLASH_OB_Launch");
 		FLASH_OB_Launch();
-		printf("FLASH_OB_LOCK");
+		//printf("FLASH_OB_LOCK");
 		FLASH_OB_Lock();
-		printf("FLASH_OB_Rdy");
+		//printf("FLASH_OB_Rdy");
 	}
 }

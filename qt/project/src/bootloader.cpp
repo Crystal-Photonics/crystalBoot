@@ -153,11 +153,17 @@ void Bootloader::sendfirmware()
 
         if (!fail){
             log("Initializing transfer..");
-            result = serialThread->rpcInitFirmwareTransfer(fwImage);
+            crystalBoolResult_t return_value;
+            result = serialThread->rpcInitFirmwareTransfer(&return_value,fwImage);
+
             flashResultDocumentation.addActionResult("Initialization",result);
             if (result != RPC_SUCCESS){
                 fail = true;
-                log("Transfer init fail.");
+                if (return_value == crystalBool_TryAgainLater){
+                    log("Transfer init needs a timeout break. Please try again later.");
+                }else{
+                    log("Transfer init fail.");
+                }
             }else{
                 log("Transfer init ok. ");
             }

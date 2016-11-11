@@ -15,7 +15,7 @@ extern "C" {
 
 typedef enum {rpcLEDStatus_none,rpcLEDStatus_off,rpcLEDStatus_on} rpcLEDStatus_t;
 
-typedef enum {crystalBool_Fail,crystalBool_OK} crystalBoolResult_t;
+typedef enum {crystalBool_Fail,crystalBool_OK,crystalBool_TryAgainLater} crystalBoolResult_t;
 typedef enum {crystalBoolCrypto_Plain,crystalBoolCrypto_AES} crystalBoolCrypto_t;
 
 typedef struct{
@@ -24,6 +24,7 @@ typedef struct{
 	uint16_t nameCRC16;
 	uint32_t size;
 	uint32_t entryPoint;
+
 	char name[12];
 	char version[8];
 } firmware_descriptor_t;
@@ -39,6 +40,7 @@ typedef struct{
 	uint32_t minimalFirmwareEntryPoint;
 	uint8_t cryptoRequired;
 	uint8_t protectionLevel;
+	uint8_t firmwareVerified;
 } mcu_descriptor_t;
 
 

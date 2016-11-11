@@ -100,7 +100,7 @@ public:
     FlashResultDocumentation();
 
     void save(CrystalBootSettings crystalBootSettings);
-    void addActionResult(QString action, RPC_RESULT RPC_result);
+    void addActionResult(QString action,  RPC_RESULT RPC_result);
     void setNewFirmwareDescriptor(FirmwareImage firmwareImage);
     void setRemoteDeviceInfo(RemoteDeviceInfo remoteDeviceInfo);
     void print();

@@ -28,6 +28,7 @@ typedef struct{
 }firmware_meta_t;
 
 
+
 void programmer_init();
 crystalBoolResult_t programmerErase(void);
 crystalBoolResult_t programmerVerify(void);
@@ -39,6 +40,7 @@ crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size);
 uint32_t programmerGetApplicationEntryPoint();
 
 void programmerRunApplication(void);
+void programmerIncrementAESReInitWaitTime_s(void);
 
 
 firmware_descriptor_t programmerGetFirmwareDescriptor( );

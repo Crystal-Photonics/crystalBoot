@@ -220,14 +220,21 @@ int main(void)
 	while (1)
 	{
 		static uint32_t oldTick100ms;
+		static uint32_t oldTick1000ms;
 
 		uint32_t tick100ms = sysTick_ms/100;
+		uint32_t tick1000ms = sysTick_ms/1000;
+
 		rpc_receive();
 
 		if ((blJumpMode == blm_timeout_waiting_till_communication) && ((sysTick_ms - startSysTick) > BOORLOADER_WAITTIME_FOR_APP_BOOT_ms)){
 			programmerRunApplication();
 
 		}
+		if (oldTick1000ms != tick1000ms){
+			programmerIncrementAESReInitWaitTime_s();
+		}
+		oldTick1000ms = tick1000ms;
 		if (oldTick100ms != tick100ms){
 			if (tick100ms & 1){
 				SET_LED_BUSY();

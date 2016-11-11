@@ -176,6 +176,12 @@ void MainWindow::loadUIDeviceInfo(){
         ui->lbl_rf_namehash->setText(bootloader.remoteDeviceInfo.getFW_nameCRC());
         ui->lbl_rf_name->setText(bootloader.remoteDeviceInfo.getFW_name());
         ui->lbl_rf_version->setText(bootloader.remoteDeviceInfo.getFW_version());
+        if (bootloader.remoteDeviceInfo.mcu_descriptor.firmwareVerified ){
+            ui->lbl_rf_verify->setText("OK");
+        }else{
+            ui->lbl_rf_verify->setText("no");
+        }
+
     }else{
         ui->plainTextEdit->clear();
 
@@ -201,6 +207,7 @@ void MainWindow::loadUIDeviceInfo(){
         ui->lbl_rf_namehash->setText("");
         ui->lbl_rf_name->setText("");
         ui->lbl_rf_version->setText("");
+        ui->lbl_rf_verify->setText("");
     }
 
    loadUIPlausibility();
@@ -463,6 +470,7 @@ void MainWindow::on_actionTransfer_2_triggered()
 void MainWindow::on_actionTransfer_triggered()
 {
     bootloader.sendfirmware();
+    bootloader.getDeviceInfo();
 }
 
 void MainWindow::on_actionRefresh_triggered()

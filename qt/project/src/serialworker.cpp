@@ -214,11 +214,11 @@ RPC_RESULT SerialThread::rpcEraseFlash()
     return result;
 }
 
-RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
+RPC_RESULT SerialThread::rpcInitFirmwareTransfer(crystalBoolResult_t *return_value, FirmwareImage &fwImage){
     QString resultstr;
     RPC_RESULT result;
 
-    crystalBoolResult_t return_value = crystalBool_OK;
+    *return_value = crystalBool_OK;
 
     firmware_descriptor_t firmwareDescriptor;
 
@@ -282,9 +282,13 @@ RPC_RESULT SerialThread::rpcInitFirmwareTransfer(FirmwareImage &fwImage){
         qDebug() << "checksum copy wrong size";
         return RPC_FAILURE;
     }
-    result = mcuInitFirmwareTransfer(&return_value, &firmwareDescriptor,sha256,aes128_iv, crypto);
+    result = mcuInitFirmwareTransfer(return_value, &firmwareDescriptor,sha256,aes128_iv, crypto);
 
-    if (return_value == crystalBool_Fail){
+    if (*return_value == crystalBool_Fail){
+        result = RPC_FAILURE;
+    }
+
+    if (*return_value == crystalBool_TryAgainLater){
         result = RPC_FAILURE;
     }
 

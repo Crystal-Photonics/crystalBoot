@@ -31,6 +31,8 @@ static crystalBoolCrypto_t cryptoUsed;
 static firmware_meta_t firmwareMetaData;
 static bool firmware_meta_is_valid = false;
 
+static uint16_t programmer_AES_reinitialization_wait_time_s;
+
 
 #ifndef  BOOTLOADER_BOOT_APP_USING_RESET
 #error "please define BOOTLOADER_BOOT_APP_USING_RESET"
@@ -40,6 +42,11 @@ uint32_t programmerGetApplicationEntryPoint(){
 	return firmwareMetaData.d.firmwareDescriptor.entryPoint;
 }
 
+void programmerIncrementAESReInitWaitTime_s(void){
+	if (programmer_AES_reinitialization_wait_time_s < 0xFFFF){
+		programmer_AES_reinitialization_wait_time_s++;
+	}
+}
 
 static void programmer_destroyMetaData(){
 #if 1
@@ -76,6 +83,7 @@ static void programer_writeMetaData(){
 
 void programmer_init(){
 	transferIsInitialized = false;
+	programmer_AES_reinitialization_wait_time_s = 0;
 	programer_readMetaData();
 }
 
@@ -152,6 +160,7 @@ crystalBoolResult_t programmerQuickVerify(void){
 }
 
 crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor, uint8_t sha256[32], uint8_t aes128_iv[16], const crystalBoolCrypto_t crypto){
+	transferIsInitialized = false;
 	if (firmwareDescriptor->entryPoint < MINIMAL_APPLICATION_ADDRESS){
 		return crystalBool_Fail;
 	}
@@ -175,6 +184,13 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 		return crystalBool_Fail;
 	}
 
+	if (	(BOOTLOADER_AES_REINITIALISATION_WAITTIME_s) &&
+			(firmwareMetaData.d.checksumVerified ==0) &&
+			(crypto == crystalBoolCrypto_AES) &&
+			(BOOTLOADER_AES_REINITIALISATION_WAITTIME_s > programmer_AES_reinitialization_wait_time_s)){
+		return crystalBool_TryAgainLater;
+	}
+
 	memcpy(&firmwareMetaData.d.firmwareDescriptor,firmwareDescriptor,sizeof(firmware_descriptor_t));
 
 	programmWritePointerAddress = programmerGetApplicationEntryPoint();
@@ -191,6 +207,7 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 	pointerToAESiv = aes128_iv_buf;
 
 	transferIsInitialized = true;
+	programmer_AES_reinitialization_wait_time_s = 0;
 	return crystalBool_OK;
 }
 
@@ -283,6 +300,7 @@ mcu_descriptor_t programmerGetMCUDescriptor( ){
 	result.availFlashSize = 			FLASH_ADDRESS+result.flashsize - MINIMAL_APPLICATION_ADDRESS;
 	result.cryptoRequired = 			BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION==0;
 	result.protectionLevel =			portFlashGetProtectionLevel();
+	result.firmwareVerified =			firmwareMetaData.d.checksumVerified;
 	return result;
 }
 //(void)programmer_destroyMetaData();
