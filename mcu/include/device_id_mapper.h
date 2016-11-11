@@ -35,6 +35,6 @@
  *
  * */
 
-#include "../../../_deviceIDs/include/deviceIDs.h"
+#include "../bootloaderconfig/board/bootloader_config.h"
 
 #endif /* MCU_INCLUDE_DEVICE_ID_MAPPER_H_ */
