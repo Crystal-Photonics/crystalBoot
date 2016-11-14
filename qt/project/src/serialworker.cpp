@@ -44,9 +44,10 @@ SerialThread::SerialThread(QObject *parent) :
     QObject(parent)
 {
 
-    thread = new QThread(this);
 
+    thread = new QThread(this);
     serialWorker = new SerialWorker(this);
+
     serialWorkerForRPCFunc = serialWorker;
     serialWorker->moveToThread(thread);
 
@@ -71,10 +72,7 @@ SerialThread::SerialThread(QObject *parent) :
 
 SerialThread::~SerialThread()
 {
-    thread->terminate();
     delete serialWorker;
-    delete thread;
-
 }
 
 void SerialThread::open(QString name, int baudrate)
@@ -487,7 +485,7 @@ SerialWorker::SerialWorker(SerialThread *serialThread, QObject *parent):
 
 SerialWorker::~SerialWorker()
 {
-
+    emit finished();
 }
 
 
