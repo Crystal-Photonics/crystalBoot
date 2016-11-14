@@ -1,2 +1,0 @@
-can be downloaded at:
-http://www2.st.com/content/st_com/en/products/embedded-software/mcus-embedded-software/stm32-embedded-software/stm32cube-embedded-software/stm32cubel1.html#
