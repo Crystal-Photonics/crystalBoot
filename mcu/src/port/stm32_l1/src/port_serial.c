@@ -37,7 +37,8 @@ void portSerialInit(int baud){
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
 	/* Enable UART clock */
-	RCC_APB2PeriphClockCmd(COM_USART_CLK, ENABLE);
+	//RCC_APB2PeriphClockCmd(COM_USART_CLK, ENABLE);
+	boardEnableSerialClk();
 
 
 	/* USART configuration */
@@ -149,8 +150,11 @@ bool portSerialGetChar(uint8_t *c){
 * @param  None
 * @retval None
 */
+
 void USART1_IRQHandler(void)
 {
+#if COM_USART_IRQ==USART1_IRQn
+
 	/* USART in mode Tramitter -------------------------------------------------*/
 	if (USART_GetITStatus(COM_USART_BASE, USART_IT_TXE) == SET)
 	{
@@ -169,4 +173,58 @@ void USART1_IRQHandler(void)
 	{
 		fifo_push(&fifo_rx,USART_ReceiveData(COM_USART_BASE));
 	}
+#endif
+
 }
+
+
+void USART2_IRQHandler(void)
+{
+#if COM_USART_IRQ==USART2_IRQn
+	/* USART in mode Tramitter -------------------------------------------------*/
+	if (USART_GetITStatus(COM_USART_BASE, USART_IT_TXE) == SET)
+	{
+		/* Send the data */
+		if (fifo_is_empty(&fifo_tx)){
+			USART_ITConfig(COM_USART_BASE, USART_IT_TXE, DISABLE);
+		}else{
+			uint8_t byte;
+			fifo_pop(&fifo_tx,&byte);
+			USART_SendData(COM_USART_BASE,byte);
+		}
+	}
+
+	/* USART in mode Receiver --------------------------------------------------*/
+	if (USART_GetITStatus(COM_USART_BASE, USART_IT_RXNE) == SET)
+	{
+		fifo_push(&fifo_rx,USART_ReceiveData(COM_USART_BASE));
+	}
+#endif
+}
+
+
+
+void USART3_IRQHandler(void)
+{
+#if COM_USART_IRQ==USART3_IRQn
+	/* USART in mode Tramitter -------------------------------------------------*/
+	if (USART_GetITStatus(COM_USART_BASE, USART_IT_TXE) == SET)
+	{
+		/* Send the data */
+		if (fifo_is_empty(&fifo_tx)){
+			USART_ITConfig(COM_USART_BASE, USART_IT_TXE, DISABLE);
+		}else{
+			uint8_t byte;
+			fifo_pop(&fifo_tx,&byte);
+			USART_SendData(COM_USART_BASE,byte);
+		}
+	}
+
+	/* USART in mode Receiver --------------------------------------------------*/
+	if (USART_GetITStatus(COM_USART_BASE, USART_IT_RXNE) == SET)
+	{
+		fifo_push(&fifo_rx,USART_ReceiveData(COM_USART_BASE));
+	}
+#endif
+}
+

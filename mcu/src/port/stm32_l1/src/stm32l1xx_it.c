@@ -250,8 +250,7 @@ void I2C1_EV_IRQHandler  (){ }
   void SPI1_IRQHandler  (){ }
   void SPI2_IRQHandler  (){ }
 
-  void USART2_IRQHandler  (){ }
-  void USART3_IRQHandler  (){ }
+
   void EXTI15_10_IRQHandler  (){ }
   void RTC_Alarm_IRQHandler  (){ }
   void USB_FS_WKUP_IRQHandler  (){ }
