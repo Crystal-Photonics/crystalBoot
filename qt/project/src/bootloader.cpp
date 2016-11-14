@@ -56,8 +56,10 @@ ConnectionState Bootloader::getConnectionState()
 
 void Bootloader::connectComPort(QString serialPortName)
 {
-    settings.COMPortName = serialPortName;
-    connectComPort();
+    if (serialPortName != ""){
+        settings.COMPortName = serialPortName;
+        connectComPort();
+    }
 }
 
 void Bootloader::connectComPort()

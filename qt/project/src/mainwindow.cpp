@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QStringList bdl;
     bdl << "75" << "300" << "1200" << "2400" << "4800" << "9600" << "14400" << "19200" << "28800" << "38400" << "57600" << "115200";
 
-    qDebug() << "gui:" << QThread::currentThreadId();
+  //  qDebug() << "gui:" << QThread::currentThreadId();
     setConnState(ConnectionState::Disconnected);
     loadUIFromSettigns();
     loadFile(lastSettings.value("lastImageFile","").toString());

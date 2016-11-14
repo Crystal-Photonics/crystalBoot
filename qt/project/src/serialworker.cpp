@@ -64,7 +64,7 @@ SerialThread::SerialThread(QObject *parent) :
     connect(this, SIGNAL(sendData(QByteArray)), serialWorker, SLOT(sendData(QByteArray)), Qt::QueuedConnection);
 
 
-
+    thread->start();
 
 
 }
@@ -521,7 +521,7 @@ void SerialWorker::sendData(QByteArray data)
 
 void SerialWorker::process()
 {
-    //qDebug()<<"process "<<QThread::currentThreadId();
+   // qDebug()<<"process "<<QThread::currentThreadId();
 }
 
 void SerialWorker::on_readyRead()
