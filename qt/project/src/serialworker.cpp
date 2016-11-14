@@ -65,7 +65,15 @@ SerialThread::SerialThread(QObject *parent) :
 
 
 
-    thread->start();
+
+
+}
+
+SerialThread::~SerialThread()
+{
+    thread->terminate();
+    delete serialWorker;
+    delete thread;
 
 }
 
@@ -474,6 +482,11 @@ SerialWorker::SerialWorker(SerialThread *serialThread, QObject *parent):
     channel_init_instance(&channel_codec_instance[channel_codec_comport_transmission],
                                      channel_codec_rxbuffer[channel_codec_comport_transmission],CHANNEL_CODEC_RX_BUFFER_SIZE,
                                      channel_codec_txbuffer[channel_codec_comport_transmission],CHANNEL_CODEC_TX_BUFFER_SIZE);
+
+}
+
+SerialWorker::~SerialWorker()
+{
 
 }
 

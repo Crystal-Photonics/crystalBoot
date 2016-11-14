@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+
     delete ui;
 }
 
@@ -86,13 +87,18 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::paintEvent(QPaintEvent *event){
     QMainWindow::paintEvent(event);
-    loadFirmwarePathUIFromFile();
+  //  this->update();
+   loadFirmwarePathUIFromFile();
+    (void)event;
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-   QMainWindow::resizeEvent(event);
-   loadFirmwarePathUIFromFile();
+   // this->resize();
+    QMainWindow::resizeEvent(event);
+   //loadFirmwarePathUIFromFile();
+    (void) event;
+    this->repaint();
 }
 
 void MainWindow::loadUIFromFile(){
@@ -108,7 +114,8 @@ void MainWindow::loadUIFromFile(){
     ui->lbl_nf_gitdate->setText(bootloader.fwImage.firmware_gitdate_dt.toString("yyyy.MM.dd HH:mm"));
     ui->lbl_nf_size->setText( QString::number( bootloader.fwImage.firmware_size/1024,10) +"kB ("+  QString::number( bootloader.fwImage.firmware_size,10)+" Bytes)");
     ui->lbl_nf_entrypoint->setText("0x"+QString::number( bootloader.fwImage.firmware_entryPoint,16).toUpper());
-    loadFirmwarePathUIFromFile();
+    //loadFirmwarePathUIFromFile();
+    this->repaint(); //will put filename on screen
     if (bootloader.fwImage.firmwareLoadConsistency){
         ui->lbl_nf_consistency->setText("OK");
     }else{
@@ -117,14 +124,18 @@ void MainWindow::loadUIFromFile(){
 
 }
 
+
+
 void MainWindow::loadFirmwarePathUIFromFile()
 {
-    QPainter painter(ui->lbl_nf_path);
+    QPainter painter(this);
     QFontMetrics fontMetrics = painter.fontMetrics();
 
     QString elidedPath = fontMetrics.elidedText(bootloader.fileNameToSend, Qt::ElideLeft, ui->lbl_nf_path->width());
+    //QString elidedPath = fontMetrics.elidedText("bootloader.fileNameToSend sdgfdsfgdfg dsfgdsfgdfg dsfgdfgdfgdf/dgfsdgfdfg dsfgdsfg", Qt::ElideLeft, ui->lbl_nf_path->width());
     ui->lbl_nf_path->setText(elidedPath);
 }
+
 
 void MainWindow::log(QString str)
 {
@@ -444,13 +455,9 @@ void MainWindow::on_actionConnect_triggered()
 
 void MainWindow::on_actionGet_Chip_Info_triggered()
 {
-    on_actionGet_Info_triggered();
-}
-
-void MainWindow::on_actionGet_Info_triggered()
-{
     bootloader.getDeviceInfo();
 }
+
 
 void MainWindow::on_actionRun_Application_triggered()
 {
@@ -561,6 +568,8 @@ void MainWindow::onReconnectTimer()
 {
     bootloader.tryConnect();
 }
+
+
 
 
 

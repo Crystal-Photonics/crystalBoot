@@ -16,7 +16,7 @@ Bootloader::Bootloader(QString settingsFileName, QObject *parent) : QObject(pare
 
 Bootloader::~Bootloader()
 {
-
+    delete serialThread;
 }
 
 

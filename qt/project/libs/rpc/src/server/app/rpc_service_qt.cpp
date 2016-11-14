@@ -31,6 +31,8 @@ void RPC_TRANSMISSION_mutex_init(void){
 
 }
 
+
+
 /* Locks the mutex. If it is already locked it yields until it can lock the mutex. */
 void RPC_TRANSMISSION_mutex_lock(RPC_mutex_id mutex_id){
     mutexes[mutex_id].lock();

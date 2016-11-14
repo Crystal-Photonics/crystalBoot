@@ -4,8 +4,10 @@
 #include <QMainWindow>
 #include <QSettings>
 #include <QCloseEvent>
+#include <QPaintEvent>
 #include <QComboBox>
 #include <QTimer>
+#include <QLabel>
 #include "serialworker.h"
 #include "crystalsettings.h"
 
@@ -46,7 +48,7 @@ public:
 private slots:
     void on_actionOpen_triggered();
     void on_actionConnect_triggered();
-    void on_actionGet_Info_triggered();
+    //void on_actionGet_Info_triggered();
     void on_actionRun_triggered();
     void on_actionTransfer_triggered();
     void on_actionRefresh_triggered();

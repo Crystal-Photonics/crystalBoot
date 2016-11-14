@@ -17,6 +17,8 @@ class SerialWorker : public QObject
     Q_OBJECT
 public:
     explicit SerialWorker(SerialThread* serialThread, QObject *parent = 0);
+    ~SerialWorker();
+
 
 
 public slots:
@@ -47,6 +49,7 @@ struct SerialThread : public QObject
     Q_OBJECT
 public:
     explicit SerialThread(QObject *parent = 0);
+    ~SerialThread();
     QThread* thread;
     //QSerialPort* serialport;
     SerialWorker * serialWorker;
