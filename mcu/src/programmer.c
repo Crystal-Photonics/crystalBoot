@@ -53,6 +53,7 @@ static void programmer_destroyMetaData(){
 	transferIsInitialized = false;
 	memset(&firmwareMetaData,(uint8_t) 0x00,sizeof firmwareMetaData );
 	firmwareMetaData.d.checksumVerified = 0;
+	firmwareMetaData.d.checksumVerifiedByCrypto = 0;
 	assert(portFlashSaveFirmwareDescriptorBuffer((uint8_t*)&firmwareMetaData,sizeof firmwareMetaData ));
 #endif
 	firmware_meta_is_valid = false;
@@ -134,14 +135,18 @@ crystalBoolResult_t programmerVerify(void){
 
 	if (memcmp(sha256_calced_hash,firmwareMetaData.d.sha256,CHECKSUM_SIZE) == 0){
 		firmwareMetaData.d.checksumVerified = 1;
+
+		if (firmwareMetaData.d.usedCrypto == crystalBoolCrypto_Plain){
+			firmwareMetaData.d.checksumVerifiedByCrypto = 0;
+		}else{
+			firmwareMetaData.d.checksumVerifiedByCrypto = 1;
+		}
 	}else{
 		firmwareMetaData.d.checksumVerified = 0;
+		firmwareMetaData.d.checksumVerifiedByCrypto = 0;
 		result = crystalBool_Fail;
 	}
 
-	if (result == crystalBool_OK){
-		firmwareMetaData.d.checksumVerified = 1;
-	}
 	programer_writeMetaData();
 #endif
 	return result;
@@ -185,7 +190,7 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 	}
 
 	if (	(BOOTLOADER_AES_REINITIALISATION_WAITTIME_s) &&
-			(firmwareMetaData.d.checksumVerified ==0) &&
+			(firmwareMetaData.d.checksumVerifiedByCrypto ==0) &&
 			(crypto == crystalBoolCrypto_AES) &&
 			(BOOTLOADER_AES_REINITIALISATION_WAITTIME_s > programmer_AES_reinitialization_wait_time_s)){
 		return crystalBool_TryAgainLater;
@@ -197,6 +202,8 @@ crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwa
 	programmReadPointerAddress  = programmerGetApplicationEntryPoint();
 	cryptoUsed = crypto;
 	firmwareMetaData.d.checksumVerified = 0;
+	firmwareMetaData.d.checksumVerifiedByCrypto = 0;
+	firmwareMetaData.d.usedCrypto = crypto;
 	memcpy(firmwareMetaData.d.sha256,sha256,sizeof(firmwareMetaData.d.sha256));
 	programer_writeMetaData();
 

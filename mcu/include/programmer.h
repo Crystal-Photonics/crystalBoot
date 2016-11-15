@@ -17,6 +17,8 @@ typedef struct{
 	firmware_descriptor_t firmwareDescriptor;
 
 	bool checksumVerified;
+	bool checksumVerifiedByCrypto;
+	crystalBoolCrypto_t usedCrypto;
 
 	uint8_t sha256[CHECKSUM_SIZE];
 
