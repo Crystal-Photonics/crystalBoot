@@ -581,5 +581,5 @@ void MainWindow::onReconnectTimer()
 
 void MainWindow::on_actionErase_EEPROM_triggered()
 {
-
+    bootloader.eraseEEPROM();
 }
