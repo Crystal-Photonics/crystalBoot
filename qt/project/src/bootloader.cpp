@@ -264,6 +264,33 @@ void Bootloader::sendfirmware()
     emit onFinished();
 }
 
+void Bootloader::eraseEEPROM()
+{
+    RPC_RESULT result = RPC_SUCCESS;
+    FlashResultDocumentation flashResultDocumentation;
+    result = getDeviceInfo();
+    flashResultDocumentation.addActionResult("GetInfo",result);
+    flashResultDocumentation.setRemoteDeviceInfo(remoteDeviceInfo);
+
+
+    QTime runtime;
+
+
+    runtime.start();
+#if 1
+    log("erasing eeprom..");
+    RPC_setTimeout(20*1000);
+    result = serialThread->rpcEraseEEPROM();
+    flashResultDocumentation.addActionResult("Erase EEPROM",result);
+    if (result != RPC_SUCCESS){
+        log("erasing eeprom fail");
+    }else{
+        log("erase eeprom ok. " + QString::number(runtime.elapsed()/1000.0)+" seconds needed");
+    }
+    flashResultDocumentation.save(settings);
+#endif
+}
+
 
 
 RPC_RESULT Bootloader::getDeviceInfo()

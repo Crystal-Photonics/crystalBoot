@@ -189,6 +189,39 @@ RPC_RESULT SerialThread::rpcVerifyChecksum()
     return result;
 }
 
+
+
+RPC_RESULT SerialThread::rpcEraseEEPROM()
+{
+    RPC_RESULT result;
+
+    crystalBoolResult_t return_value = crystalBool_OK;
+
+    result = mcuEraseEEPROM(&return_value);
+    if (return_value == crystalBool_Fail){
+        result = RPC_FAILURE;
+    }
+
+    QString resultstr;
+    switch(result){
+    case RPC_SUCCESS:
+        resultstr = "RPC_SUCCESS";
+        break;
+    case RPC_FAILURE:
+        resultstr = "RPC_FAILURE";
+        break;
+    case RPC_COMMAND_UNKNOWN:
+        resultstr = "RPC_COMMAND_UNKNOWN";
+        break;
+    case RPC_COMMAND_INCOMPLETE:
+        resultstr = "RPC_COMMAND_INCOMPLETE";
+        break;
+    }
+
+  //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
 RPC_RESULT SerialThread::rpcEraseFlash()
 {
     RPC_RESULT result;

@@ -480,6 +480,20 @@ bool portFlashEraseApplication(){
 	return portFlashEraseFlash(MINIMAL_APPLICATION_ADDRESS, FLASH_END_ADDR-MINIMAL_APPLICATION_ADDRESS);
 }
 
+
+bool portFlashEraseEEPROM(){
+	FLASH_Status result = FLASH_BUSY;
+	DATA_EEPROM_Unlock();
+	for (uint32_t address=DATA_EEPROM_START_ADDR;address<DATA_EEPROM_END_ADDR;address+=4){
+		result = DATA_EEPROM_EraseWord(address);
+		if (result != FLASH_COMPLETE){
+			break;
+		}
+	}
+	DATA_EEPROM_Lock();
+	return result == FLASH_COMPLETE;
+}
+
 bool portFlashVerifyAgainstBuffer(const uint32_t startAddress, uint8_t *buffer, const size_t size){
 	uint32_t flashAddress = startAddress;
 	CLEAR_LED_BLUE();

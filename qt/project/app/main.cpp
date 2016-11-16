@@ -13,7 +13,7 @@
 #include "vc.h"
 
 
-enum class CommandlineAction{info, transfer, run };
+enum class CommandlineAction{info, transfer, run, eraseEEPROM };
 //enum class CommandlineAction{info, transfer, run };
 
 void call_from_thread(int argc, char *argv[]) {
@@ -32,9 +32,11 @@ void call_from_thread(int argc, char *argv[]) {
     QCommandLineOption cmdInfo("info");
     QCommandLineOption cmdTransfer("transfer");
     QCommandLineOption cmdRun("run");
+    QCommandLineOption cmdEraseEEPROM("eraseEEPROM");
     parser.addOption( cmdInfo);
     parser.addOption( cmdTransfer);
     parser.addOption( cmdRun);
+    parser.addOption( cmdEraseEEPROM);
 
     QCommandLineOption cmdTimoutOption(QStringList() << "t" << "timout" ,"timout in seconds","2");
     QCommandLineOption cmdImageOption(QStringList() << "i" << "image", "path to image for beeing transfered","image.cfw");
@@ -59,6 +61,9 @@ void call_from_thread(int argc, char *argv[]) {
     if (parser.isSet(cmdTransfer)){
         cmdAction.erase(CommandlineAction::info);
         cmdAction.insert(CommandlineAction::transfer);
+    }
+    if (parser.isSet(cmdEraseEEPROM)){
+        cmdAction.insert(CommandlineAction::eraseEEPROM);
     }
     //qDebug() << argslist;
 
@@ -118,6 +123,9 @@ void call_from_thread(int argc, char *argv[]) {
         }
     }
 
+    if(cmdAction.count(CommandlineAction::eraseEEPROM)){
+        bl.eraseEEPROM();
+    }
     if(cmdAction.count(CommandlineAction::run)){
         bl.runApplication();
     }

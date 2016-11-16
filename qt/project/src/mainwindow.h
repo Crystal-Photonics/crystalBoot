@@ -74,6 +74,8 @@ private slots:
 
     void on_actionSave_settings_as_triggered();
 
+    void on_actionErase_EEPROM_triggered();
+
 private:
 
     Ui::MainWindow *ui;

@@ -63,6 +63,7 @@ public:
     bool rpcGetRemoteHashVersion(unsigned char hash[16], uint16_t *version);
 
     RPC_RESULT rpcEraseFlash();
+    RPC_RESULT rpcEraseEEPROM();
     RPC_RESULT rpcWriteFirmwareBlock(uint8_t *data, size_t size);
     RPC_RESULT rpcReadFirmwareBlock(uint8_t *data, size_t size);
     RPC_RESULT rpcVerifyChecksum();
@@ -73,6 +74,7 @@ public:
     RPC_RESULT rpcGetMCUDescriptor(mcu_descriptor_t *descriptor);
     RPC_RESULT rpcGetDeviceDescriptor(device_descriptor_v1_t *descriptor);
     RPC_RESULT rpcGetFirmwareDescriptor(firmware_descriptor_t *descriptor);
+
 
 signals:
 

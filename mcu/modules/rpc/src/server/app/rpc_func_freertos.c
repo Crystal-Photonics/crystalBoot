@@ -14,10 +14,13 @@
 #include "version_info.h"
 
 
-uint8_t mcuEraseFlash(){
+crystalBoolResult_t mcuEraseFlash(){
 	return programmerErase();
 }
 
+crystalBoolResult_t mcuEraseEEPROM(){
+	return programmerEraseEEPROM();
+}
 crystalBoolResult_t mcuSetApplicationAddress(uint32_t applicationAddress){
 	(void)applicationAddress;
 	return crystalBool_OK;

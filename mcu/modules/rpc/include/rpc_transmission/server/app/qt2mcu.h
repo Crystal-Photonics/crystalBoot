@@ -64,6 +64,7 @@ firmware_descriptor_t mcuGetFirmwareDescriptor( );
 crystalBoolResult_t mcuWriteFirmwareBlock(uint8_t data_in[128]);
 crystalBoolResult_t mcuReadFirmwareBlock(uint8_t data_out[128]);
 crystalBoolResult_t mcuEraseFlash();
+crystalBoolResult_t mcuEraseEEPROM();
 
 crystalBoolResult_t mcuVerifyFirmware();
 mcu_descriptor_t mcuGetMCUDescriptor( );

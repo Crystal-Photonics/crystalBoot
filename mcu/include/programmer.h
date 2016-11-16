@@ -31,6 +31,7 @@ typedef struct{
 
 void programmer_init();
 crystalBoolResult_t programmerErase(void);
+crystalBoolResult_t programmerEraseEEPROM(void);
 crystalBoolResult_t programmerVerify(void);
 crystalBoolResult_t programmerQuickVerify(void);
 crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor,  uint8_t sha256[32], uint8_t aes128_iv[16], const crystalBoolCrypto_t crypto );

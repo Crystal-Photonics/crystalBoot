@@ -29,6 +29,9 @@
 	#define FLASH_SIZE                	0x80000
 	#define FLASH_END_ADDR				0x08000000+FLASH_SIZE
 	#define F_SIZE_ADDRESS				((uint32_t)0x1FF800CC)  /* on 0x427 Medium+ and 0x436 HD devices */
+
+	#define DATA_EEPROM_START_ADDR     0x08080000
+	#define DATA_EEPROM_END_ADDR       0x08083FFF
 #else
  #error "Please select first the STM32 device to be used"
 #endif
@@ -65,6 +68,7 @@ void FLASH_DisableWriteProtectionPages(void);
 
 
 bool portFlashEraseApplication();
+bool portFlashEraseEEPROM();
 bool portFlashSaveFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size);
 bool portFlashReadFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size);
 bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const size_t size);

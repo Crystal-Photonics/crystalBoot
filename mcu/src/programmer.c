@@ -101,6 +101,18 @@ crystalBoolResult_t programmerErase(){
 #endif
 }
 
+crystalBoolResult_t programmerEraseEEPROM(){
+#if 1
+	if (portFlashEraseEEPROM()){
+		return crystalBool_OK;
+	}else{
+		return crystalBool_Fail;
+	}
+#else
+	return crystalBool_Fail;
+#endif
+}
+
 crystalBoolResult_t programmerVerify(void){
 
 	crystalBoolResult_t result = crystalBool_OK;

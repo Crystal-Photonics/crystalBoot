@@ -27,6 +27,7 @@ public:
 
     void disconnectComPort();
     void sendfirmware();
+    void eraseEEPROM();
     RPC_RESULT getDeviceInfo();
     void runApplication();
     void loadFile(QString fileName);

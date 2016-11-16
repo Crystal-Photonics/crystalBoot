@@ -402,6 +402,7 @@ void MainWindow::recalcUIState()
             ui->actionGet_Chip_Info->setEnabled(false);
             ui->actionTransfer->setEnabled(false);
             ui->actionTransfer_2->setEnabled(false);
+            ui->actionErase_EEPROM->setEnabled(false);
             break;
         case ConnectionState::Connected:
             statusBar()->showMessage("connected");
@@ -412,6 +413,7 @@ void MainWindow::recalcUIState()
             ui->actionGet_Chip_Info->setEnabled(true);
             ui->actionTransfer->setEnabled(true);
             ui->actionTransfer_2->setEnabled(true);
+            ui->actionErase_EEPROM->setEnabled(true);
             break;
         case ConnectionState::Connecting:
             statusBar()->showMessage("connecting..");
@@ -422,6 +424,7 @@ void MainWindow::recalcUIState()
             ui->actionGet_Chip_Info->setEnabled(false);
             ui->actionTransfer->setEnabled(false);
             ui->actionTransfer_2->setEnabled(false);
+            ui->actionErase_EEPROM->setEnabled(false);
             break;
         case ConnectionState::none:
             break;
@@ -436,6 +439,7 @@ void MainWindow::recalcUIState()
 
         ui->actionTransfer->setEnabled(false);
         ui->actionTransfer_2->setEnabled(false);
+        ui->actionErase_EEPROM->setEnabled(false);
     }
 }
 
@@ -574,3 +578,8 @@ void MainWindow::onReconnectTimer()
 
 
 
+
+void MainWindow::on_actionErase_EEPROM_triggered()
+{
+
+}
