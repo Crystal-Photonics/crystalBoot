@@ -12,13 +12,12 @@
 
 extern channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
 
-enum class ConnectionState {none,Connecting, Connected, Disconnected};
+enum class ConnectionState { none, Connecting, Connected, Disconnected };
 
-class Bootloader : public QObject
-{
+class Bootloader : public QObject {
 
     Q_OBJECT
-public:
+  public:
     explicit Bootloader(QString settingsFileName, QObject *parent = 0);
     ~Bootloader();
 
@@ -28,6 +27,7 @@ public:
     void disconnectComPort();
     void sendfirmware();
     void eraseEEPROM();
+    RPC_RESULT eraseFlash();
     RPC_RESULT getDeviceInfo();
     void runApplication();
     void loadFile(QString fileName);
@@ -43,19 +43,16 @@ public:
     void tryConnect();
     ConnectionState getConnectionState();
 
-
-
-signals:
+  signals:
     void onConnStateChanged(ConnectionState connState);
     void onProgress(int progress);
     void onFinished();
     void onLog(QString text);
     void onMCUGotDeviceInfo();
 
-
-private:
+  private:
     ConnectionState connState;
-    SerialThread* serialThread;
+    SerialThread *serialThread;
     void log(QString str);
     void setConnState(ConnectionState connState);
 };

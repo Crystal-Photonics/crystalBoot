@@ -3,6 +3,8 @@ include(../defaults.pri)
 TEMPLATE = app
 
 
+RC_ICONS += app_icon_multisize.ico
+
 SOURCES +=  main.cpp
 
 CONFIG(debug, debug|release) {

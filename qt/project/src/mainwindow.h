@@ -15,9 +15,6 @@
 #include "flashresultdocumentation.h"
 #include "bootloader.h"
 
-
-
-
 #if 0
 class TargetInfo{
     mcu_descriptor_t mcu_descriptor;
@@ -29,26 +26,23 @@ namespace Ui {
 class MainWindow;
 }
 
-
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
+  public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void closeEvent(QCloseEvent *event);
-    void resizeEvent(QResizeEvent* event);
+    void resizeEvent(QResizeEvent *event);
     void paintEvent(QPaintEvent *event);
     void loadUIFromSettigns();
 
-
     void loadUIDeviceInfo();
     void loadUIPlausibility();
-private slots:
+  private slots:
     void on_actionOpen_triggered();
     void on_actionConnect_triggered();
-    //void on_actionGet_Info_triggered();
+    // void on_actionGet_Info_triggered();
     void on_actionRun_triggered();
     void on_actionTransfer_triggered();
     void on_actionRefresh_triggered();
@@ -76,10 +70,10 @@ private slots:
 
     void on_actionErase_EEPROM_triggered();
 
-private:
+    void on_actionErase_Flash_triggered();
 
+  private:
     Ui::MainWindow *ui;
-
 
     QComboBox *cmbPort;
     QTimer *reconnectTimer;
@@ -96,14 +90,10 @@ private:
     void recalcUIState();
     void setConnState(ConnectionState connState);
 
-
-
     void loadUIFromFile();
     void loadFirmwarePathUIFromFile();
     uint16_t getNameHash(QString name);
     void log(QString str);
-
-
 };
 
 #endif // MAINWINDOW_H

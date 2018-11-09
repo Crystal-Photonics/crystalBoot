@@ -5,6 +5,8 @@ TEMPLATE = app
 
 SOURCES +=  main.cpp
 
+RC_ICONS += app_icon_multisize.ico
+
 CONFIG(debug, debug|release) {
    # message(Debug)
 }

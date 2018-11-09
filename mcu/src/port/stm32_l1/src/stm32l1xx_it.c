@@ -66,7 +66,7 @@ void HardFault_Handler( void ) __attribute__( ( naked ) );
 prvGetRegistersFromStack(). */
  void HardFault_Handler(void)
 {
-#if 	 1
+#if 	 0
     __asm volatile
     (
         " tst lr, #4                                                \n"

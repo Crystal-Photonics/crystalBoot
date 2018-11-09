@@ -145,9 +145,9 @@ OPENOCD   = openocd
 DOXYGEN   = doxygen
 STLINK    = st-flash
 
-SH = "C:\Program Files (x86)\Git\usr\bin\sh.exe"
-MKDIR =  "C:\Program Files (x86)\Git\usr\bin\mkdir.exe"
-TAIL =  "C:\Program Files (x86)\Git\usr\bin\tail.exe"
+SH 			= "C:\Program Files\Git\usr\bin\sh.exe"
+MKDIR 		= "C:\Program Files\Git\usr\bin\mkdir.exe"
+TAIL		= "C:\Program Files\Git\usr\bin\tail.exe"
 
 ifeq (AMD64, $(PROCESSOR_ARCHITEW6432))
   SUBWCREV = tools/SubWCRev64.exe

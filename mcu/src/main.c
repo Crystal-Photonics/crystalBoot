@@ -36,10 +36,7 @@
 #include "channel_codec/phylayer.h"
 #include "errorlogger/generic_eeprom_errorlogger.h"
 
-
-
-typedef enum{blm_none, blm_direct_into_bootloader_mode,blm_direct_to_application, blm_timeout_waiting_till_communication} bootloaderJumpMode_t;
-
+typedef enum { blm_none, blm_direct_into_bootloader_mode, blm_direct_to_application, blm_timeout_waiting_till_communication } bootloaderJumpMode_t;
 
 #if BOOTLOADER_ALLOW_PAIN_TEXT_COMMUNICATION == 0 && BOOTLOADER_WITH_DECRYPT_SUPPORT == 0
 #error "this way no communication is possible"
@@ -52,7 +49,6 @@ typedef enum{blm_none, blm_direct_into_bootloader_mode,blm_direct_to_application
 uint32_t sysTick_ms;
 
 static volatile bootloaderJumpMode_t blJumpMode = blm_none;
-
 
 #if 0
 /**
@@ -116,145 +112,117 @@ static void printResetReason_t(resetReason_t reason){
 }
 #endif
 
-
-
-
-
-
-
-bool testIfStartIntoProgrammingMode(){
-	return true;
+bool testIfStartIntoProgrammingMode() {
+    return true;
 }
 
-
-
-void mainEnterProgrammingMode(){
-	blJumpMode = blm_direct_into_bootloader_mode;
+void mainEnterProgrammingMode() {
+    blJumpMode = blm_direct_into_bootloader_mode;
 }
 
-int main(void)
-{
+int main(void) {
 
-	bool hardreset=true;
-	blJumpMode = blm_timeout_waiting_till_communication;
+    bool hardreset = true;
+    blJumpMode = blm_timeout_waiting_till_communication;
 
-	boardInit();
+    boardInit();
 
+    resetReason_t resetReason = portTestResetSource();
 
+    if (getEnterBootloaderKeyState()) {
+        blJumpMode = blm_direct_into_bootloader_mode;
+    }
+    switch (resetReason) {
+        case rer_none:
+        case rer_resetPin:
+        case rer_powerOnReset:
+            break;
+        case rer_softwareReset:
+            if (port_isDirectApplicationLaunchProgrammed()) {
+                blJumpMode = blm_direct_to_application;
+                if (getEnterBootloaderKeyState()) {
+                    blJumpMode = blm_direct_into_bootloader_mode;
+                }
+            }
+            break;
 
-	resetReason_t resetReason = portTestResetSource();
+        case rer_independendWatchdog:
+        case rer_windowWatchdog:
+        case rer_rtc:
+        case rer_wupin:
+            blJumpMode = blm_direct_to_application;
+            break;
+    }
 
-	if (getEnterBootloaderKeyState()){
-		blJumpMode = blm_direct_into_bootloader_mode;
-	}
-	switch (resetReason){
-		case rer_none:
-		case rer_resetPin:
-		case rer_powerOnReset:
-			break;
-		case rer_softwareReset:
-			if (port_isDirectApplicationLaunchProgrammed()){
-				blJumpMode = blm_direct_to_application;
-				if (getEnterBootloaderKeyState()){
-					blJumpMode = blm_direct_into_bootloader_mode;
-				}
-			}
-			break;
+    programmer_init();
+    if (programmerQuickVerify() == crystalBool_Fail) {
+        blJumpMode = blm_direct_into_bootloader_mode;
+    }
+    if (!port_checkFlashConfiguration(false)) {
+        blJumpMode = blm_direct_into_bootloader_mode;
+    }
 
+    if (blJumpMode == blm_direct_to_application) {
+        portFlashRunApplication();
+        while (1) {
+        }
+    }
+    programmer_init();
 
+    port_chipInit();
+    portSerialInit(115200);
 
-		case rer_independendWatchdog:
-		case rer_windowWatchdog:
-		case rer_rtc:
-		case rer_wupin:
-			blJumpMode = blm_direct_to_application;
-			break;
+    while (!port_checkFlashConfiguration(true)) {
+    }
 
-	}
-
-
-
-	programmer_init();
-	if (programmerQuickVerify() == crystalBool_Fail){
-		blJumpMode = blm_direct_into_bootloader_mode;
-	}
-	if (!port_checkFlashConfiguration(false)){
-		blJumpMode = blm_direct_into_bootloader_mode;
-	}
-
-	if(blJumpMode == blm_direct_to_application){
-		portFlashRunApplication();
-		while(1){
-
-		}
-	}
-	programmer_init();
-
-
-	port_chipInit();
-	portSerialInit(115200);
-
-
-	while (!port_checkFlashConfiguration(true)){	}
-
-	if (portFlashGetProtectionLevel() != BOOTLOADER_PROTECTION_LEVEL){
-		portFlashSetProtectionLevel(BOOTLOADER_PROTECTION_LEVEL);
-	}
-	//printResetReason_t(mainResetReason);
+    if (portFlashGetProtectionLevel() != BOOTLOADER_PROTECTION_LEVEL) {
+        portFlashSetProtectionLevel(BOOTLOADER_PROTECTION_LEVEL);
+    }
+// printResetReason_t(mainResetReason);
 #if 1
-	printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR,hardreset);
-	printf("githash = %X\n", GITHASH);
-	printf("gitdate = %s %u\n", GITDATE, GITUNIX);
+    printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR, hardreset);
+    printf("githash = %X\n", GITHASH);
+    printf("gitdate = %s %u\n", GITDATE, GITUNIX);
 #endif
 
+    SET_LED_BUSY();
 
-	SET_LED_BUSY();
+    if (programmerQuickVerify() == crystalBool_Fail) {
+        printf("application Checksum verify fail\n");
+    }
 
-	if (programmerQuickVerify() == crystalBool_Fail){
-		printf("application Checksum verify fail\n");
-	}
+    rpc_receiver_init();
+    uint32_t startSysTick = sysTick_ms;
+    while (1) {
+        static uint32_t oldTick100ms;
+        static uint32_t oldTick1000ms;
 
+        uint32_t tick100ms = sysTick_ms / 100;
+        uint32_t tick1000ms = sysTick_ms / 1000;
 
-	rpc_receiver_init();
-	uint32_t startSysTick = sysTick_ms;
-	while (1)
-	{
-		static uint32_t oldTick100ms;
-		static uint32_t oldTick1000ms;
+        rpc_receive();
 
-		uint32_t tick100ms = sysTick_ms/100;
-		uint32_t tick1000ms = sysTick_ms/1000;
+        if ((blJumpMode == blm_timeout_waiting_till_communication) && ((sysTick_ms - startSysTick) > BOORLOADER_WAITTIME_FOR_APP_BOOT_ms)) {
+            programmerRunApplication();
+        }
+        if (oldTick1000ms != tick1000ms) {
+            programmerIncrementAESReInitWaitTime_s();
+        }
+        oldTick1000ms = tick1000ms;
+        if (oldTick100ms != tick100ms) {
+            if (tick100ms & 1) {
+                SET_LED_BUSY();
+            } else {
+                CLEAR_LED_BUSY();
+                // printf("hallo\n");
+                // portSerialPutString("Hallo\n");
+            }
+        }
+        oldTick100ms = tick100ms;
+    }
 
-		rpc_receive();
-
-		if ((blJumpMode == blm_timeout_waiting_till_communication) && ((sysTick_ms - startSysTick) > BOORLOADER_WAITTIME_FOR_APP_BOOT_ms)){
-			programmerRunApplication();
-
-		}
-		if (oldTick1000ms != tick1000ms){
-			programmerIncrementAESReInitWaitTime_s();
-		}
-		oldTick1000ms = tick1000ms;
-		if (oldTick100ms != tick100ms){
-			if (tick100ms & 1){
-				SET_LED_BUSY();
-			}else{
-				CLEAR_LED_BUSY();
-				//printf("hallo\n");
-				//portSerialPutString("Hallo\n");
-			}
-		}
-		oldTick100ms = tick100ms;
-	}
-
-
-	while(1){
-
-	}
-
-
-
-
+    while (1) {
+    }
 }
 
 #ifdef USE_FULL_ASSERT
@@ -265,19 +233,16 @@ int main(void)
   * @param  line: assert_param error line source number
   * @retval None
   */
-void assert_failed(uint8_t* file, uint32_t line)
-{
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+void assert_failed(uint8_t *file, uint32_t line) {
+    /* User can add his own implementation to report the file name and line number,
+       ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 
-  /* Infinite loop */
-  while (1)
-  {
-  }
+    /* Infinite loop */
+    while (1) {
+    }
 }
 #endif
 
 /**
   * @}
   */
-

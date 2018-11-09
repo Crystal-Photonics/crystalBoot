@@ -612,6 +612,7 @@
     <addaction name="actionRun_Application"/>
     <addaction name="actionGet_Chip_Info"/>
     <addaction name="actionErase_EEPROM"/>
+    <addaction name="actionErase_Flash"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -711,6 +712,11 @@
   <action name="actionErase_EEPROM">
    <property name="text">
     <string>Erase EEPROM</string>
+   </property>
+  </action>
+  <action name="actionErase_Flash">
+   <property name="text">
+    <string>Erase Flash</string>
    </property>
   </action>
  </widget>
