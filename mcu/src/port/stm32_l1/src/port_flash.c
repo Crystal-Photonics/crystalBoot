@@ -399,9 +399,10 @@ static uint32_t bufferToUint32_t(uint8_t *buffer) {
     return result;
 }
 
-bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const size_t size) {
+bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const uint32_t size) {
     FLASH_Status FLASHStatus = FLASH_COMPLETE;
     bool MemoryProgramOK = true;
+    // printf("write start@ %" PRIx32 ", size = %" PRIx32 "\n", startAddress, size);
     const uint32_t HALF_PAGE_SIZE = FLASH_PAGE_SIZE / 2;
 
     CLEAR_LED_OK();
@@ -428,7 +429,7 @@ bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const size_t s
         uint32_t halfPageBuffer[HALF_PAGE_WORD_COUNT];
 
         for (uint32_t i = 0; i < HALF_PAGE_WORD_COUNT; i++) {
-            halfPageBuffer[i] = bufferToUint32_t(&buffer[i * 4]);
+            halfPageBuffer[i] = bufferToUint32_t(&buffer[(i * 4) + (HALF_PAGE_SIZE * pageOffset)]);
         }
 
         const uint32_t flashAddress = startAddress + HALF_PAGE_SIZE * pageOffset;
