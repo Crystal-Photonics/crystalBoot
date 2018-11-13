@@ -1,3 +1,4 @@
+#include "intelhexclass.h"
 #include "firmwareimage.h"
 #include <QXmlStreamWriter>
 #include <QFile>
@@ -6,117 +7,74 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QCryptographicHash>
+#include <fstream>
 
-
-
-FirmwareImage::FirmwareImage()
-{
+FirmwareImage::FirmwareImage() {
     clear();
 }
 
-void FirmwareImage::clear()
-{
-    firmware_githash = 0;
-    firmware_gitdate_unix = 0;
-    firmware_gitdate_dt = QDateTime();
-    firmware_version = "";
-    firmware_name = "";
-
-    firmware_entryPoint = 0;
-    firmware_size = 0;
-
-    crypto = Crypto::Plain;
-    binary.clear();
+void FirmwareImage::clear() {
+    firmware_meta_data.clear();
+    binary_encoded.clear();
     sha256.clear();
     firmwareLoadConsistency = false;
 }
 
-bool FirmwareImage::isValid()
-{
+bool FirmwareImage::isValid() {
     const uint32_t CHECKSUM_SIZE = 32;
-    //signature check
-    if(!firmware_githash){
-        qDebug() << "firmware_githash is zero";
+    // signature check
+
+    if (!firmware_meta_data.is_valid()) {
         return false;
     }
 
-    if(!firmware_gitdate_unix){
-        qDebug() << "firmware_gitdate_unix is zero";
-        return false;
-    }
-
-    if(!firmware_entryPoint){
-        qDebug() << "firmware_entryPoint is zero";
-        return false;
-    }
-
-    if(!firmware_size){
-        qDebug() << "firmware_size is zero";
-        return false;
-    }
-
-    if(!binary.size()){
+    if (!binary_encoded.size()) {
         qDebug() << "binary.size() is zero";
         return false;
     }
 
-    if(((size_t)firmware_size != (size_t)binary.size()) && (crypto == Crypto::Plain)){
-        qDebug() <<  "firmware_size doesnt equal binary.size()";
+    if ((firmware_meta_data.firmware_size != (size_t)binary_encoded.size()) && (firmware_meta_data.crypto == FirmwareMetaData::Crypto::Plain)) {
+        qDebug() << "firmware_size doesnt equal binary.size()";
         return false;
     }
 
-
-    if(sha256.size() != CHECKSUM_SIZE){
+    if (sha256.size() != CHECKSUM_SIZE) {
         qDebug() << "sha256 is not 32";
         return false;
     }
 
-    return true ;
+    return true;
 }
 
-bool FirmwareImage::isFileModified()
-{
+bool FirmwareImage::isFileModified() {
     return lastModified != QFileInfo(fileName).lastModified();
 }
 
-QString FirmwareImage::getGitHash_str()
-{
-    return "0x"+QString::number(firmware_githash,16).toUpper();
+const FirmwareMetaData &FirmwareImage::get_firmware_meta_data() {
+    return firmware_meta_data;
 }
 
-void FirmwareImage::createXML_for_checksum(QBuffer &buf)
-{
+void FirmwareImage::set_crypto(FirmwareMetaData::Crypto crypto) {
+    firmware_meta_data.crypto = crypto;
+}
+
+void FirmwareImage::createXML_for_checksum(QBuffer &buf) {
     QXmlStreamWriter xml;
     xml.setDevice(&buf);
-
-    xml.writeStartElement("meta");
-    xml.writeAttribute("githash", "0x"+QString::number(firmware_githash,16).toUpper());
-    xml.writeAttribute("gitdate", QString::number(firmware_gitdate_unix));
-    xml.writeAttribute("firmware_version", firmware_version);
-    xml.writeAttribute("firmware_name", firmware_name);
-    xml.writeAttribute("firmware_entrypoint","0x"+QString::number(firmware_entryPoint,16).toUpper() );
-    xml.writeAttribute("firmware_size",QString::number(firmware_size));
-    xml.writeAttribute("creation_date",imageCreationDate.toString("yyyy.MM.dd HH:mm"));
-    if (crypto == Crypto::Plain){
-        xml.writeAttribute("crypto","plain");
-    }else if(crypto == Crypto::AES128){
-        xml.writeAttribute("crypto","aes");
-    }
-    xml.writeEndElement();
-
+    firmware_meta_data.write_meta_data_to_xml(xml);
     QByteArray aes128_iv_64 = aes128_iv.toBase64();
-    xml.writeTextElement("aes128_iv",aes128_iv_64.data() );
+    xml.writeTextElement("aes128_iv", aes128_iv_64.data());
 
     QByteArray checkSumBinary64 = sha256.toBase64();
-    xml.writeTextElement("sha256_for_verify",checkSumBinary64.data() );
+    xml.writeTextElement("sha256_for_verify", checkSumBinary64.data());
 
-    QByteArray imageBinary64 = binary.toBase64();
-    xml.writeTextElement("binary",imageBinary64.data() );
+    QByteArray imageBinary64 = binary_encoded.toBase64();
+    xml.writeTextElement("binary", imageBinary64.data());
 
     xml.writeEndDocument();
 }
 
-QString FirmwareImage::getBase64CheckSum(QBuffer &bufferForCheckSum){
+QString FirmwareImage::getBase64CheckSum(QBuffer &bufferForCheckSum) {
     bufferForCheckSum.open(QIODevice::ReadOnly);
     QCryptographicHash hashfunction(QCryptographicHash::Sha256);
     hashfunction.addData(&bufferForCheckSum);
@@ -126,17 +84,17 @@ QString FirmwareImage::getBase64CheckSum(QBuffer &bufferForCheckSum){
     return hashValue_64;
 }
 
-bool FirmwareImage::save(QString targetFile){
+bool FirmwareImage::save_compiled_image(QString targetFile) {
 
     QFile file(targetFile);
 
-    if(!file.open(QIODevice::WriteOnly)){
-        qDebug() << "cant open file"<< targetFile;
+    if (!file.open(QIODevice::WriteOnly)) {
+        qDebug() << "cant open file" << targetFile;
         return false;
     }
     fileName = targetFile;
 
-    imageCreationDate = QDateTime::currentDateTime();
+    firmware_meta_data.imageCreationDate = QDateTime::currentDateTime();
     QBuffer bufferForCheckSum;
     bufferForCheckSum.open(QIODevice::WriteOnly);
     createXML_for_checksum(bufferForCheckSum);
@@ -167,10 +125,9 @@ bool FirmwareImage::save(QString targetFile){
     {
         QTextStream stream(&file);
         stream << "<crystalBoot version=\"1.0\">";
-        stream << "<data>" << xmlData <<"</data>";
+        stream << "<data>" << xmlData << "</data>";
         stream << "<check>" << hashValue_64 << "</check>";
         stream << "</crystalBoot>";
-
     }
 
     file.close();
@@ -178,8 +135,7 @@ bool FirmwareImage::save(QString targetFile){
     return true;
 }
 
-bool FirmwareImage::open(QString fileName)
-{
+bool FirmwareImage::load_compiled_image(QString fileName) {
     /*
      * <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE crystalBoot>
@@ -205,7 +161,7 @@ bool FirmwareImage::open(QString fileName)
     QDomDocument doc("mydocument");
     QFile file(fileName);
     this->fileName = "";
-    if (!file.open(QIODevice::ReadOnly)){
+    if (!file.open(QIODevice::ReadOnly)) {
         qDebug() << "cant open file as readonly";
         return false;
     }
@@ -219,101 +175,53 @@ bool FirmwareImage::open(QString fileName)
         return false;
     }
 
-
-
     QDomNode topNode = doc.elementsByTagName("crystalBoot").at(0);
-    if (topNode.isNull()){
-       qDebug() << "crystalBoot does not exist";
+    if (topNode.isNull()) {
+        qDebug() << "crystalBoot does not exist";
         return false;
     }
 
     QDomNode crystalBootNode = topNode.firstChildElement("data");
-    if (crystalBootNode.isNull()){
-       qDebug() << "crystalBoot/data does not exist";
+    if (crystalBootNode.isNull()) {
+        qDebug() << "crystalBoot/data does not exist";
         return false;
     }
 
     QDomElement metaNodeElement = crystalBootNode.firstChildElement("meta");
-    if (metaNodeElement.isNull()){
-        return false;
-    }
 
-    bool ok = true;
-    firmware_githash = metaNodeElement.attribute("githash","").toInt(&ok,0);
-    if (!ok) {
-        qDebug() << "githash is not a number";
-        return false;
-    }
-    firmware_gitdate_unix = metaNodeElement.attribute("gitdate","").toInt(&ok,0);;
-    firmware_gitdate_dt = QDateTime::fromTime_t(firmware_gitdate_unix);
-    if (!ok) {
-        qDebug() << "gitdate is not a date/number";
-        return false;
-    }
-    firmware_version = metaNodeElement.attribute("firmware_version","");
+    firmware_meta_data.load_meta_data_from_xml(metaNodeElement);
 
-    firmware_name = metaNodeElement.attribute("firmware_name","");
-    firmware_entryPoint = metaNodeElement.attribute("firmware_entrypoint","").toInt(&ok,0);
-    if (!ok) {
-        qDebug() << "firmware_entrypoint is not a number";
-        return false;
-    }
-    firmware_size = metaNodeElement.attribute("firmware_size","").toInt(&ok,0);
-    if (!ok) {
-        qDebug() << "firmware_size is not a number";
-        return false;
-    }
-
-    QString imageCreationDate_str = metaNodeElement.attribute("creation_date","");
-    imageCreationDate = QDateTime::fromString(imageCreationDate_str,"yyyy.MM.dd HH:mm");
-    if (!imageCreationDate.isValid()) {
-        qDebug() << "imageCreationDate is not a datetime";
-        return false;
-    }
-
-    QString crpt = metaNodeElement.attribute("crypto","").toLower();
-    if (crpt == "plain"){
-        crypto = Crypto::Plain;
-    }else if (crpt == "aes"){
-        crypto = Crypto::AES128;
-    }else{
-        qDebug() << "no crypto type found";
-        return false;
-    }
-
-    if (crypto == Crypto::AES128){
+    if (firmware_meta_data.crypto == FirmwareMetaData::Crypto::AES128) {
         QDomElement aes128_ivNodeElement = crystalBootNode.firstChildElement("aes128_iv");
-        if (aes128_ivNodeElement.isNull()){
+        if (aes128_ivNodeElement.isNull()) {
             qDebug() << "no iv found";
             return false;
         }
         QByteArray aes128_iv_64 = aes128_ivNodeElement.text().toUtf8();
         aes128_iv = QByteArray::fromBase64(aes128_iv_64);
-    }else{
-        aes128_iv = QByteArray(16,0);
+    } else {
+        aes128_iv = QByteArray(16, 0);
     }
 
     QDomElement checksumNodeElement = crystalBootNode.firstChildElement("sha256_for_verify");
-    if (checksumNodeElement.isNull()){
+    if (checksumNodeElement.isNull()) {
         qDebug() << "no checksum found";
         return false;
     }
     QByteArray checksum_base64 = checksumNodeElement.text().toUtf8();
     sha256 = QByteArray::fromBase64(checksum_base64);
 
-
     QDomElement binNodeElement = crystalBootNode.firstChildElement("binary");
-    if (binNodeElement.isNull()){
-            qDebug() << "no binary found";
+    if (binNodeElement.isNull()) {
+        qDebug() << "no binary found";
         return false;
     }
     QByteArray bin_base64 = binNodeElement.text().toUtf8();
-    binary =  QByteArray::fromBase64(bin_base64);
-
+    binary_encoded = QByteArray::fromBase64(bin_base64);
 
     QDomElement checkNode = topNode.firstChildElement("check");
-    if (checkNode.isNull()){
-       qDebug() << "crystalBoot/check does not exist";
+    if (checkNode.isNull()) {
+        qDebug() << "crystalBoot/check does not exist";
         return false;
     }
 
@@ -336,26 +244,89 @@ bool FirmwareImage::open(QString fileName)
 #endif
     QString hashValue_64_calced = getBase64CheckSum(bufferForCheckSum);
     firmwareLoadConsistency = hashValue_64_calced == check_read;
-    if (firmwareLoadConsistency){
+    if (firmwareLoadConsistency) {
         qDebug() << "data consistent";
-    }else{
+    } else {
         qDebug() << "data not consistent";
     }
-
 
     return isValid();
 }
 
+bool readHexFile(QString fileName, QByteArray &result, uint32_t &startAddress) {
+    intelhex ihex;
+    std::ifstream intelHexFile;
+    intelHexFile.open(fileName.toStdString(), std::ifstream::in);
 
-
-QString FirmwareImage::getNameShort(int len)
-{
-    return firmware_name.left(len);
+    if (!intelHexFile.good()) {
+        qDebug() << "Error: couldn't open " << fileName;
+        return false;
+    }
+    intelHexFile >> ihex;
+    ihex.begin();
+    startAddress = ihex.currentAddress();
+    ihex.begin();
+    uint8_t hexByte = 0;
+    result.clear();
+    uint32_t oldAddress = ihex.currentAddress();
+    while (ihex.getData(&hexByte)) {
+        uint32_t newAddress = ihex.currentAddress(); // fill "blank address spaces" with 0
+        uint32_t diffAddress = newAddress - oldAddress;
+        for (uint32_t diff = 1; diff < diffAddress; diff++) {
+            uint8_t val = 0;
+            result.append(val);
+        }
+        result.append(hexByte);
+        oldAddress = newAddress;
+        ++ihex;
+    }
+    int numberWarnings = ihex.getNoWarnings();
+    if (numberWarnings) {
+        qDebug() << "reading hexfile number of warnings:" << numberWarnings;
+        return false;
+    }
+    int numberErrors = ihex.getNoErrors();
+    if (numberErrors) {
+        qDebug() << "reading hexfile number of errors:" << numberErrors;
+        return false;
+    }
+    return true;
 }
 
-uint16_t FirmwareImage::getNameCRC16()
-{
-    return qChecksum(firmware_name.toStdString().c_str(),firmware_name.length());
+bool readBinFile(QString fileName, QByteArray &result) {
+    QFile firmwareFile(fileName);
+
+    if (!firmwareFile.open(QIODevice::ReadOnly)) {
+        return false;
+    }
+    result = firmwareFile.readAll();
+    return true;
 }
 
+bool FirmwareImage::load_plain_image(ImageCreatorSettings &settings) {
+    clear();
+    if (firmware_meta_data.load_meta_data_from_source(settings) == false) {
+        return false;
+    }
 
+    if (!readHexFile(settings.hex_file_name_application_absolute, binary_plain, firmware_meta_data.firmware_entryPoint)) {
+        qDebug() << "error loading hex file:" << firmware_meta_data.firmware_name;
+        return false;
+    }
+    firmware_meta_data.firmware_size = binary_plain.size();
+
+    QCryptographicHash sha256_check(QCryptographicHash::Sha256);
+    QByteArray data_for_hashing(binary_plain);
+
+    sha256_check.addData(data_for_hashing);
+    sha256 = sha256_check.result();
+
+    aes128_iv = QByteArray(16, 0);
+    binary_encoded = binary_plain;
+
+    qDebug() << "entrypoint: 0x" + QString::number(firmware_meta_data.firmware_entryPoint, 16);
+    qDebug() << "size: " + QString::number(firmware_meta_data.firmware_size);
+
+    qDebug() << "sha256: " << sha256.toHex();
+    return true;
+}

@@ -4,45 +4,35 @@
 #include <QString>
 #include <QDateTime>
 #include <QBuffer>
+#include "firmwaremetadata.h"
+#include "imagecreatorsettings.h"
 
-class FirmwareImage{
-public:
-    enum Crypto{Plain,AES128};
+class FirmwareImage {
+  public:
     explicit FirmwareImage();
     void clear();
-    bool save(QString targetFile);
-    bool open(QString fileName);
+    bool save_compiled_image(QString targetFile);
+    bool load_compiled_image(QString fileName);
+    bool load_plain_image(ImageCreatorSettings &settings);
     bool isValid();
     bool isFileModified();
 
-    QString getGitHash_str();
-    QString getNameShort(int len);
     QString fileName;
-    uint16_t getNameCRC16();
 
-    uint32_t firmware_githash;
-    uint32_t firmware_gitdate_unix;
-    QDateTime firmware_gitdate_dt;
-    QString firmware_version;
-    QString firmware_name;
-    QDateTime imageCreationDate;
-
-
-    uint32_t firmware_entryPoint;
-    uint32_t firmware_size;
-
-    Crypto crypto;
-    QByteArray binary;
+    QByteArray binary_encoded;
+    QByteArray binary_plain;
     QByteArray sha256;
     QByteArray aes128_iv;
 
     bool firmwareLoadConsistency;
+    const FirmwareMetaData &get_firmware_meta_data();
 
-private:
+    void set_crypto(FirmwareMetaData::Crypto crypto);
+
+  private:
+    FirmwareMetaData firmware_meta_data;
     QDateTime lastModified;
     void createXML_for_checksum(QBuffer &buf);
     QString getBase64CheckSum(QBuffer &bufferForCheckSum);
-
 };
 #endif // FIRMWAREIMAGE_H
-

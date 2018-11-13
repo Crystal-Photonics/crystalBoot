@@ -11,17 +11,17 @@ bool readBinFile(QString fileName, QByteArray &result);
 QByteArray AES_CBC_128_encrypt(QByteArray &key, QByteArray &iv, QByteArray &plain);
 QByteArray AES_CBC_128_decrypt(QByteArray key, QByteArray iv, QByteArray &cipher);
 
-class FirmwareEncoder{
-public:
-    explicit FirmwareEncoder(ImageCreatorSettings imageCreatorSettings);
-    bool loadFirmwareData();
+class FirmwareImageContainer {
+  public:
+    explicit FirmwareImageContainer(ImageCreatorSettings &imageCreatorSettings);
+    bool load_plain_image();
     bool saveImage();
 
     FirmwareImage fwImage;
-private:
-    enum DefineType {None,Number,String} ;
-    ImageCreatorSettings imageCreatorSettings;
-    bool parseTheDefine(QString defineName, DefineType defineType ,QString line,  QString &value);
+
+  private:
+    ImageCreatorSettings &imageCreatorSettings;
+    //   bool parseTheDefine(QString defineName, DefineType defineType, QString line, QString &value);
     intelhex ihex;
 };
 #endif // FIRMWAREENCODER_H

@@ -28,9 +28,13 @@ SOURCES += mainwindow.cpp
 SOURCES += ../libs/rpc/src/server/app/rpc_func_qt.cpp
 SOURCES += ../libs/rpc/src/server/app/rpc_service_qt.cpp
 
+SOURCES += $$PWD/../../../qt_common/imagecreatorsettings.cpp
 SOURCES += $$PWD/../../../qt_common/firmwareimage.cpp
-HEADERS += $$PWD/../../../qt_common/firmwareimage.h
+SOURCES += $$PWD/../../../qt_common/firmwaremetadata.cpp
 
+HEADERS += $$PWD/../../../qt_common/imagecreatorsettings.h
+HEADERS += $$PWD/../../../qt_common/firmwareimage.h
+HEADERS += $$PWD/../../../qt_common/firmwaremetadata.h
 
 HEADERS += mainwindow.h
 HEADERS += infodialog.h
@@ -40,6 +44,9 @@ HEADERS += crystalsettings.h
 HEADERS += flashresultdocumentation.h
 HEADERS += namedplacemarker.h
 HEADERS += bootloader.h
+
+SOURCES += ../libs/Intel-HEX-Class/intelhex_class/intelhexclass.cpp
+HEADERS += ../libs/Intel-HEX-Class/intelhex_class/intelhexclass.h
 
 SOURCES += ../libs/rpc/src/client/generated_app/RPC_TRANSMISSION_qt2mcu.c
 SOURCES += ../libs/rpc/src/server/generated_app/RPC_TRANSMISSION_parser.c
@@ -61,6 +68,7 @@ HEADERS += ../libs/rpc/include/channel_codec/channel_codec_config.h
 
 
 INCLUDEPATH += ../libs/RPC-ChannelCodec/include/errorlogger_dummy
+INCLUDEPATH += ../libs/Intel-HEX-Class/intelhex_class
 #INCLUDEPATH += ../libs/RPC-ChannelCodec/tests/include
 
 INCLUDEPATH += ../libs/rpc/include/

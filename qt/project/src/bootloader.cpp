@@ -122,7 +122,7 @@ void Bootloader::sendfirmware() {
 
         emit onProgress(0);
 
-        qint64 fileSize = fwImage.binary.size();
+        qint64 fileSize = fwImage.binary_encoded.size();
         qint64 byteCounter = 0;
         QTime runtime;
         QTime totalRuntime;
@@ -181,7 +181,7 @@ void Bootloader::sendfirmware() {
 #if 1
         {
 #if 1
-            QBuffer firmwareFile(&fwImage.binary);
+            QBuffer firmwareFile(&fwImage.binary_encoded);
             firmwareFile.open(QIODevice::ReadOnly);
             while (!firmwareFile.atEnd() && fail == false) {
 
@@ -353,7 +353,7 @@ void Bootloader::setConnState(ConnectionState connState) {
 }
 
 void Bootloader::loadFile(QString fileName) {
-    if (fwImage.open(fileName)) {
+    if (fwImage.load_compiled_image(fileName)) {
         fileLoaded = true;
 
     } else {

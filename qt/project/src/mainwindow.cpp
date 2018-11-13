@@ -99,19 +99,20 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
 }
 
 void MainWindow::loadUIFromFile() {
-    ui->lbl_nf_name->setText(bootloader.fwImage.firmware_name);
-    ui->lbl_nf_namehash->setText("0x" + QString::number(bootloader.fwImage.getNameCRC16(), 16).toUpper());
-    ui->lbl_nf_version->setText(bootloader.fwImage.firmware_version);
-    if (bootloader.fwImage.crypto == FirmwareImage::Crypto::AES128)
+    const FirmwareMetaData &fw_meta_data = bootloader.fwImage.get_firmware_meta_data();
+    ui->lbl_nf_name->setText(fw_meta_data.firmware_name);
+    ui->lbl_nf_namehash->setText("0x" + QString::number(fw_meta_data.getNameCRC16(), 16).toUpper());
+    ui->lbl_nf_version->setText(fw_meta_data.firmware_version);
+    if (fw_meta_data.crypto == FirmwareMetaData::Crypto::AES128)
         ui->lbl_nf_crypto->setText("AES");
-    else if (bootloader.fwImage.crypto == FirmwareImage::Crypto::Plain) {
+    else if (fw_meta_data.crypto == FirmwareMetaData::Crypto::Plain) {
         ui->lbl_nf_crypto->setText("Plaintext");
     }
-    ui->lbl_nf_githash->setText("0x" + QString::number(bootloader.fwImage.firmware_githash, 16).toUpper());
-    ui->lbl_nf_gitdate->setText(bootloader.fwImage.firmware_gitdate_dt.toString("yyyy.MM.dd HH:mm"));
-    ui->lbl_nf_size->setText(QString::number(bootloader.fwImage.firmware_size / 1024, 10) + "kB (" +
-                             QString::number(bootloader.fwImage.firmware_size, 10) + " Bytes)");
-    ui->lbl_nf_entrypoint->setText("0x" + QString::number(bootloader.fwImage.firmware_entryPoint, 16).toUpper());
+    ui->lbl_nf_githash->setText("0x" + QString::number(fw_meta_data.firmware_githash, 16).toUpper());
+    ui->lbl_nf_gitdate->setText(fw_meta_data.firmware_gitdate_dt.toString("yyyy.MM.dd HH:mm"));
+    ui->lbl_nf_size->setText(QString::number(fw_meta_data.firmware_size / 1024, 10) + "kB (" + QString::number(fw_meta_data.firmware_size, 10) +
+                             " Bytes)");
+    ui->lbl_nf_entrypoint->setText("0x" + QString::number(fw_meta_data.firmware_entryPoint, 16).toUpper());
     // loadFirmwarePathUIFromFile();
     this->repaint(); // will put filename on screen
     if (bootloader.fwImage.firmwareLoadConsistency) {
