@@ -1,4 +1,4 @@
-#include "intelhexclass.h"
+#include "hexfile.h"
 #include "firmwareimage.h"
 #include <QXmlStreamWriter>
 #include <QFile>
@@ -7,7 +7,6 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QCryptographicHash>
-#include <fstream>
 
 FirmwareImage::FirmwareImage() {
     clear();
@@ -253,44 +252,13 @@ bool FirmwareImage::load_compiled_image(QString fileName) {
     return isValid();
 }
 
-bool readHexFile(QString fileName, QByteArray &result, uint32_t &startAddress) {
-    intelhex ihex;
-    std::ifstream intelHexFile;
-    intelHexFile.open(fileName.toStdString(), std::ifstream::in);
+bool readHexFile(QString file_name, QByteArray &result, uint32_t &startAddress) {
 
-    if (!intelHexFile.good()) {
-        qDebug() << "Error: couldn't open " << fileName;
-        return false;
-    }
-    intelHexFile >> ihex;
-    ihex.begin();
-    startAddress = ihex.currentAddress();
-    ihex.begin();
-    uint8_t hexByte = 0;
-    result.clear();
-    uint32_t oldAddress = ihex.currentAddress();
-    while (ihex.getData(&hexByte)) {
-        uint32_t newAddress = ihex.currentAddress(); // fill "blank address spaces" with 0
-        uint32_t diffAddress = newAddress - oldAddress;
-        for (uint32_t diff = 1; diff < diffAddress; diff++) {
-            uint8_t val = 0;
-            result.append(val);
-        }
-        result.append(hexByte);
-        oldAddress = newAddress;
-        ++ihex;
-    }
-    int numberWarnings = ihex.getNoWarnings();
-    if (numberWarnings) {
-        qDebug() << "reading hexfile number of warnings:" << numberWarnings;
-        return false;
-    }
-    int numberErrors = ihex.getNoErrors();
-    if (numberErrors) {
-        qDebug() << "reading hexfile number of errors:" << numberErrors;
-        return false;
-    }
-    return true;
+    HexFile hf;
+    bool ret = hf.append_hex_file(file_name);
+    result = hf.get_binary();
+    startAddress = hf.get_start_address();
+    return ret;
 }
 
 bool readBinFile(QString fileName, QByteArray &result) {

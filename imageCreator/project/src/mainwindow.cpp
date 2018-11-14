@@ -158,10 +158,8 @@ void MainWindow::loadUIFromFirmwaredata(FirmwareImage fwImage) {
 
 void MainWindow::on_btnPreview_clicked() {
     bool result = false;
-    FirmwareImage fwImage;
     FirmwareImageContainer fwImageEncode(imageCreatorSettings);
     saveUIToSettings();
-    fwImage.load_plain_image(imageCreatorSettings);
     result = fwImageEncode.load_plain_image();
     if (!result) {
         ui->statusBar->showMessage("error loading firmware data");
