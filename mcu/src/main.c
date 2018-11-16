@@ -126,9 +126,12 @@ int main(void) {
 
     resetReason_t resetReason = portTestResetSource();
     bootloader_preprogrammed_boot_mode_t preprogrammed_bootmode = port_dataex_get_preprogrammed_bootmode();
+    port_dataex_clear_bootmode();
+
     if (getEnterBootloaderKeyState()) {
         blJumpMode = blm_direct_into_bootloader_mode;
     }
+
     switch (resetReason) {
         case rer_none:
         case rer_resetPin:
@@ -148,6 +151,9 @@ int main(void) {
         case rer_rtc:
         case rer_wupin:
             blJumpMode = blm_direct_to_application;
+            if (getEnterBootloaderKeyState()) {
+                blJumpMode = blm_direct_into_bootloader_mode;
+            }
             break;
     }
 
@@ -183,7 +189,7 @@ int main(void) {
     if (portFlashGetProtectionLevel() != BOOTLOADER_PROTECTION_LEVEL) {
         portFlashSetProtectionLevel(BOOTLOADER_PROTECTION_LEVEL);
     }
-// printResetReason_t(mainResetReason);
+
 #if 1
     printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR, hardreset);
     printf("githash = %X\n", GITHASH);
@@ -222,8 +228,6 @@ int main(void) {
                 SET_LED_BUSY();
             } else {
                 CLEAR_LED_BUSY();
-                // printf("hallo\n");
-                // portSerialPutString("Hallo\n");
             }
         }
         oldTick100ms = tick100ms;
