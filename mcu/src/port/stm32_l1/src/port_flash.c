@@ -512,11 +512,14 @@ bool portEEPROMWrite(uint16_t address, uint8_t *buffer, uint16_t size) {
             break;
         }
         // since we dont use the fastbyte program we dont need to erase
-        FLASH_Status status = DATA_EEPROM_ProgramByte((uint32_t)hw_address, (uint32_t)(buffer[i]));
-        if (status != FLASH_COMPLETE) {
-            printf("EEPROM Write err @%" PRId32 ": status: %d\n", hw_address, status);
-            result = false;
-            break;
+        uint8_t old_eeprom_byte = *((uint8_t *)(hw_address));
+        if (old_eeprom_byte != buffer[i]) {
+            FLASH_Status status = DATA_EEPROM_ProgramByte((uint32_t)hw_address, (uint32_t)(buffer[i]));
+            if (status != FLASH_COMPLETE) {
+                printf("EEPROM Write err @%" PRId32 ": status: %d\n", hw_address, status);
+                result = false;
+                break;
+            }
         }
     }
     DATA_EEPROM_Lock();
