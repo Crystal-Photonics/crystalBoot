@@ -288,6 +288,8 @@ void Bootloader::sendfirmware() {
 void Bootloader::readEEPROMToFile(QString file_name) {
     QFile file_bin(file_name);
     if (file_bin.open(QIODevice::WriteOnly)) {
+        QTime runtime;
+        runtime.start();
         emit onProgress(0);
 #if 0
         RPC_RESULT rpcEEPROMWriteBlock(uint8_t *data, uint8_t size);
@@ -343,7 +345,7 @@ void Bootloader::readEEPROMToFile(QString file_name) {
                 progress_old = progress;
             }
         }
-        log("Reading eeprom done.");
+        log("Reading eeprom done." + QString::number(runtime.elapsed() / 1000.0) + " seconds needed");
         file_bin.close();
     }
     emit onFinished();
@@ -353,6 +355,8 @@ void Bootloader::writeEEPROMFromFile(QString file_name) {
 
     QFile file_bin(file_name);
     if (file_bin.open(QIODevice::ReadOnly)) {
+        QTime runtime;
+        runtime.start();
         emit onProgress(0);
         log("Writing eeprom from file..");
         uint16_t eeprom_size = 0;
@@ -404,7 +408,7 @@ void Bootloader::writeEEPROMFromFile(QString file_name) {
                 progress_old = progress;
             }
         }
-        log("Writing eeprom done.");
+        log("Writing eeprom done." + QString::number(runtime.elapsed() / 1000.0) + " seconds needed");
         file_bin.close();
     }
     emit onFinished();
@@ -413,6 +417,8 @@ void Bootloader::writeEEPROMFromFile(QString file_name) {
 bool Bootloader::verifyEEPROMFromFile(QString file_name) {
     QFile file_bin(file_name);
     if (file_bin.open(QIODevice::ReadOnly)) {
+        QTime runtime;
+        runtime.start();
         log("Verifing eeprom..");
         uint16_t eeprom_size = 0;
         uint16_t crc16 = 0;
@@ -456,8 +462,8 @@ bool Bootloader::verifyEEPROMFromFile(QString file_name) {
             return false;
         }
         file_bin.close();
+        log("Verify EEPROM ok." + QString::number(runtime.elapsed() / 1000.0) + " seconds needed");
     }
-    log("Verify EEPROM ok.");
     return true;
 }
 
@@ -469,7 +475,6 @@ void Bootloader::eraseEEPROM() {
     flashResultDocumentation.setRemoteDeviceInfo(remoteDeviceInfo);
 
     QTime runtime;
-
     runtime.start();
 #if 1
     log("erasing eeprom..");
