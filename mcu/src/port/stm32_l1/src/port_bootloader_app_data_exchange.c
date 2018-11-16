@@ -46,6 +46,18 @@ static bootloader_app_data_exchange_t bootloader_data_exchange __attribute__((se
 const uint32_t MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_APPMODE = 0x5868FE4A;
 const uint32_t MAGIC_KEY_IN_BACKUP_TO_START_DIRECTLY_IN_PROGRAMMODE = 0x48B4A946;
 
+bool port_dataex_check_for_address_plausibility(uint32_t stack_top_address) {
+    // lets check if the application really has its linkerscript prepared for data exchange via shared memory.
+    // if its stack is located beneath the shared memory section we assume that everything is ok
+
+    uint32_t data_exchange_address = (uint32_t)&bootloader_data_exchange;
+
+    if (stack_top_address < data_exchange_address) {
+        return true;
+    } else {
+        return false;
+    }
+}
 bootloader_preprogrammed_boot_mode_t port_dataex_get_preprogrammed_bootmode() {
     bootloader_preprogrammed_boot_mode_t result = boot_mode_none;
     uint32_t val = bootloader_data_exchange.magic_key_which_survives_soft_reset_and_mustn_be_inited;

@@ -27,4 +27,6 @@ void port_dataex_set_bootloader_git_info(void);
 uint32_t port_dataex_get_bootloader_git_hash(void);
 uint32_t port_dataex_get_bootloader_git_unixdate(void);
 
+bool port_dataex_check_for_address_plausibility(uint32_t stack_top_address);
+
 #endif /* CRYSTALBOOT_MCU_SRC_PORT_STM32_L1_INCLUDE_PORT_BOOTLOADER_APP_DATA_EXCHANGE_C_ */

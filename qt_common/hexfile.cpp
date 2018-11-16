@@ -2,6 +2,7 @@
 #include "hexfile.h"
 #include <QStringList>
 #include <QDebug>
+#include <QMessageBox>
 #include <assert.h>
 #include <fstream>
 
@@ -99,7 +100,12 @@ void HexFile::append_binary_(const QByteArray &indata, uint32_t start_address, b
                 binary_m[i + offset] = indata[i];
             }
         } else {
-            assert(0);
+            QString msg = "There is a memory overlap: (start: 0x" + QString::number(new_start_address, 16).toUpper() + ", end: 0x" +
+                          QString::number(new_end_address, 16).toUpper() + ") is added to (start: 0x" +
+                          QString::number(actual_start_address, 16).toUpper() + ", end: 0x" + QString::number(actual_end_address, 16).toUpper() + ")";
+            qDebug() << msg;
+
+            QMessageBox::critical(nullptr, "Bundle overlap", msg);
         }
     }
 }

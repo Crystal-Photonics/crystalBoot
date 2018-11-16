@@ -594,6 +594,11 @@ void portFlashRunApplicationAfterReset() {
     port_ResetMCU();
 }
 
+bool portFlashCheckForApplicationStackAddressPlausibility() {
+    uint32_t app_stack_address = *(__IO uint32_t *)programmerGetApplicationEntryPoint();
+    return port_dataex_check_for_address_plausibility(app_stack_address);
+}
+
 void portFlashRunApplication() {
     //#define ApplicationAddress    0x8003000
     // MINIMAL_APPLICATION_ADDRESS
@@ -606,6 +611,7 @@ void portFlashRunApplication() {
      * magic number 0x2FFE0000 results from ram size aka stack pointer
      */
     stackAddressOfApplication = *(__IO uint32_t *)programmerGetApplicationEntryPoint();
+
     if ((stackAddressOfApplication & 0x2FFE0000) == 0x20000000) {
         static uint32_t applicationResetVector = 0;
         applicationResetVector = programmerGetApplicationEntryPoint() + 4;

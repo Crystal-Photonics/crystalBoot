@@ -4,8 +4,6 @@
 #include "programmer.h"
 #include <stdio.h>
 
-extern uint32_t __firmware_descriptor_buffer_end;
-
 #if 0
 #define portDISABLE_INTERRUPTS() ulPortSetInterruptMask()
 #define portENABLE_INTERRUPTS() vPortClearInterruptMask(0)
@@ -168,25 +166,17 @@ resetReason_t portTestResetSource(void) {
 bool port_checkFlashConfiguration(bool usePrintf) {
     if (portFlashGetFlashSize() != FLASH_SIZE) {
         if (usePrintf) {
-            printf("Flash size malconfigured");
+            printf("Flash size malconfigured\n");
         }
         return false;
     }
 
     if (sizeof(firmware_meta_t) > FIRMWARE_DESCRIPTION_BUFFER_SIZE) {
         if (usePrintf) {
-            printf("Application meta data too big for buffer");
+            printf("Application meta data too big for buffer\n");
         }
         return false;
     }
 
-    uint32_t lastUsedAddressInFlash = (uint32_t)&__firmware_descriptor_buffer_end;
-
-    if (MINIMAL_APPLICATION_ADDRESS < lastUsedAddressInFlash) {
-        if (usePrintf) {
-            printf("Bootloader flash region overlaps with application memory");
-        }
-        return false;
-    }
     return true;
 }

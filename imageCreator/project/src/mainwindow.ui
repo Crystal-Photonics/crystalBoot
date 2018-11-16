@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>597</width>
-    <height>582</height>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,46 +25,20 @@
         <string>File paths</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_17">
+        <item row="11" column="1" colspan="2">
+         <widget class="QLineEdit" name="edt_bundle_target"/>
+        </item>
+        <item row="10" column="1" colspan="2">
+         <widget class="QCheckBox" name="cbtn_create_bundle">
           <property name="text">
-           <string>relative To:</string>
+           <string>Create bundled bootloader / application hex file</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QLineEdit" name="edtRelative">
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1" colspan="2">
-         <widget class="QLineEdit" name="edt_app_hex_file"/>
-        </item>
-        <item row="2" column="1" colspan="2">
-         <widget class="QPlainTextEdit" name="edt_versionInfoHeader"/>
-        </item>
-        <item row="7" column="1" colspan="2">
-         <widget class="QLineEdit" name="edt_application_target_file"/>
-        </item>
-        <item row="6" column="1" colspan="2">
-         <widget class="QLineEdit" name="edt_encryptionKey"/>
-        </item>
-        <item row="5" column="2">
-         <widget class="QRadioButton" name="rbtn_crypt_aes">
+        <item row="8" column="0">
+         <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>AES-128 encryption</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QRadioButton" name="rbtn_crypt_plain">
-          <property name="text">
-           <string>No encryption</string>
+           <string>Application target image:</string>
           </property>
          </widget>
         </item>
@@ -83,40 +57,13 @@
          </widget>
         </item>
         <item row="7" column="0">
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Application target image:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
          <widget class="QLabel" name="label_3">
           <property name="text">
            <string>Encryption key file:</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Bootloader Hex-File</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="1" colspan="2">
-         <widget class="QLineEdit" name="edt_bundle_target"/>
-        </item>
-        <item row="4" column="1" colspan="2">
-         <widget class="QLineEdit" name="edt_bootloader_symbol_file"/>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_18">
-          <property name="text">
-           <string>Bootloader Sym-File</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0">
+        <item row="11" column="0">
          <widget class="QLabel" name="label_19">
           <property name="text">
            <string>Bootloader / application bundle target image:</string>
@@ -126,12 +73,92 @@
         <item row="3" column="1" colspan="2">
          <widget class="QLineEdit" name="edt_bootloader_hex_file"/>
         </item>
-        <item row="8" column="1" colspan="2">
-         <widget class="QCheckBox" name="cbtn_create_bundle">
+        <item row="4" column="1" colspan="2">
+         <widget class="QLineEdit" name="edt_bootloader_symbol_file"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>Create bundled bootloader / application hex file</string>
+           <string>Bootloader Hex-File</string>
           </property>
          </widget>
+        </item>
+        <item row="1" column="1" colspan="2">
+         <widget class="QLineEdit" name="edt_app_hex_file"/>
+        </item>
+        <item row="2" column="1" colspan="2">
+         <widget class="QPlainTextEdit" name="edt_versionInfoHeader"/>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLineEdit" name="edtRelative">
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="1" colspan="2">
+         <widget class="QLineEdit" name="edt_application_target_file"/>
+        </item>
+        <item row="7" column="1" colspan="2">
+         <widget class="QLineEdit" name="edt_encryptionKey"/>
+        </item>
+        <item row="13" column="1">
+         <widget class="QLabel" name="label_20">
+          <property name="text">
+           <string>Name Placeholder: %GITHASH%</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_17">
+          <property name="text">
+           <string>relative To:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="2">
+         <widget class="QRadioButton" name="rbtn_crypt_aes">
+          <property name="text">
+           <string>AES-128 encryption</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QRadioButton" name="rbtn_crypt_plain">
+          <property name="text">
+           <string>No encryption</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_18">
+          <property name="text">
+           <string>Bootloader Sym-File</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="1">
+         <widget class="QLabel" name="label_21">
+          <property name="text">
+           <string>Name Placehodlers: %GITHASH%</string>
+          </property>
+         </widget>
+        </item>
+        <item row="13" column="2">
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>

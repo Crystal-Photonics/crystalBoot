@@ -15,8 +15,30 @@
 #include "stm32l1xx_conf.h"
 #include "stm32l1xx.h"
 
-#define MINIMAL_APPLICATION_ADDRESS 0x8005000
-//#define APPLICATION_ADDRESS  				0x8006000
+/*
+ *
+ * _bootloader_flash_end has to be define in linker script. For example:
+ *
+ * MEMORY
+ * {
+ *  	FLASH (rx)      				: ORIGIN = 0x8000000, LENGTH = 0x8005100 - 0x8000000
+ *  	RAM (xrw)       				: ORIGIN = 0x20000000, LENGTH = 80K-16
+ *  	BOOTLOADER_DATA_EXCHANGE (rwx)	: ORIGIN = 0x20013FF0, LENGTH = 16
+ *  	MEMORY_B1 (rx)  				: ORIGIN = 0x60000000, LENGTH = 0K
+ * }
+ *
+ *
+ * _estack = ORIGIN(RAM) + LENGTH(RAM)-4;
+ * _bootloader_flash_end = ORIGIN(FLASH) + LENGTH(FLASH)-4;
+ *
+ *
+ *
+ * */
+extern uint32_t __bootloader_flash_end;
+// extern uint32_t __firmware_descriptor_buffer_end;
+
+#define MINIMAL_APPLICATION_ADDRESS (uint32_t) & __bootloader_flash_end
+
 #define FLASH_ADDRESS FLASH_BASE
 #define FIRMWARE_DESCRIPTION_BUFFER_SIZE FLASH_PAGE_SIZE
 
@@ -79,7 +101,7 @@ bool portFlashReadFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size);
 bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const uint32_t size);
 bool portFlashVerifyAgainstBuffer(const uint32_t startAddress, uint8_t *buffer, const size_t size);
 bool portFlashRead(const uint32_t startAddress, uint8_t *buffer, const size_t size);
-
+bool portFlashCheckForApplicationStackAddressPlausibility();
 void portFlashRunApplication();
 
 void portFlashVerify();

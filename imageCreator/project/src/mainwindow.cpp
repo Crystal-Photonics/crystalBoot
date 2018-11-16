@@ -79,6 +79,7 @@ void MainWindow::loadUIFromSettings() {
         ui->rbtn_crypt_aes->setChecked(false);
         ui->rbtn_crypt_plain->setChecked(true);
     }
+    on_cbtn_create_bundle_toggled(imageCreatorSettings.create_bundle_image_wanted);
 }
 
 void MainWindow::saveUIToSettings() {
@@ -294,4 +295,10 @@ void MainWindow::on_actionCreate_AES_128_key_triggered() {
 
     qDebug() << key.toHex();
 #endif
+}
+
+void MainWindow::on_cbtn_create_bundle_toggled(bool checked) {
+    ui->edt_bundle_target->setEnabled(checked);
+    ui->edt_bootloader_hex_file->setEnabled(checked);
+    ui->edt_bootloader_symbol_file->setEnabled(checked);
 }

@@ -1,8 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-
-
 #include <QMainWindow>
 #include <QSettings>
 #include <QCloseEvent>
@@ -14,20 +12,17 @@ namespace Ui {
 class MainWindow;
 }
 
-
-
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
+  public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void closeEvent(QCloseEvent *event);
     void loadUIFromSettings();
     void saveUIToSettings();
 
-private slots:
+  private slots:
     void on_btnSave_clicked();
     void on_btnLoad_clicked();
     void on_btnSaveAs_clicked();
@@ -38,12 +33,13 @@ private slots:
 
     void on_actionCreate_AES_128_key_triggered();
 
-private:
+    void on_cbtn_create_bundle_toggled(bool checked);
+
+  private:
     ImageCreatorSettings imageCreatorSettings;
     void loadUIFromFirmwaredata(FirmwareImage fwImage);
     QSettings settings;
     Ui::MainWindow *ui;
-
 };
 
 #endif // MAINWINDOW_H

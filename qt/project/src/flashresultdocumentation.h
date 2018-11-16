@@ -7,7 +7,7 @@
 #include "firmwareimage.h"
 #include "crystalsettings.h"
 
-enum class PlausibilityResult{
+enum class PlausibilityResult {
     error_firmwareimage_too_big,
     error_wrong_entrypoint,
     error_inconsistency,
@@ -20,27 +20,23 @@ enum class PlausibilityResult{
     warning_equal_version_but_different_gitHash
 };
 
-
-class RemoteDeviceInfo{
-public:
+class RemoteDeviceInfo {
+  public:
     RemoteDeviceInfo();
     void setMCUDescriptor(mcu_descriptor_t *mcu_descriptor);
     void setDeviceDescriptor(device_descriptor_v1_t *deviceDescriptor);
-    void setOldFirmwareDescriptor(firmware_descriptor_t  *firmwareDescriptor);
+    void setOldFirmwareDescriptor(firmware_descriptor_t *firmwareDescriptor);
 
     QString getDeviceCategorieString();
-
-
 
     void unSet();
     bool isValid();
 
     mcu_descriptor_t mcu_descriptor;
     device_descriptor_v1_t deviceDescriptor;
-    firmware_descriptor_t  firmwareDescriptor;
+    firmware_descriptor_t firmwareDescriptor;
 
     static QString arrayToHexString(uint8_t *buff, const size_t length, int insertNewLine);
-
 
     QString getMCU_RevString();
     QString getMCU_FlashsizeString();
@@ -66,18 +62,18 @@ public:
     QString getFW_name();
     QString getFW_version();
 
-
     QString getFW_entryPoint();
     QString getFW_size();
     QString getMCU_cryptoRequired();
-private:
+
+  private:
     bool mcu_set;
     bool device_set;
     bool firmware_set;
 };
 
-class FirmwareUpdatePlausibilityCheck{
-public:
+class FirmwareUpdatePlausibilityCheck {
+  public:
     FirmwareUpdatePlausibilityCheck();
 
     void checkPlausibiltity(RemoteDeviceInfo remoteDevInfo, FirmwareImage firmwareImage);
@@ -88,33 +84,30 @@ public:
     QString plausibilityResultToStrShort(PlausibilityResult plauRes);
     QString plausibilityResultToStrReadable(PlausibilityResult plauRes);
 
-    bool showWarngingMessage(); //cancel if false
-private:
+    bool showWarngingMessage(); // cancel if false
+  private:
     std::set<PlausibilityResult> plausibilityResults;
 };
 
-
-class FlashResultDocumentation
-{
-public:
+class FlashResultDocumentation {
+  public:
     FlashResultDocumentation();
 
     void save(CrystalBootSettings crystalBootSettings);
-    void addActionResult(QString action,  RPC_RESULT RPC_result);
+    void addActionResult(QString action, RPC_RESULT RPC_result);
     void setNewFirmwareDescriptor(FirmwareImage firmwareImage);
     void setRemoteDeviceInfo(RemoteDeviceInfo remoteDeviceInfo);
     void print();
     void checkPlausibility();
     bool showWarngingMessage();
 
-
-private:
+  private:
     FirmwareUpdatePlausibilityCheck plausibilityResult;
     RemoteDeviceInfo remoteDeviceInfo;
     bool getOverAllResult();
 
-    QMap<QString,RPC_RESULT> actionResults;
-    FirmwareImage  firmwareImage;
+    QMap<QString, RPC_RESULT> actionResults;
+    FirmwareImage firmwareImage;
 };
 
 #endif // FLASHRESULTDOCUMENTATION_H

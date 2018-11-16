@@ -38,10 +38,18 @@ ENTRY(Reset_Handler)
 _Min_Heap_Size = 0x200;      /* required amount of heap  */
 _Min_Stack_Size = 0x400; /* required amount of stack */
 
+MINIMAL_APPLICATION_ADDRESS = 0x8005000;
+
+BOOTLOADER_START_ADDRESS = 0x8000000;
+BOOTLOADER_FLASH_SIZE = MINIMAL_APPLICATION_ADDRESS - BOOTLOADER_START_ADDRESS;
+
+
+
+
 /* Specify the memory areas */
 MEMORY
 {
-  FLASH (rx)      				: ORIGIN = 0x08000000, LENGTH = 512K
+  FLASH (rx)      				: ORIGIN = 0x8000000, LENGTH = 0x8005100 - 0x8000000
   RAM (xrw)       				: ORIGIN = 0x20000000, LENGTH = 80K-16
   BOOTLOADER_DATA_EXCHANGE (rwx): ORIGIN = 0x20013FF0, LENGTH = 16
   MEMORY_B1 (rx)  				: ORIGIN = 0x60000000, LENGTH = 0K
@@ -49,6 +57,8 @@ MEMORY
 
 /* Highest address of the user mode stack */
 _estack = ORIGIN(RAM) + LENGTH(RAM)-4;    /* end of 80K RAM */
+__bootloader_flash_end = ORIGIN(FLASH) + LENGTH(FLASH);  
+
 
 /* Define output sections */
 SECTIONS

@@ -154,7 +154,7 @@ void MainWindow::loadUIDeviceInfo() {
 
         ui->lblMCU_devid->setText(bootloader.remoteDeviceInfo.getMCU_DeviceIDString() + " " + bootloader.remoteDeviceInfo.getDeviceCategorieString());
         ui->lblMCU_avSize->setText(QString::number(bootloader.remoteDeviceInfo.mcu_descriptor.availFlashSize / 1024) + "kb");
-        ui->lblMCU_entryPoint->setText(bootloader.remoteDeviceInfo.getMCU_EntryPointString());
+        ui->lblMCU_entryPoint->setText(bootloader.remoteDeviceInfo.getMCU_MinimalEntryPointString());
         ui->lblMCU_fsize->setText(QString::number(bootloader.remoteDeviceInfo.mcu_descriptor.flashsize / 1024) + "kB");
         ui->lblMCU_guid->setText(bootloader.remoteDeviceInfo.getMCU_UniqueIDString(4));
         if (bootloader.remoteDeviceInfo.mcu_descriptor.cryptoRequired) {

@@ -151,6 +151,11 @@ int main(void) {
             break;
     }
 
+    bool application_stack_address_not_plausible = !portFlashCheckForApplicationStackAddressPlausibility();
+    if (application_stack_address_not_plausible) {
+        blJumpMode = blm_direct_into_bootloader_mode;
+    }
+
     if (preprogrammed_bootmode == boot_mode_firmware_update) {
         blJumpMode = blm_direct_into_bootloader_mode;
     }
@@ -189,8 +194,11 @@ int main(void) {
 
     if (programmerQuickVerify() == crystalBool_Fail) {
         printf("application Checksum verify fail\n");
+    } else {
+        if (application_stack_address_not_plausible) {
+            printf("application Stack position not prepared for shared memory. fail\n");
+        }
     }
-
     rpc_receiver_init();
     uint32_t startSysTick = sysTick_ms;
     while (1) {

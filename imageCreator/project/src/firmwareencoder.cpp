@@ -1,5 +1,7 @@
 #include "firmwareencoder.h"
 #include "hexfile.h"
+#include <QMessageBox>
+#include <QFileInfo>
 #include <QDebug>
 #include <iostream>
 #include <fstream>
@@ -109,30 +111,48 @@ bool FirmwareImageContainer::load_plain_image() {
     return true;
 }
 
+QString replace_name_placeholders(QString str, const FirmwareMetaData &firmware_meta_data) {
+    if (str.contains("%GITHASH%")) {
+        QString githash = QString::number(firmware_meta_data.firmware_githash, 16).toUpper();
+        str.replace("%GITHASH%", githash);
+    }
+    return str;
+}
 bool FirmwareImageContainer::saveImage() {
-    bool result = fwImage.save_compiled_image(imageCreatorSettings.target_file_name_application_image_absolute);
     const auto &firmware_meta_data = fwImage.get_firmware_meta_data();
+    bool result =
+        fwImage.save_compiled_image(replace_name_placeholders(imageCreatorSettings.target_file_name_application_image_absolute, firmware_meta_data));
 
-    HexFile hexfile;
-    hexfile.append_hex_file(imageCreatorSettings.hex_file_name_bootloader_absolute);
-    QByteArray descriptor_binary = firmware_meta_data.compile_firmware_descriptor_binary(fwImage.sha256);
-    hexfile.overwrite_binary(descriptor_binary, firmware_meta_data.address_firmware_descriptor_in_bootloader);
-    hexfile.append_hex_file(imageCreatorSettings.hex_file_name_application_absolute);
-    QStringList bundled_hex_file = hexfile.get_hex_file();
+    if (imageCreatorSettings.create_bundle_image_wanted) {
 
-    QFile file_hex("out.hex");
-    if (file_hex.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&file_hex);
-        for (const auto &s : bundled_hex_file) {
-            out << s << "\n";
+        HexFile hexfile;
+        hexfile.append_hex_file(imageCreatorSettings.hex_file_name_bootloader_absolute);
+        QByteArray descriptor_binary = firmware_meta_data.compile_firmware_descriptor_binary(fwImage.sha256);
+        hexfile.overwrite_binary(descriptor_binary, firmware_meta_data.address_firmware_descriptor_in_bootloader);
+        hexfile.append_hex_file(imageCreatorSettings.hex_file_name_application_absolute);
+        QStringList bundled_hex_file = hexfile.get_hex_file();
+
+        QString bundle_path = imageCreatorSettings.target_file_name_bundle_image_absolute;
+        bundle_path = replace_name_placeholders(bundle_path, firmware_meta_data);
+        QString bundle_path_suffix = QFileInfo(bundle_path).suffix();
+        if (bundle_path_suffix == "hex") {
+            QFile file_hex(bundle_path);
+            if (file_hex.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                QTextStream out(&file_hex);
+                for (const auto &s : bundled_hex_file) {
+                    out << s << "\n";
+                }
+                file_hex.close();
+            }
+        } else if (bundle_path_suffix == "bin") {
+            QFile file_bin(bundle_path);
+            if (file_bin.open(QIODevice::WriteOnly)) {
+                file_bin.write(hexfile.get_binary());
+                file_bin.close();
+            }
+        } else {
+            QMessageBox::critical(nullptr, "Bundle target filename", "The file name suffix for the firmware bundle must be either '.hex' or '.bin'");
         }
-        file_hex.close();
     }
-    QFile file_bin("out.bin");
-    if (file_bin.open(QIODevice::WriteOnly)) {
-        file_bin.write(hexfile.get_binary());
-        file_bin.close();
-    }
-
     return result;
 }
