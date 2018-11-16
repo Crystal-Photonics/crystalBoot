@@ -13,30 +13,35 @@
 #include "rpc_transmission/server/app/qt2mcu.h"
 
 #define CHECKSUM_SIZE 32
-typedef struct{
-	firmware_descriptor_t firmwareDescriptor;
+typedef struct {
+    firmware_descriptor_t firmwareDescriptor;
 
-	bool checksumVerified;
-	bool checksumVerifiedByCrypto;
-	crystalBoolCrypto_t usedCrypto;
+    bool checksumVerified;
+    bool checksumVerifiedByCrypto;
+    crystalBoolCrypto_t usedCrypto;
 
-	uint8_t sha256[CHECKSUM_SIZE];
+    uint8_t sha256[CHECKSUM_SIZE];
 
-}firmware_meta_data_t;
+} firmware_meta_data_t;
 
-typedef struct{
-	uint16_t crc16OfMetaData;
-	firmware_meta_data_t d;
-}firmware_meta_t;
-
-
+typedef struct {
+    uint16_t crc16OfMetaData;
+    firmware_meta_data_t d;
+} firmware_meta_t;
 
 void programmer_init();
 crystalBoolResult_t programmerErase(void);
-crystalBoolResult_t programmerEraseEEPROM(void);
+crystalBoolResult_t programmerEEPROMErase(void);
+crystalBoolResult_t programmerEEPROMInitTransfer();
+crystalBoolResult_t programmerEEPROMVerify(uint16_t crc16);
+crystalBoolResult_t programmerEEPROMGetSize(uint16_t size_bytes_out[1]);
+crystalBoolResult_t programmerEEPROMRead(uint8_t data_in[128], uint8_t size);
+crystalBoolResult_t programmerEEPROMWrite(uint8_t data_out[128], uint8_t size);
+
 crystalBoolResult_t programmerVerify(void);
 crystalBoolResult_t programmerQuickVerify(void);
-crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor,  uint8_t sha256[32], uint8_t aes128_iv[16], const crystalBoolCrypto_t crypto );
+crystalBoolResult_t programmerInitFirmwareTransfer(firmware_descriptor_t *firmwareDescriptor, uint8_t sha256[32], uint8_t aes128_iv[16],
+                                                   const crystalBoolCrypto_t crypto);
 crystalBoolResult_t programmerWriteBlock(uint8_t *data, size_t size);
 crystalBoolResult_t programmerReadBlock(uint8_t *data, size_t size);
 
@@ -45,9 +50,8 @@ uint32_t programmerGetApplicationEntryPoint();
 void programmerRunApplication(void);
 void programmerIncrementAESReInitWaitTime_s(void);
 
-
-firmware_descriptor_t programmerGetFirmwareDescriptor( );
-mcu_descriptor_t programmerGetMCUDescriptor( );
+firmware_descriptor_t programmerGetFirmwareDescriptor();
+mcu_descriptor_t programmerGetMCUDescriptor();
 void programmerGetGUID(uint8_t guid[12]);
 
 #endif /* MCU_INCLUDE_PROGRAMMER_H_ */

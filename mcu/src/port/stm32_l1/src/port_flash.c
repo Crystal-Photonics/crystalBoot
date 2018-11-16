@@ -13,6 +13,8 @@
 #include "main.h"
 #include "port_chip.h"
 #include "programmer.h"
+#include "channel_codec/crc16.h"
+#include "port_bootloader_app_data_exchange.h"
 
 typedef void (*pFunction)(void);
 
@@ -276,8 +278,6 @@ uint32_t FLASH_PagesMask(__IO uint32_t Size)
 }
 #endif
 
-#if 1
-// static __RAM_FUNC
 static bool portFlashEraseFlash_(uint32_t startAddress, uint32_t size) {
     /*
      * This function falls into a sort of lowpower mode when running under Debugger(segger jlink) as soon as it reaches the second
@@ -298,7 +298,6 @@ static bool portFlashEraseFlash_(uint32_t startAddress, uint32_t size) {
     if (startAddress + size > FLASH_END_ADDR) { // buffer exceeds flashsize
         return false;
     }
-#if 1
     FLASH_Unlock();
     FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_SIZERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_OPTVERRUSR);
 
@@ -335,7 +334,6 @@ static bool portFlashEraseFlash_(uint32_t startAddress, uint32_t size) {
     }
 
     FLASH_Lock();
-#endif
     if (MemoryProgramOK) {
         SET_LED_BLUE();
         printf("erase ok\n");
@@ -347,9 +345,7 @@ static bool portFlashEraseFlash_(uint32_t startAddress, uint32_t size) {
 
 static bool portFlashEraseFlash(uint32_t startAddress, uint32_t size) {
     return portFlashEraseFlash_(startAddress, size);
-    // return true;
 }
-#endif
 
 bool portFlashSaveFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size) {
     bool result;
@@ -473,7 +469,19 @@ bool portFlashEraseApplication() {
     return portFlashEraseFlash(MINIMAL_APPLICATION_ADDRESS, FLASH_END_ADDR - MINIMAL_APPLICATION_ADDRESS);
 }
 
-bool portFlashEraseEEPROM() {
+uint32_t portEEPROMGetStartIndex() {
+    return DATA_EEPROM_START_ADDR;
+}
+
+uint32_t portEEPROMGetSize() {
+    return DATA_EEPROM_END_ADDR - DATA_EEPROM_START_ADDR + 1;
+}
+
+uint32_t portEEPROMGetEndAddress() {
+    return DATA_EEPROM_END_ADDR;
+}
+
+bool portEEPROMErase() {
     FLASH_Status result = FLASH_BUSY;
     DATA_EEPROM_Unlock();
     for (uint32_t address = DATA_EEPROM_START_ADDR; address < DATA_EEPROM_END_ADDR; address += 4) {
@@ -484,6 +492,53 @@ bool portFlashEraseEEPROM() {
     }
     DATA_EEPROM_Lock();
     return result == FLASH_COMPLETE;
+}
+
+bool portEEPROMWrite(uint16_t address, uint8_t *buffer, uint16_t size) {
+    bool result = true;
+    // someone produces at some point a writeprotection error which is never cleared
+    // so we have to clear it now
+
+    FLASH_ClearFlag(FLASH_FLAG_WRPERR | FLASH_FLAG_OPTVERR | FLASH_FLAG_PGAERR);
+    DATA_EEPROM_Unlock();
+    uint32_t hw_start_address = DATA_EEPROM_START_ADDR + (uint32_t)address;
+
+    //  printf("Writing %" PRIu16 " bytes to eeprom @ %" PRIx32 "\n", size, hw_start_address);
+    for (uint16_t i = 0; i < size; i++) {
+        uint32_t hw_address = hw_start_address + (uint32_t)i;
+        if (!IS_FLASH_DATA_ADDRESS(hw_address)) {
+            printf("EEPROM Write @%" PRId32 ": OutOfRange\n", hw_address);
+            result = false;
+            break;
+        }
+        // since we dont use the fastbyte program we dont need to erase
+        FLASH_Status status = DATA_EEPROM_ProgramByte((uint32_t)hw_address, (uint32_t)(buffer[i]));
+        if (status != FLASH_COMPLETE) {
+            printf("EEPROM Write err @%" PRId32 ": status: %d\n", hw_address, status);
+            result = false;
+            break;
+        }
+    }
+    DATA_EEPROM_Lock();
+    return result;
+}
+
+bool portEEPROMRead(uint16_t address, uint8_t *buffer, uint16_t size) {
+    if (address + size > DATA_EEPROM_END_ADDR) {
+        printf("EEPROM read adr(%d)+size(%d) > %d\n", address, size, DATA_EEPROM_END_ADDR);
+        return false;
+    }
+
+    for (uint16_t i = 0; i < size; i++) {
+        uint32_t hw_address = DATA_EEPROM_START_ADDR + address + i;
+        if (!IS_FLASH_DATA_ADDRESS(hw_address)) {
+            printf("EEPROM read @%" PRId32 ": OutOfRange\n", hw_address);
+            return false;
+        }
+        buffer[i] = *((uint8_t *)(hw_address));
+        // buffer[i] = i;
+    }
+    return true;
 }
 
 bool portFlashVerifyAgainstBuffer(const uint32_t startAddress, uint8_t *buffer, const size_t size) {
@@ -535,8 +590,8 @@ void portFlashRunApplicationAfterReset() {
     for (int i = 0; i < 10000; i++) {
         __asm__("NOP");
     }
-    port_programDirectApplicationLaunch();
-    NVIC_SystemReset();
+    port_dataex_set_bootmode_app_launch_after_reset();
+    port_ResetMCU();
 }
 
 void portFlashRunApplication() {

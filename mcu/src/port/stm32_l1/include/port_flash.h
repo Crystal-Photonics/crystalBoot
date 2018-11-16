@@ -65,7 +65,15 @@ void GetInputString(uint8_t *buffP);
 void FLASH_DisableWriteProtectionPages(void);
 
 bool portFlashEraseApplication();
-bool portFlashEraseEEPROM();
+bool portEEPROMErase();
+
+uint32_t portEEPROMGetStartIndex();
+uint32_t portEEPROMGetSize();
+uint32_t portEEPROMGetEndAddress();
+
+bool portEEPROMRead(uint16_t address, uint8_t *buffer, uint16_t size);
+bool portEEPROMWrite(uint16_t address, uint8_t *buffer, uint16_t size);
+
 bool portFlashSaveFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size);
 bool portFlashReadFirmwareDescriptorBuffer(uint8_t *buffer, const size_t size);
 bool portFlashWrite(const uint32_t startAddress, uint8_t *buffer, const uint32_t size);

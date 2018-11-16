@@ -375,6 +375,10 @@ void MainWindow::recalcUIState() {
                 ui->actionTransfer->setEnabled(false);
                 ui->actionTransfer_2->setEnabled(false);
                 ui->actionErase_EEPROM->setEnabled(false);
+                ui->actionRead_EEPROM_into_file->setEnabled(false);
+                ui->actionWrite_EEPROM_from_file->setEnabled(false);
+                ui->actionVerify_EEPROM->setEnabled(false);
+                ui->actionErase_Flash->setEnabled(false);
                 break;
             case ConnectionState::Connected:
                 statusBar()->showMessage("connected");
@@ -386,6 +390,10 @@ void MainWindow::recalcUIState() {
                 ui->actionTransfer->setEnabled(true);
                 ui->actionTransfer_2->setEnabled(true);
                 ui->actionErase_EEPROM->setEnabled(true);
+                ui->actionRead_EEPROM_into_file->setEnabled(true);
+                ui->actionWrite_EEPROM_from_file->setEnabled(true);
+                ui->actionVerify_EEPROM->setEnabled(true);
+                ui->actionErase_Flash->setEnabled(true);
                 break;
             case ConnectionState::Connecting:
                 statusBar()->showMessage("connecting..");
@@ -397,6 +405,10 @@ void MainWindow::recalcUIState() {
                 ui->actionTransfer->setEnabled(false);
                 ui->actionTransfer_2->setEnabled(false);
                 ui->actionErase_EEPROM->setEnabled(false);
+                ui->actionRead_EEPROM_into_file->setEnabled(false);
+                ui->actionWrite_EEPROM_from_file->setEnabled(false);
+                ui->actionVerify_EEPROM->setEnabled(false);
+                ui->actionErase_Flash->setEnabled(false);
                 break;
             case ConnectionState::none:
                 break;
@@ -412,6 +424,10 @@ void MainWindow::recalcUIState() {
         ui->actionTransfer->setEnabled(false);
         ui->actionTransfer_2->setEnabled(false);
         ui->actionErase_EEPROM->setEnabled(false);
+        ui->actionRead_EEPROM_into_file->setEnabled(false);
+        ui->actionWrite_EEPROM_from_file->setEnabled(false);
+        ui->actionVerify_EEPROM->setEnabled(false);
+        ui->actionErase_Flash->setEnabled(false);
     }
 }
 
@@ -523,4 +539,34 @@ void MainWindow::on_actionErase_EEPROM_triggered() {
 
 void MainWindow::on_actionErase_Flash_triggered() {
     bootloader.eraseFlash();
+}
+
+void MainWindow::on_actionRead_EEPROM_into_file_triggered() {
+    QFileDialog dialog(this);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setNameFilter(tr("EEPROM file (*.bin)"));
+    if (dialog.exec()) {
+        QString filename = dialog.selectedFiles()[0];
+        bootloader.readEEPROMToFile(filename);
+    }
+}
+
+void MainWindow::on_actionWrite_EEPROM_from_file_triggered() {
+    QFileDialog dialog(this);
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    dialog.setNameFilter(tr("EEPROM file (*.bin)"));
+    if (dialog.exec()) {
+        QString filename = dialog.selectedFiles()[0];
+        bootloader.writeEEPROMFromFile(filename);
+    }
+}
+
+void MainWindow::on_actionVerify_EEPROM_triggered() {
+    QFileDialog dialog(this);
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    dialog.setNameFilter(tr("EEPROM file (*.bin)"));
+    if (dialog.exec()) {
+        QString filename = dialog.selectedFiles()[0];
+        bootloader.verifyEEPROMFromFile(filename);
+    }
 }

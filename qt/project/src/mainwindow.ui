@@ -611,8 +611,12 @@
     <addaction name="actionTransfer_2"/>
     <addaction name="actionRun_Application"/>
     <addaction name="actionGet_Chip_Info"/>
+    <addaction name="actionRead_EEPROM_into_file"/>
+    <addaction name="actionWrite_EEPROM_from_file"/>
+    <addaction name="actionVerify_EEPROM"/>
     <addaction name="actionErase_EEPROM"/>
     <addaction name="actionErase_Flash"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -717,6 +721,21 @@
   <action name="actionErase_Flash">
    <property name="text">
     <string>Erase Flash</string>
+   </property>
+  </action>
+  <action name="actionRead_EEPROM_into_file">
+   <property name="text">
+    <string>Read EEPROM into file</string>
+   </property>
+  </action>
+  <action name="actionWrite_EEPROM_from_file">
+   <property name="text">
+    <string>Write EEPROM from file</string>
+   </property>
+  </action>
+  <action name="actionVerify_EEPROM">
+   <property name="text">
+    <string>Verify EEPROM</string>
    </property>
   </action>
  </widget>

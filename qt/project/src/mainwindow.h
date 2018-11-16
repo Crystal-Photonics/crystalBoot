@@ -72,6 +72,12 @@ class MainWindow : public QMainWindow {
 
     void on_actionErase_Flash_triggered();
 
+    void on_actionRead_EEPROM_into_file_triggered();
+
+    void on_actionWrite_EEPROM_from_file_triggered();
+
+    void on_actionVerify_EEPROM_triggered();
+
   private:
     Ui::MainWindow *ui;
 

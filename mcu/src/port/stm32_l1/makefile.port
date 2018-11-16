@@ -26,6 +26,7 @@ PORT_LDFLAGS += -T$(PORT_DIR)/STM32L152RE_FLASH.ld
 PORT_SOURCES += $(PORT_DIR)/src/port_flash.c
 PORT_SOURCES += $(PORT_DIR)/src/port_chip.c
 PORT_SOURCES += $(PORT_DIR)/src/port_serial.c
+PORT_SOURCES += $(PORT_DIR)/src/port_bootloader_app_data_exchange.c
 
 PORT_SOURCES += $(PORT_DIR)/src/stm32l1xx_it.c
 PORT_SOURCES += $(PORT_DIR)/src/system_stm32l1xx.c
@@ -65,7 +66,7 @@ PORT_SOURCES += $(CMSIS)/Device/ST/STM32L1xx/Source/Templates/gcc_ride7/startup_
 PORT_CPPFLAGS += -I$(CMSIS)/Include
 PORT_CPPFLAGS += -I$(CMSIS)/Device/ST/STM32L1xx/Include/
 PORT_CPPFLAGS += -Isrc/port/stm32_l1/libraries/STM32L1xx_StdPeriph_Lib_V1.3.1/Libraries/STM32L1xx_StdPeriph_Driver/inc/
-PORT_CPPFLAGS += -Isrc/port/stm32_l1/include
+PORT_CPPFLAGS += -Isrc/port/stm32_l1/include/
 PORT_CPPFLAGS += -Isrc/port/stm32_l1/fifo/include/
 
 

@@ -77,12 +77,9 @@ bool SerialThread::isOpen() {
 }
 
 RPC_RESULT SerialThread::rpcWriteFirmwareBlock(uint8_t *data, size_t size) {
-
     RPC_RESULT result;
     assert(size == 128);
-
     crystalBoolResult_t return_value = crystalBool_OK;
-
     result = mcuWriteFirmwareBlock(&return_value, data);
     if (return_value == crystalBool_Fail) {
         result = RPC_FAILURE;
@@ -110,9 +107,7 @@ RPC_RESULT SerialThread::rpcWriteFirmwareBlock(uint8_t *data, size_t size) {
 RPC_RESULT SerialThread::rpcReadFirmwareBlock(uint8_t *data, size_t size) {
     RPC_RESULT result;
     assert(size == 128);
-
     crystalBoolResult_t return_value = crystalBool_OK;
-
     result = mcuReadFirmwareBlock(&return_value, data);
     if (return_value == crystalBool_Fail) {
         result = RPC_FAILURE;
@@ -167,12 +162,144 @@ RPC_RESULT SerialThread::rpcVerifyChecksum() {
     return result;
 }
 
-RPC_RESULT SerialThread::rpcEraseEEPROM() {
+RPC_RESULT SerialThread::rpcEEPROMInitTransfer() {
+    RPC_RESULT result;
+    crystalBoolResult_t return_value = crystalBool_OK;
+    result = mcuEEPROMInitTransfer(&return_value);
+    if (return_value == crystalBool_Fail) {
+        result = RPC_FAILURE;
+    }
+    QString resultstr;
+    switch (result) {
+        case RPC_SUCCESS:
+            resultstr = "RPC_SUCCESS";
+            break;
+        case RPC_FAILURE:
+            resultstr = "RPC_FAILURE";
+            break;
+        case RPC_COMMAND_UNKNOWN:
+            resultstr = "RPC_COMMAND_UNKNOWN";
+            break;
+        case RPC_COMMAND_INCOMPLETE:
+            resultstr = "RPC_COMMAND_INCOMPLETE";
+            break;
+    }
+    //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
+RPC_RESULT SerialThread::rpcEEPROMGetSize(uint16_t *size) {
+    RPC_RESULT result;
+    crystalBoolResult_t return_value = crystalBool_OK;
+    result = mcuEEPROMGetSize(&return_value, size);
+    if (return_value == crystalBool_Fail) {
+        result = RPC_FAILURE;
+    }
+    QString resultstr;
+    switch (result) {
+        case RPC_SUCCESS:
+            resultstr = "RPC_SUCCESS";
+            break;
+        case RPC_FAILURE:
+            resultstr = "RPC_FAILURE";
+            break;
+        case RPC_COMMAND_UNKNOWN:
+            resultstr = "RPC_COMMAND_UNKNOWN";
+            break;
+        case RPC_COMMAND_INCOMPLETE:
+            resultstr = "RPC_COMMAND_INCOMPLETE";
+            break;
+    }
+    //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
+RPC_RESULT SerialThread::rpcEEPROMWriteBlock(uint8_t *data, uint8_t size) {
+    RPC_RESULT result;
+    assert(size <= 128);
+    crystalBoolResult_t return_value = crystalBool_OK;
+    result = mcuEEPROMWrite(&return_value, data, size);
+    if (return_value == crystalBool_Fail) {
+        result = RPC_FAILURE;
+    }
+    QString resultstr;
+    switch (result) {
+        case RPC_SUCCESS:
+            resultstr = "RPC_SUCCESS";
+            break;
+        case RPC_FAILURE:
+            resultstr = "RPC_FAILURE";
+            break;
+        case RPC_COMMAND_UNKNOWN:
+            resultstr = "RPC_COMMAND_UNKNOWN";
+            break;
+        case RPC_COMMAND_INCOMPLETE:
+            resultstr = "RPC_COMMAND_INCOMPLETE";
+            break;
+    }
+    //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
+RPC_RESULT SerialThread::rpcEEPROMReadBlock(uint8_t *data, uint8_t size) {
+    RPC_RESULT result;
+    assert(size <= 128);
+    crystalBoolResult_t return_value = crystalBool_OK;
+    result = mcuEEPROMRead(&return_value, data, size);
+    if (return_value == crystalBool_Fail) {
+        result = RPC_FAILURE;
+    }
+    QString resultstr;
+    switch (result) {
+        case RPC_SUCCESS:
+            resultstr = "RPC_SUCCESS";
+            break;
+        case RPC_FAILURE:
+            resultstr = "RPC_FAILURE";
+            break;
+        case RPC_COMMAND_UNKNOWN:
+            resultstr = "RPC_COMMAND_UNKNOWN";
+            break;
+        case RPC_COMMAND_INCOMPLETE:
+            resultstr = "RPC_COMMAND_INCOMPLETE";
+            break;
+    }
+    //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
+RPC_RESULT SerialThread::rpcEEPROMVerify(uint16_t crc16) {
+    RPC_RESULT result;
+    crystalBoolResult_t return_value = crystalBool_OK;
+    result = mcuEEPROMVerify(&return_value, crc16);
+    if (return_value == crystalBool_Fail) {
+        result = RPC_FAILURE;
+    }
+    QString resultstr;
+    switch (result) {
+        case RPC_SUCCESS:
+            resultstr = "RPC_SUCCESS";
+            break;
+        case RPC_FAILURE:
+            resultstr = "RPC_FAILURE";
+            break;
+        case RPC_COMMAND_UNKNOWN:
+            resultstr = "RPC_COMMAND_UNKNOWN";
+            break;
+        case RPC_COMMAND_INCOMPLETE:
+            resultstr = "RPC_COMMAND_INCOMPLETE";
+            break;
+    }
+    //  qDebug() << "sending data return: "  << " with : "<< resultstr;
+    return result;
+}
+
+RPC_RESULT SerialThread::rpcEEPROMErase() {
     RPC_RESULT result;
 
     crystalBoolResult_t return_value = crystalBool_OK;
 
-    result = mcuEraseEEPROM(&return_value);
+    result = mcuEEPROMErase(&return_value);
     if (return_value == crystalBool_Fail) {
         result = RPC_FAILURE;
     }

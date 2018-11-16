@@ -1,8 +1,22 @@
 #include "bootloader.h"
 #include <QMessageBox>
 #include <QDebug>
+#include <QFile>
+#include <assert.h>
 
 channel_codec_instance_t channel_codec_instance[channel_codec_comport_COUNT];
+
+static void crc16_online(uint8_t data, uint16_t *crc16) {
+    uint8_t x;
+
+    x = *crc16 >> 8 ^ data;
+    x ^= x >> 4;
+    *crc16 = (*crc16 << 8) ^ ((uint16_t)(x << 12)) ^ ((uint16_t)(x << 5)) ^ ((uint16_t)x);
+}
+
+static void crc16_online_init(uint16_t *crc16) {
+    *crc16 = 0xFFFF;
+}
 
 void RPC_setTimeout(uint32_t timeout_ms);
 uint32_t RPC_getTimeout(void);
@@ -15,6 +29,22 @@ Bootloader::Bootloader(QString settingsFileName, QObject *parent) : QObject(pare
 
 Bootloader::~Bootloader() {
     delete serialThread;
+}
+
+static QString RPC_RESULT_to_string(RPC_RESULT rpc_result) {
+    switch (rpc_result) {
+        case RPC_SUCCESS:
+            return "RPC_SUCCESS";
+        case RPC_FAILURE:
+            return "RPC_FAILURE";
+
+        case RPC_COMMAND_UNKNOWN:
+            return "RPC_COMMAND_UNKNOWN";
+
+        case RPC_COMMAND_INCOMPLETE:
+            return "RPC_COMMAND_INCOMPLETE";
+    }
+    return "";
 }
 
 void Bootloader::tryConnect() {
@@ -227,21 +257,7 @@ void Bootloader::sendfirmware() {
 #endif
         flashResultDocumentation.addActionResult("Transfer", result);
         if ((result != RPC_SUCCESS) || fail) {
-            QString resultstr;
-            switch (result) {
-                case RPC_SUCCESS:
-                    resultstr = "RPC_SUCCESS";
-                    break;
-                case RPC_FAILURE:
-                    resultstr = "RPC_FAILURE";
-                    break;
-                case RPC_COMMAND_UNKNOWN:
-                    resultstr = "RPC_COMMAND_UNKNOWN";
-                    break;
-                case RPC_COMMAND_INCOMPLETE:
-                    resultstr = "RPC_COMMAND_INCOMPLETE";
-                    break;
-            }
+            QString resultstr = RPC_RESULT_to_string(result);
             log(resultstr);
         } else {
             log("tranfer ok. " + QString::number(runtime.elapsed() / 1000.0) + " seconds needed. In Total: " +
@@ -269,6 +285,182 @@ void Bootloader::sendfirmware() {
     emit onFinished();
 }
 
+void Bootloader::readEEPROMToFile(QString file_name) {
+    QFile file_bin(file_name);
+    if (file_bin.open(QIODevice::WriteOnly)) {
+        emit onProgress(0);
+#if 0
+        RPC_RESULT rpcEEPROMWriteBlock(uint8_t *data, uint8_t size);
+        RPC_RESULT rpcEEPROMReadBlock(uint8_t *data, uint8_t size);
+        RPC_RESULT rpcEEPROMGetSize(uint16_t *size);
+        RPC_RESULT rpcEEPROMInitTransfer();
+        RPC_RESULT rpcEEPROMVerify(uint16_t crc16);
+#endif
+        log("Reading eeprom to file..");
+        uint16_t eeprom_size = 0;
+        RPC_RESULT result;
+        result = serialThread->rpcEEPROMGetSize(&eeprom_size);
+        if (result != RPC_SUCCESS) {
+            QString resultstr = RPC_RESULT_to_string(result);
+            // qDebug() << "readEEPROMToFile, rpcEEPROMGetSize " << resultstr;
+            log("error: readEEPROMToFile, rpcEEPROMGetSize: " + resultstr);
+            emit onFinished();
+            return;
+        }
+        result = serialThread->rpcEEPROMInitTransfer();
+        if (result != RPC_SUCCESS) {
+            QString resultstr = RPC_RESULT_to_string(result);
+            log("error: readEEPROMToFile, rpcEEPROMInitTransfer: " + resultstr);
+            emit onFinished();
+            return;
+        }
+        uint32_t read_position = 0;
+        while (read_position < eeprom_size) {
+            uint8_t block_buffer[128] = {};
+            uint32_t block_size_32 = 128;
+            if (read_position + block_size_32 > eeprom_size) {
+                block_size_32 = eeprom_size - read_position;
+            }
+            assert(block_size_32 < 0x100); // RPC function has 8 bits for size
+            uint8_t block_size_8 = block_size_32;
+            result = serialThread->rpcEEPROMReadBlock(block_buffer, block_size_8);
+            if (result != RPC_SUCCESS) {
+                QString resultstr = RPC_RESULT_to_string(result);
+                log("error: readEEPROMToFile, rpcEEPROMReadBlock: " + resultstr);
+                emit onFinished();
+                return;
+            }
+            file_bin.write((char *)block_buffer, block_size_32);
+            read_position += block_size_32;
+            {
+                static qint64 progress_old = 100;
+                qint64 progress = 100 * read_position;
+                progress /= eeprom_size;
+                if (progress_old != progress) {
+                    log("progress: " + QString::number(progress) + "%");
+                    emit onProgress(progress);
+                }
+                progress_old = progress;
+            }
+        }
+        log("Reading eeprom done.");
+        file_bin.close();
+    }
+    emit onFinished();
+}
+
+void Bootloader::writeEEPROMFromFile(QString file_name) {
+
+    QFile file_bin(file_name);
+    if (file_bin.open(QIODevice::ReadOnly)) {
+        emit onProgress(0);
+        log("Writing eeprom from file..");
+        uint16_t eeprom_size = 0;
+        RPC_RESULT result;
+        result = serialThread->rpcEEPROMGetSize(&eeprom_size);
+        if (result != RPC_SUCCESS) {
+            QString resultstr = RPC_RESULT_to_string(result);
+            log("error: writeEEPROMFromFile, rpcEEPROMGetSize: " + resultstr);
+            emit onFinished();
+            return;
+        }
+        result = serialThread->rpcEEPROMInitTransfer();
+        if (result != RPC_SUCCESS) {
+            QString resultstr = RPC_RESULT_to_string(result);
+            log("error: writeEEPROMFromFile, rpcEEPROMInitTransfer: " + resultstr);
+            emit onFinished();
+            return;
+        }
+        uint32_t write_position = 0;
+        while (write_position < eeprom_size) {
+            uint8_t block_buffer[128];
+            uint32_t block_size_32 = 128;
+            if (write_position + block_size_32 > eeprom_size) {
+                block_size_32 = eeprom_size - write_position;
+            }
+            block_size_32 = file_bin.read((char *)block_buffer, block_size_32);
+            if (block_size_32 == 0) {
+                break;
+            }
+
+            assert(block_size_32 < 0x100); // RPC function has 8 bits for size
+            uint8_t block_size_8 = block_size_32;
+            result = serialThread->rpcEEPROMWriteBlock(block_buffer, block_size_8);
+            if (result != RPC_SUCCESS) {
+                QString resultstr = RPC_RESULT_to_string(result);
+                log("error: writeEEPROMFromFile, rpcEEPROMWriteBlock: " + resultstr);
+                emit onFinished();
+                return;
+            }
+            write_position += block_size_32;
+            {
+                static qint64 progress_old = 100;
+                qint64 progress = 100 * write_position;
+                progress /= eeprom_size;
+                if (progress_old != progress) {
+                    log("progress: " + QString::number(progress) + "%");
+                    emit onProgress(progress);
+                }
+                progress_old = progress;
+            }
+        }
+        log("Writing eeprom done.");
+        file_bin.close();
+    }
+    emit onFinished();
+}
+
+bool Bootloader::verifyEEPROMFromFile(QString file_name) {
+    QFile file_bin(file_name);
+    if (file_bin.open(QIODevice::ReadOnly)) {
+        log("Verifing eeprom..");
+        uint16_t eeprom_size = 0;
+        uint16_t crc16 = 0;
+        crc16_online_init(&crc16);
+        RPC_RESULT result;
+        result = serialThread->rpcEEPROMGetSize(&eeprom_size);
+
+        if (result != RPC_SUCCESS) {
+            QString resultstr = RPC_RESULT_to_string(result);
+            log("error: verifyEEPROMFromFile, rpcEEPROMGetSize: " + resultstr);
+            log("Verify EEPROM failed.");
+            return false;
+        }
+
+        if (file_bin.size() != eeprom_size) {
+            log("verifyEEPROMFromFile, siz emissmatch, file:" + QString::number(file_bin.size()) + ", eeprom:" + QString::number(eeprom_size));
+            log("Verify EEPROM failed.");
+            return false;
+        }
+        uint32_t write_position = 0;
+        while (write_position < eeprom_size) {
+            uint8_t block_buffer[128];
+            uint32_t block_size_32 = 128;
+            if (write_position + block_size_32 > eeprom_size) {
+                block_size_32 = eeprom_size - write_position;
+            }
+            block_size_32 = file_bin.read((char *)block_buffer, block_size_32);
+            if (block_size_32 == 0) {
+                break;
+            }
+            for (uint32_t i = 0; i < block_size_32; i++) {
+                crc16_online(block_buffer[i], &crc16);
+            }
+        }
+
+        result = serialThread->rpcEEPROMVerify(crc16);
+        if (result != RPC_SUCCESS) {
+            QString resultstr = RPC_RESULT_to_string(result);
+            log("error: verifyEEPROMFromFile, rpcEEPROMVerify: " + resultstr);
+            log("Verify EEPROM failed.");
+            return false;
+        }
+        file_bin.close();
+    }
+    log("Verify EEPROM ok.");
+    return true;
+}
+
 void Bootloader::eraseEEPROM() {
     RPC_RESULT result = RPC_SUCCESS;
     FlashResultDocumentation flashResultDocumentation;
@@ -282,7 +474,7 @@ void Bootloader::eraseEEPROM() {
 #if 1
     log("erasing eeprom..");
     RPC_setTimeout(20 * 1000);
-    result = serialThread->rpcEraseEEPROM();
+    result = serialThread->rpcEEPROMErase();
     flashResultDocumentation.addActionResult("Erase EEPROM", result);
     if (result != RPC_SUCCESS) {
         log("erasing eeprom fail");

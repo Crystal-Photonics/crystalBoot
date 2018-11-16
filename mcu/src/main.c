@@ -25,6 +25,7 @@
 #include "main.h"
 #include "port_flash.h"
 #include "port_serial.h"
+#include "port_bootloader_app_data_exchange.h"
 
 #include "rpc_receiver.h"
 #include "rpc_transmission/server/generated_general/RPC_TRANSMISSION_network.h"
@@ -116,19 +117,15 @@ bool testIfStartIntoProgrammingMode() {
     return true;
 }
 
-void mainEnterProgrammingMode() {
-    blJumpMode = blm_direct_into_bootloader_mode;
-}
-
 int main(void) {
 
     bool hardreset = true;
     blJumpMode = blm_timeout_waiting_till_communication;
-
+    port_dataex_set_bootloader_git_info();
     boardInit();
 
     resetReason_t resetReason = portTestResetSource();
-
+    bootloader_preprogrammed_boot_mode_t preprogrammed_bootmode = port_dataex_get_preprogrammed_bootmode();
     if (getEnterBootloaderKeyState()) {
         blJumpMode = blm_direct_into_bootloader_mode;
     }
@@ -138,7 +135,7 @@ int main(void) {
         case rer_powerOnReset:
             break;
         case rer_softwareReset:
-            if (port_isDirectApplicationLaunchProgrammed()) {
+            if (preprogrammed_bootmode == boot_mode_app_launch) {
                 blJumpMode = blm_direct_to_application;
                 if (getEnterBootloaderKeyState()) {
                     blJumpMode = blm_direct_into_bootloader_mode;
@@ -154,6 +151,9 @@ int main(void) {
             break;
     }
 
+    if (preprogrammed_bootmode == boot_mode_firmware_update) {
+        blJumpMode = blm_direct_into_bootloader_mode;
+    }
     programmer_init();
     if (programmerQuickVerify() == crystalBool_Fail) {
         blJumpMode = blm_direct_into_bootloader_mode;

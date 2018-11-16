@@ -30,20 +30,25 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-/* Highest address of the user mode stack */
-_estack = 0x20014000;    /* end of 80K RAM */
 
-/* Generate a link error if heap and stack don't fit into RAM */
+
+/* Generate a link error if heap and stack don't fit into RAM 
+ 
+  */
 _Min_Heap_Size = 0x200;      /* required amount of heap  */
 _Min_Stack_Size = 0x400; /* required amount of stack */
 
 /* Specify the memory areas */
 MEMORY
 {
-  FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 512K
-  RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 80K
-  MEMORY_B1 (rx)  : ORIGIN = 0x60000000, LENGTH = 0K
+  FLASH (rx)      				: ORIGIN = 0x08000000, LENGTH = 512K
+  RAM (xrw)       				: ORIGIN = 0x20000000, LENGTH = 80K-16
+  BOOTLOADER_DATA_EXCHANGE (rwx): ORIGIN = 0x20013FF0, LENGTH = 16
+  MEMORY_B1 (rx)  				: ORIGIN = 0x60000000, LENGTH = 0K
 }
+
+/* Highest address of the user mode stack */
+_estack = ORIGIN(RAM) + LENGTH(RAM)-4;    /* end of 80K RAM */
 
 /* Define output sections */
 SECTIONS
@@ -153,16 +158,6 @@ SECTIONS
     __bss_end__ = _ebss;
   } >RAM
 
-/*https://mcuoneclipse.com/2014/04/19/gnu-linker-can-you-not-initialize-my-variable/*/
-  /* Uninitialized data section */
-
-  .un_init (NOLOAD):
-  {
-  	. = ALIGN(4);
-    *(.un_init)
-    . = ALIGN(4);
-  } >RAM
-  
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :
   {
@@ -174,6 +169,17 @@ SECTIONS
     . = ALIGN(4);
   } >RAM
 
+  /*https://mcuoneclipse.com/2014/04/19/gnu-linker-can-you-not-initialize-my-variable/*/
+  /*https://mcuoneclipse.com/2014/04/19/gnu-linker-can-you-not-initialize-my-variable/*/
+    /* Uninitialized data section */
+    /* Define memory into the  BOOTLOADER_DATA_EXCHANGE section: */
+  .un_init (NOLOAD):
+  {
+    . = ALIGN(4);
+    KEEP(*(.un_init))
+    . = ALIGN(4);
+  } > BOOTLOADER_DATA_EXCHANGE
+  
   /* MEMORY_bank1 section, code must be located here explicitly            */
   /* Example: extern int foo(void) __attribute__ ((section (".mb1text"))); */
   .memory_b1_text :

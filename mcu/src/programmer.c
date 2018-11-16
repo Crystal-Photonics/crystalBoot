@@ -21,6 +21,12 @@ SHA256_CTX sha56_ctx;
 static uint32_t programmWritePointerAddress = 0;
 static uint32_t programmReadPointerAddress = 0;
 
+static uint32_t EEPROMWritePointerAddress = 0;
+static bool EEPROMWritePointerAddress_initialized = false;
+
+static uint32_t EEPROMReadPointerAddress = 0;
+static bool EEPROMReadPointerAddress_initialized = false;
+
 static uint8_t aes128_iv_buf[AES_128_IV_LENGTH];
 static uint8_t aes128_key_local[AES_128_IV_LENGTH];
 static uint8_t *pointerToAESkey;
@@ -101,9 +107,9 @@ crystalBoolResult_t programmerErase() {
 #endif
 }
 
-crystalBoolResult_t programmerEraseEEPROM() {
+crystalBoolResult_t programmerEEPROMErase() {
 #if 1
-    if (portFlashEraseEEPROM()) {
+    if (portEEPROMErase()) {
         return crystalBool_OK;
     } else {
         return crystalBool_Fail;
@@ -111,6 +117,75 @@ crystalBoolResult_t programmerEraseEEPROM() {
 #else
     return crystalBool_Fail;
 #endif
+}
+
+crystalBoolResult_t programmerEEPROMInitTransfer() {
+    EEPROMWritePointerAddress = portEEPROMGetStartIndex();
+    EEPROMReadPointerAddress = portEEPROMGetStartIndex();
+    EEPROMReadPointerAddress_initialized = true;
+    EEPROMWritePointerAddress_initialized = true;
+    return crystalBool_OK;
+}
+
+crystalBoolResult_t programmerEEPROMVerify(uint16_t crc16) {
+    uint16_t crc16_calc = 0;
+    crc16_online_init(&crc16_calc);
+    uint32_t eeprom_address = portEEPROMGetStartIndex();
+    const uint32_t eeprom_end_address = portEEPROMGetStartIndex() + portEEPROMGetSize();
+    uint8_t eeprom_buffer[8];
+    while (eeprom_address < eeprom_end_address) {
+        uint32_t size = sizeof(eeprom_buffer);
+        if (eeprom_address + size > eeprom_end_address) {
+            size = eeprom_end_address - eeprom_address;
+        }
+        portEEPROMRead(eeprom_address, eeprom_buffer, size);
+        eeprom_address += size;
+        for (uint8_t i = 0; i < size; i++) {
+            crc16_online(eeprom_buffer[i], &crc16_calc);
+        }
+    }
+
+    if (crc16_calc == crc16) {
+        return crystalBool_OK;
+    } else {
+        return crystalBool_Fail;
+    }
+}
+
+crystalBoolResult_t programmerEEPROMGetSize(uint16_t size_bytes_out[1]) {
+    size_bytes_out[0] = portEEPROMGetSize();
+    return crystalBool_OK;
+}
+crystalBoolResult_t programmerEEPROMRead(uint8_t data_in[128], uint8_t size) {
+    if (EEPROMReadPointerAddress_initialized == false) {
+        return crystalBool_Fail;
+    }
+
+    if (size > 128) {
+        return crystalBool_Fail;
+    }
+
+    if (!portEEPROMRead(EEPROMReadPointerAddress, data_in, size)) {
+        return crystalBool_Fail;
+    }
+    EEPROMReadPointerAddress += size;
+    return crystalBool_OK;
+}
+
+crystalBoolResult_t programmerEEPROMWrite(uint8_t data_out[128], uint8_t size) {
+    if (EEPROMWritePointerAddress_initialized == false) {
+        return crystalBool_Fail;
+    }
+
+    if (size > 128) {
+        return crystalBool_Fail;
+    }
+
+    if (!portEEPROMWrite(EEPROMWritePointerAddress, data_out, size)) {
+        return crystalBool_Fail;
+    }
+    EEPROMWritePointerAddress += size;
+    return crystalBool_OK;
 }
 
 crystalBoolResult_t programmerVerify(void) {

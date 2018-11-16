@@ -26,7 +26,11 @@ class Bootloader : public QObject {
 
     void disconnectComPort();
     void sendfirmware();
+    void readEEPROMToFile(QString file_name);
+    void writeEEPROMFromFile(QString file_name);
+    bool verifyEEPROMFromFile(QString file_name);
     void eraseEEPROM();
+
     RPC_RESULT eraseFlash();
     RPC_RESULT getDeviceInfo();
     void runApplication();

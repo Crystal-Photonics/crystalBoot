@@ -31,10 +31,12 @@ SOURCES += ../libs/rpc/src/server/app/rpc_service_qt.cpp
 SOURCES += $$PWD/../../../qt_common/imagecreatorsettings.cpp
 SOURCES += $$PWD/../../../qt_common/firmwareimage.cpp
 SOURCES += $$PWD/../../../qt_common/firmwaremetadata.cpp
+SOURCES += $$PWD/../../../qt_common/hexfile.cpp
 
 HEADERS += $$PWD/../../../qt_common/imagecreatorsettings.h
 HEADERS += $$PWD/../../../qt_common/firmwareimage.h
 HEADERS += $$PWD/../../../qt_common/firmwaremetadata.h
+HEADERS += $$PWD/../../../qt_common/hexfile.h
 
 HEADERS += mainwindow.h
 HEADERS += infodialog.h
