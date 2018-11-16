@@ -125,6 +125,11 @@ bool FirmwareImageContainer::saveImage() {
 
     if (imageCreatorSettings.create_bundle_image_wanted) {
 
+        if (imageCreatorSettings.crypto == ImageCreatorSettings::Crypto::AES128) {
+            QMessageBox::warning(nullptr, "Crypto OK?", "If the  bootloader's crypto support is disabled it would be possible to flash the bundle "
+                                                        "but the ctf-image will be unflashable via bootloader.\n"
+                                                        "Did you double check whether the crypto support is enabled in the bootloader?");
+        }
         HexFile hexfile;
         hexfile.append_hex_file(imageCreatorSettings.hex_file_name_bootloader_absolute);
         QByteArray descriptor_binary = firmware_meta_data.compile_firmware_descriptor_binary(fwImage.sha256);
