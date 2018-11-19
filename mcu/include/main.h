@@ -19,8 +19,7 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-
 extern uint32_t sysTick_ms;
-void mainEnterProgrammingMode(void);
+void main_enter_programming_mode(void);
 
 #endif /* MAIN_H_ */

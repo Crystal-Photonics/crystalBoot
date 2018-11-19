@@ -113,8 +113,8 @@ static void printResetReason_t(resetReason_t reason){
 }
 #endif
 
-bool testIfStartIntoProgrammingMode() {
-    return true;
+void main_enter_programming_mode() {
+    blJumpMode = blm_direct_into_bootloader_mode;
 }
 
 int main(void) {

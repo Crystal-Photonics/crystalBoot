@@ -94,6 +94,7 @@ device_descriptor_v1_t mcuGetDeviceDescriptor(void) {
 }
 
 void mcuEnterProgrammerMode(void) {
+    main_enter_programming_mode();
     // port_dataex_set_bootmode_firmware_update_after_reset();
     //  port_ResetMCU();
 }
