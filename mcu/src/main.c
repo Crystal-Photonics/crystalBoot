@@ -47,6 +47,10 @@ typedef enum { blm_none, blm_direct_into_bootloader_mode, blm_direct_to_applicat
 #error "please define this"
 #endif
 
+#if BOOTLOADER_WAITTIME_FOR_APP_BOOT_ms > BOOTLOADER_WAITTIME_FOR_REBOOT_AFTER_BOOTLOADER_MODE_IDLE_ms
+#error BOOTLOADER_WAITTIME_FOR_REBOOT_AFTER_BOOTLOADER_MODE_IDLE_ms should be greater than BOOTLOADER_WAITTIME_FOR_APP_BOOT_ms
+#endif
+
 uint32_t sysTick_ms;
 
 static volatile bootloaderJumpMode_t blJumpMode = blm_none;
@@ -120,7 +124,11 @@ void main_enter_programming_mode() {
 int main(void) {
 
     bool hardreset = true;
+#if BOOTLOADER_APP_STARTS_AFTER_POR_WITHOUT_WAITING
+    blJumpMode = blm_direct_to_application;
+#else
     blJumpMode = blm_timeout_waiting_till_communication;
+#endif
     port_dataex_set_bootloader_git_info();
     boardInit();
 
@@ -128,21 +136,19 @@ int main(void) {
     bootloader_preprogrammed_boot_mode_t preprogrammed_bootmode = port_dataex_get_preprogrammed_bootmode();
     port_dataex_clear_bootmode();
 
-    if (getEnterBootloaderKeyState()) {
-        blJumpMode = blm_direct_into_bootloader_mode;
-    }
+    const bool key_state_for_bootloader_mode = getEnterBootloaderKeyState();
 
     switch (resetReason) {
         case rer_none:
         case rer_resetPin:
         case rer_powerOnReset:
+#if BOOTLOADER_APP_STARTS_AFTER_POR_WITHOUT_WAITING
+            blJumpMode = blm_direct_to_application;
+#endif
             break;
         case rer_softwareReset:
             if (preprogrammed_bootmode == boot_mode_app_launch) {
                 blJumpMode = blm_direct_to_application;
-                if (getEnterBootloaderKeyState()) {
-                    blJumpMode = blm_direct_into_bootloader_mode;
-                }
             }
             break;
 
@@ -151,19 +157,18 @@ int main(void) {
         case rer_rtc:
         case rer_wupin:
             blJumpMode = blm_direct_to_application;
-            if (getEnterBootloaderKeyState()) {
-                blJumpMode = blm_direct_into_bootloader_mode;
-            }
             break;
     }
-
+    if (key_state_for_bootloader_mode) {
+        blJumpMode = blm_timeout_waiting_till_communication;
+    }
     bool application_stack_address_not_plausible = !portFlashCheckForApplicationStackAddressPlausibility();
     if (application_stack_address_not_plausible) {
         blJumpMode = blm_direct_into_bootloader_mode;
     }
 
     if (preprogrammed_bootmode == boot_mode_firmware_update) {
-        blJumpMode = blm_direct_into_bootloader_mode;
+        blJumpMode = blm_timeout_waiting_till_communication;
     }
     programmer_init();
     if (programmerQuickVerify() == crystalBool_Fail) {
@@ -216,9 +221,14 @@ int main(void) {
 
         rpc_receive();
 
-        if ((blJumpMode == blm_timeout_waiting_till_communication) && ((sysTick_ms - startSysTick) > BOORLOADER_WAITTIME_FOR_APP_BOOT_ms)) {
+        if (((blJumpMode == blm_timeout_waiting_till_communication)) && ((sysTick_ms - startSysTick) > BOOTLOADER_WAITTIME_FOR_APP_BOOT_ms)) {
             programmerRunApplication();
         }
+        if (((blJumpMode == blm_direct_into_bootloader_mode)) &&
+            ((sysTick_ms - startSysTick) > BOOTLOADER_WAITTIME_FOR_REBOOT_AFTER_BOOTLOADER_MODE_IDLE_ms)) {
+            portFlashRunApplicationAfterReset();
+        }
+
         if (oldTick1000ms != tick1000ms) {
             programmerIncrementAESReInitWaitTime_s();
         }
