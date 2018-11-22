@@ -27,7 +27,6 @@
 #include "main.h"
 #include "port_serial.h"
 
-
 #define CHANNEL_CODEC_TX_BUFFER_SIZE 256
 #define CHANNEL_CODEC_RX_BUFFER_SIZE 256
 
@@ -36,36 +35,35 @@ channel_codec_instance_t cc_instances[channel_codec_comport_COUNT];
 static char cc_rxBuffers[channel_codec_comport_COUNT][CHANNEL_CODEC_RX_BUFFER_SIZE];
 static char cc_txBuffers[channel_codec_comport_COUNT][CHANNEL_CODEC_TX_BUFFER_SIZE];
 
-
-void ChannelCodec_errorHandler(channel_codec_instance_t *instance, channelCodecErrorNum_t ErrNum){
-	(void)ErrNum;
-	(void)instance;
+void ChannelCodec_errorHandler(channel_codec_instance_t *instance, channelCodecErrorNum_t ErrNum) {
+    (void)ErrNum;
+    (void)instance;
 }
 
-RPC_RESULT phyPushDataBuffer(channel_codec_instance_t *instance,  const char *buffer, size_t length){
-	if (instance->aux.port == channel_codec_comport_transmission){
-		for (size_t i=0;i<length;i++){
-			portSerialPutChar(buffer[i]);
-		}
-	}
-	return RPC_SUCCESS;
+RPC_RESULT phyPushDataBuffer(channel_codec_instance_t *instance, const char *buffer, size_t length) {
+    if (instance->aux.port == channel_codec_comport_transmission) {
+        for (size_t i = 0; i < length; i++) {
+            portSerialPutChar(buffer[i]);
+        }
+    }
+    return RPC_SUCCESS;
 }
-
 
 void rpc_receiver_init() {
-	RPC_TRANSMISSION_mutex_init();
+    RPC_TRANSMISSION_mutex_init();
 
-	cc_instances[channel_codec_comport_transmission].aux.port = channel_codec_comport_transmission;
+    cc_instances[channel_codec_comport_transmission].aux.port = channel_codec_comport_transmission;
 
-	channel_init_instance(&cc_instances[channel_codec_comport_transmission],
-									 cc_rxBuffers[channel_codec_comport_transmission],CHANNEL_CODEC_RX_BUFFER_SIZE,
-									 cc_txBuffers[channel_codec_comport_transmission],CHANNEL_CODEC_TX_BUFFER_SIZE);
+    channel_init_instance(&cc_instances[channel_codec_comport_transmission], cc_rxBuffers[channel_codec_comport_transmission],
+                          CHANNEL_CODEC_RX_BUFFER_SIZE, cc_txBuffers[channel_codec_comport_transmission], CHANNEL_CODEC_TX_BUFFER_SIZE);
 }
 
-void rpc_receive() {
-
-	uint8_t inByte;
-	if (portSerialGetChar( &inByte ) == true){
-		channel_push_byte_to_RPC(&cc_instances[channel_codec_comport_transmission],inByte);
-	}
+bool rpc_receive() {
+    uint8_t inByte;
+    if (portSerialGetChar(&inByte) == true) {
+        channel_push_byte_to_RPC(&cc_instances[channel_codec_comport_transmission], inByte);
+        return true;
+    } else {
+        return false;
+    }
 }

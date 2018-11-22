@@ -43,7 +43,7 @@ typedef enum { blm_none, blm_direct_into_bootloader_mode, blm_direct_to_applicat
 #error "this way no communication is possible"
 #endif
 
-#ifndef BOORLOADER_WAITTIME_FOR_APP_BOOT_ms
+#ifndef BOOTLOADER_WAITTIME_FOR_APP_BOOT_ms
 #error "please define this"
 #endif
 
@@ -196,7 +196,7 @@ int main(void) {
     }
 
 #if 1
-    printf("reset reason %" PRIu32 "NRST:%d \n", RCC->CSR, hardreset);
+    printf("bootloader\n rst reason %" PRIu32 "NRST:%d \n", RCC->CSR, hardreset);
     printf("githash = %X\n", GITHASH);
     printf("gitdate = %s %u\n", GITDATE, GITUNIX);
 #endif
@@ -219,7 +219,10 @@ int main(void) {
         uint32_t tick100ms = sysTick_ms / 100;
         uint32_t tick1000ms = sysTick_ms / 1000;
 
-        rpc_receive();
+        if (rpc_receive() == true) {
+            // reset timeout when RPC activity
+            startSysTick = sysTick_ms;
+        }
 
         if (((blJumpMode == blm_timeout_waiting_till_communication)) && ((sysTick_ms - startSysTick) > BOOTLOADER_WAITTIME_FOR_APP_BOOT_ms)) {
             programmerRunApplication();

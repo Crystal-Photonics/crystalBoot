@@ -25,6 +25,6 @@ extern channel_codec_instance_t cc_instances[channel_codec_comport_COUNT];
 
 void rpc_receiver_init(void);
 
-void rpc_receive(void);
+bool rpc_receive(void); // returns true if data received
 
 #endif /* MCU_INCLUDE_RPC_RECEIVER_H_ */
