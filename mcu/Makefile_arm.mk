@@ -17,6 +17,7 @@ include $(PORT_DIR)/makefile.port
 BOOTLOADER_CONFIG_DIR = bootloaderconfig
 
 PORT_SOURCES += $(BOOTLOADER_CONFIG_DIR)/board/port_board.c
+PORT_SOURCES += $(BOOTLOADER_CONFIG_DIR)/board/port_board_preinit.c
 PORT_SOURCES += $(BOOTLOADER_CONFIG_DIR)/key/aes_128_key.c
 
 PORT_CPPFLAGS += -I$(BOOTLOADER_CONFIG_DIR)/board

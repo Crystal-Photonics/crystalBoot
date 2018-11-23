@@ -61,7 +61,9 @@ PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_usart.c
 PORT_SOURCES += $(STD_DRIVER)/src/stm32l1xx_wwdg.c
 
 
-PORT_SOURCES += $(CMSIS)/Device/ST/STM32L1xx/Source/Templates/gcc_ride7/startup_stm32l1xx_xl.s
+PORT_SOURCES += $(PORT_DIR)/libraries/gcc_ride7/startup_stm32l1xx_xl.s
+
+
 
 PORT_CPPFLAGS += -I$(CMSIS)/Include
 PORT_CPPFLAGS += -I$(CMSIS)/Device/ST/STM32L1xx/Include/
