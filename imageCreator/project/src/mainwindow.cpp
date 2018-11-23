@@ -152,7 +152,7 @@ void MainWindow::loadUIFromFirmwaredata(FirmwareImage fwImage) {
     ui->lblGitHash->setText("0x" + QString::number(firmware_meta_data.firmware_githash, 16).toUpper());
     ui->lblName->setText(firmware_meta_data.firmware_name);
     ui->lblVersion->setText(firmware_meta_data.firmware_version);
-    ui->lblGitDate->setText(firmware_meta_data.firmware_gitdate_dt.toString("yyyy.mm.dd HH:MM"));
+    ui->lblGitDate->setText(firmware_meta_data.firmware_gitdate_dt.toString("yyyy.MM.dd HH:mm"));
     ui->lblEntryPoint->setText("0x" + QString::number(firmware_meta_data.firmware_entryPoint, 16).toUpper());
     ui->lblSize->setText(QString::number(firmware_meta_data.firmware_size).toUpper());
 }
