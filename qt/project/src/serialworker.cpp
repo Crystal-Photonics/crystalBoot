@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <QBuffer>
+#include <QApplication>
 #include "serialworker.h"
 #include "mainwindow.h"
 
@@ -57,7 +58,10 @@ SerialThread::SerialThread(QObject *parent) : QObject(parent) {
 }
 
 SerialThread::~SerialThread() {
-    delete serialWorker;
+    thread->quit();
+    while (!thread->wait(16)) {
+        QApplication::processEvents();
+    }
 }
 
 void SerialThread::open(QString name, int baudrate) {
