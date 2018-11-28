@@ -82,7 +82,7 @@ FORMS    += mainwindow.ui \
 FORMS    += infodialog.ui
 
 
-SH = c:\Program Files (x86)\Git\usr\bin\sh.exe
+SH = C:\Program Files\Git\usr\bin\sh.exe
 
 system($$system_quote($$SH) $$PWD/git.sh)
 
