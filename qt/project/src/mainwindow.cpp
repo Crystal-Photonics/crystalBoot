@@ -230,6 +230,12 @@ void MainWindow::loadUIPlausibility() {
             palette_ok_green.setColor(QPalette::WindowText, Qt::darkGreen);
             palette_error.setColor(QPalette::WindowText, Qt::red);
 
+            if (plauResult.count(PlausibilityResult::error_verify)) {
+                ui->lbl_rf_verify->setPalette(palette_error);
+            } else {
+                ui->lbl_rf_verify->setPalette(palette_ok_green);
+            }
+
             if (plauResult.count(PlausibilityResult::error_firmwareimage_too_big)) {
                 ui->lbl_nf_size->setPalette(palette_error);
             } else {

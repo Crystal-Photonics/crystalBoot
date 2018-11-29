@@ -472,6 +472,9 @@ void FirmwareUpdatePlausibilityCheck::checkPlausibiltity(RemoteDeviceInfo remote
         (fw_meta_data.firmware_version == remoteDevInfo.getFW_version())) {
         plausibilityResults.insert(PlausibilityResult::warning_equal_version_but_different_gitHash);
     }
+    if (remoteDevInfo.mcu_descriptor.firmwareVerified == 0) {
+        plausibilityResults.insert(PlausibilityResult::error_verify);
+    }
 }
 
 void FirmwareUpdatePlausibilityCheck::clear() {
@@ -484,6 +487,9 @@ std::set<PlausibilityResult> FirmwareUpdatePlausibilityCheck::getPlausibilityRes
 
 QString FirmwareUpdatePlausibilityCheck::plausibilityResultToStrReadable(PlausibilityResult plauRes) {
     switch (plauRes) {
+        case PlausibilityResult::error_verify:
+            return QString("error: firmware on MCU not verfied.");
+
         case PlausibilityResult::error_firmwareimage_too_big:
             return QString("error: firmwareimage too big.");
 
@@ -559,68 +565,69 @@ bool FirmwareUpdatePlausibilityCheck::showWarngingMessage() // cancel if false
 
 QString FirmwareUpdatePlausibilityCheck::plausibilityResultToStrShort(PlausibilityResult plauRes) {
     switch (plauRes) {
+        case PlausibilityResult::error_verify:
+            return QString("error_verify");
+
         case PlausibilityResult::error_firmwareimage_too_big:
             return QString("error_firmwareimage_too_big");
-            break;
+
         case PlausibilityResult::error_wrong_entrypoint:
             return QString("error_wrong_entrypoint");
-            break;
+
         case PlausibilityResult::error_inconsistency:
             return QString("error_inconsistency");
-            break;
+
         case PlausibilityResult::error_crypto_required:
             return QString("error_crypto_required");
-            break;
+
         case PlausibilityResult::warning_different_name_hash:
             return QString("warning_different_name_hash");
-            break;
+
         case PlausibilityResult::warning_downgrade_date:
             return QString("warning_downgrade_date");
-            break;
 
         case PlausibilityResult::warning_equal_gitHash:
             return QString("warning_equal_gitHash");
-            break;
+
         case PlausibilityResult::warning_equal_gitHash_but_different_wersion:
             return QString("warning_equal_gitHash_but_different_wersion");
-            break;
+
         case PlausibilityResult::warning_equal_version_but_different_gitHash:
             return QString("warning_equal_gitHash_but_different_wersion");
-            break;
     }
     return "";
 }
 
 bool FirmwareUpdatePlausibilityCheck::plausibilityResultIsError(PlausibilityResult plauRes) {
     switch (plauRes) {
+        case PlausibilityResult::error_verify:
+            return false;
+
         case PlausibilityResult::error_firmwareimage_too_big:
             return true;
-            break;
+
         case PlausibilityResult::error_wrong_entrypoint:
             return true;
-            break;
+
         case PlausibilityResult::error_inconsistency:
             return true;
-            break;
+
         case PlausibilityResult::error_crypto_required:
             return true;
-            break;
+
         case PlausibilityResult::warning_different_name_hash:
             return false;
-            break;
+
         case PlausibilityResult::warning_downgrade_date:
             return false;
-            break;
 
         case PlausibilityResult::warning_equal_gitHash:
             return false;
-            break;
+
         case PlausibilityResult::warning_equal_gitHash_but_different_wersion:
             return false;
-            break;
         case PlausibilityResult::warning_equal_version_but_different_gitHash:
             return false;
-            break;
     }
     return true;
 }

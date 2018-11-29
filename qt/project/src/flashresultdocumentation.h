@@ -17,7 +17,8 @@ enum class PlausibilityResult {
 
     warning_equal_gitHash,
     warning_equal_gitHash_but_different_wersion,
-    warning_equal_version_but_different_gitHash
+    warning_equal_version_but_different_gitHash,
+    error_verify
 };
 
 class RemoteDeviceInfo {
