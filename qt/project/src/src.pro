@@ -2,10 +2,10 @@ include(../defaults.pri)
 
 CONFIG( debug, debug|release ) {
     # debug
-     TARGET = qTestProjectTemplateAppd
+     TARGET = crystalBootd
 } else {
     # release
-    TARGET = qTestProjectTemplateApp
+    TARGET = crystalBoot
 
 }
 

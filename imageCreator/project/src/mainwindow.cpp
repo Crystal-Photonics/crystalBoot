@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <QXmlStreamWriter>
+#include <QStandardPaths>
 
 #include "firmwareimage.h"
 #include "firmwareencoder.h"
@@ -16,7 +17,9 @@
 #include "aeskeyfile.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), imageCreatorSettings(parent), settings("crystalBootImager.ini", QSettings::IniFormat, parent), ui(new Ui::MainWindow) {
+    : QMainWindow(parent), imageCreatorSettings(parent),
+      settings(QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/crystalBootImager.ini", QSettings::IniFormat, parent),
+      ui(new Ui::MainWindow) {
     ui->setupUi(this);
     imageCreatorSettings.load(settings.value("LastSettingsFile", "").toString());
     loadUIFromSettings();

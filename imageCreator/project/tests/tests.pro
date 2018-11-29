@@ -33,13 +33,13 @@ CONFIG( debug, debug|release ) {
 
      LIBS += -L../src/debug/
      LIBS += -L../src/
-     LIBS +=  -lqTestProjectTemplateAppd
+     LIBS +=  -lcrystalBoot_image_creatord
 } else {
     # release
     #message(Release)
     LIBS += -L../src/release/
     LIBS += -L../src/
-    LIBS +=  -lqTestProjectTemplateApp
+    LIBS +=  -lcrystalBoot_image_creator
 
 }
 

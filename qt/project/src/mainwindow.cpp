@@ -12,16 +12,22 @@
 #include <QBuffer>
 #include <QMessageBox>
 #include <set>
+#include <QStandardPaths>
+#include <QDir>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), bootloader("bootloader_settings.ini", parent) {
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow),
+      bootloader(QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/bootloader_settings.ini", parent) {
 
     ui->setupUi(this);
 
     ui->progressBar->setVisible(false);
 
     reconnectTimer = new QTimer(this);
-
-    QSettings lastSettings("crystalBoot.ini", QSettings::IniFormat, parent);
+    QString AppDataLocation = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/";
+    settings_filename = AppDataLocation + "crystalBoot.ini";
+    //  qDebug() << "AppDataLocation" << settings_filename;
+    QSettings lastSettings(settings_filename, QSettings::IniFormat, parent);
     connect(&bootloader, SIGNAL(onConnStateChanged(ConnectionState)), this, SLOT(onConnStateChanged(ConnectionState)));
     connect(&bootloader, SIGNAL(onProgress(int)), this, SLOT(onProgress(int)));
     connect(&bootloader, SIGNAL(onFinished(void)), this, SLOT(onFinished(void)));
@@ -77,7 +83,7 @@ void MainWindow::loadUIFromSettigns() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-    QSettings lastSettings("crystalBoot.ini", QSettings::IniFormat, this);
+    QSettings lastSettings(settings_filename, QSettings::IniFormat, this);
     lastSettings.setValue("lastImageFile", bootloader.fileNameToSend);
     bootloader.saveSettings();
     event->accept();

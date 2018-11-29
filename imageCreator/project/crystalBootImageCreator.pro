@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 
-TARGET = qtTestProjectTemplate
+
 TEMPLATE = subdirs
 
 SUBDIRS = src

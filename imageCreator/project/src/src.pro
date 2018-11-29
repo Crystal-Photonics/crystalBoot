@@ -2,10 +2,10 @@ include(../defaults.pri)
 
 CONFIG( debug, debug|release ) {
     # debug
-     TARGET = qTestProjectTemplateAppd
+     TARGET = crystalBoot_image_creatord
 } else {
     # release
-    TARGET = qTestProjectTemplateApp
+    TARGET = crystalBoot_image_creator
 
 }
 

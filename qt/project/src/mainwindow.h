@@ -79,6 +79,7 @@ class MainWindow : public QMainWindow {
     void on_actionVerify_EEPROM_triggered();
 
   private:
+    QString settings_filename;
     Ui::MainWindow *ui;
 
     QComboBox *cmbPort;

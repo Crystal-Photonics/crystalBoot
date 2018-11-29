@@ -8,6 +8,9 @@
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     MainWindow w;
+    a.setOrganizationName("CPG");
+    a.setApplicationName("crystalBoot_image_creator");
+
     switch (argc) {
         case 1:
 
