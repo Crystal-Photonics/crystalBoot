@@ -57,6 +57,7 @@ TARGET = $(OBJDIR)/$(TARGETNAME)
 # Place -D, -U or -I options here for C and C++ sources
 
 CPPFLAGS += -Iinclude
+CPPFLAGS += -I$(BOOTLOADER_CONFIG_DIR)/board/common_bootloader_types
 CPPFLAGS += -Imodules/rpc/include
 CPPFLAGS += -Imodules/RPC-ChannelCodec/include
 CPPFLAGS += -Imodules/RPC-ChannelCodec/include/errorlogger_dummy

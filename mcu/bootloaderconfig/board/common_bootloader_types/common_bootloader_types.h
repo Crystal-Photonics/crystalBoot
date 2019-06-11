@@ -1,0 +1,13 @@
+/*
+ * common_bootloader_types.h
+ *
+ *  Created on: 07.06.2019
+ *      Author: ak
+ */
+
+#ifndef MCU_CRYSTALBOOT_CRYSTALBOOT_CONFIG_BOARD_COMMON_BOOTLOADER_TYPES_COMMON_BOOTLOADER_TYPES_H_
+#define MCU_CRYSTALBOOT_CRYSTALBOOT_CONFIG_BOARD_COMMON_BOOTLOADER_TYPES_COMMON_BOOTLOADER_TYPES_H_
+
+#include "../../../../mcu/crystalBoot_config/board/common_bootloader_types/common_bootloader_types.h"
+
+#endif /* MCU_CRYSTALBOOT_CRYSTALBOOT_CONFIG_BOARD_COMMON_BOOTLOADER_TYPES_COMMON_BOOTLOADER_TYPES_H_ */
